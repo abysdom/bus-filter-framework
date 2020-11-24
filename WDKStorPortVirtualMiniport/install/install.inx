@@ -1,0 +1,130 @@
+
+; MP.INF
+;
+; Copyright (c) 1998-2011, Microsoft Corporation.
+
+[Version]
+Signature="$WINDOWS NT$"
+Class=SCSIAdapter
+ClassGUID={4D36E97B-E325-11CE-BFC1-08002BE10318}
+;Provider=%MSFT%
+Provider=BFF
+DriverVer=01/30/2007,6.0.6000.16386
+CatalogFile = install.cat
+
+[DestinationDirs]
+DefaultDestDir = 12
+MP_Device_CoInstaller_CopyFiles = 11
+
+[Manufacturer]
+%MSFT%=MSFT, NT$ARCH$
+
+[MSFT.NT$ARCH$]
+%MPDeviceDesc%=MP_Device, %rootstr%
+
+[MP_Device]
+CopyFiles=@mp.sys
+CopyFiles=@BusFilter.sys
+
+[MP_Device.HW]
+AddReg = MP_Device_AddReg
+
+[MP_Device_AddReg]
+HKR, "ScsiPort", "NeedsSystemShutdownNotification", 0x00010001, 1
+HKR,,"UpperFilters",0x00010000,"BusFilter" ; REG_MULTI_SZ value
+
+[MP_Device.Services]
+AddService = mp, %SPSVCINST_ASSOCSERVICE%, MP_Service_Inst
+AddService = BusFilter,, BusFilter_Service_Inst, BusFilter_EventLog_Inst
+
+; -------------- BusFilter driver install sections
+[BusFilter_Service_Inst]
+DisplayName    = %BusFilter.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\BusFilter.sys
+AddReg		   = BusFilter_Service_AddReg
+
+[BusFilter_Service_AddReg]
+HKR,,BffLicensee,%REG_SZ%,"Yang Yuanzhi"
+HKR,,BffSerialNumber,%REG_SZ%,"FOR PRIVATE USE ONLY"
+HKR,,BffLicenseKey,%REG_SZ%,"A8FB4AC6D1C16BFF"
+
+[BusFilter_EventLog_Inst]
+AddReg=BusFilter_EventLog_AddReg
+
+[BusFilter_EventLog_AddReg]
+HKR,,EventMessageFile,0x00020000,"%%SystemRoot%%\System32\IoLogMsg.dll;%%SystemRoot%%\System32\drivers\BusFilter.sys"
+HKR,,TypesSupported,0x00010001,7
+
+[SourceDisksNames.$ARCH$]
+1 = %DiskId1%,,,
+
+[SourceDisksFiles.$ARCH$]
+mp.sys = 1,
+BusFilter.sys = 1,
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1,  ; make sure the number matches with SourceDisksNames
+
+;
+;--- MP_Device Coinstaller installation ------
+;
+;[DestinationDirs]
+;MP_Device_CoInstaller_CopyFiles = 11
+
+[MP_Device.CoInstallers]
+AddReg=MP_Device_CoInstaller_AddReg
+CopyFiles=MP_Device_CoInstaller_CopyFiles
+
+[MP_Device_CoInstaller_AddReg]
+HKR,,CoInstallers32,0x00010000, "WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,WdfCoInstaller"
+
+[MP_Device_CoInstaller_CopyFiles]
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll
+
+;[SourceDisksFiles.$ARCH$]
+;WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1,  ; make sure the number matches with SourceDisksNames
+
+[MP_Device.Wdf]
+KmdfService = mp, MP_Device_wdfsect
+
+[MP_Device_wdfsect]
+KmdfLibraryVersion = $KMDFVERSION$
+
+[MP_Service_Inst]
+DisplayName    = %MPDeviceDesc%
+ServiceType    = %SERVICE_KERNEL_DRIVER%
+StartType      = %SERVICE_BOOT_START%
+ErrorControl   = %SERVICE_ERROR_NORMAL%
+ServiceBinary  = %12%\mp.sys
+LoadOrderGroup = SCSI Miniport
+AddReg         = pnpsafe_isa_addreg
+
+[pnpsafe_isa_addreg]
+HKR, "Parameters\PnpInterface", "1",    %REG_DWORD%,  0x00000001
+;;;HKR, "Parameters", "BreakOnEntry",      %REG_DWORD%,  0x00000000
+;;;HKR, "Parameters", "DebugLevel",        %REG_DWORD%,  0x000000ff
+;;; The next 2 values will allow a 16 MB virtual harddisk as reported in Disk Manager (diskmgmt.msc).
+HKR, "Parameters", "VirtualDiskSize",   %REG_DWORD%,  0x01000000
+HKR, "Parameters", "PhysicalDiskSize",  %REG_DWORD%,  0x01000000
+HKR, "Parameters", "NbrLUNsperHBA",     %REG_DWORD%,  0x00000002
+;;;HKR, "Parameters", "CombineVirtDisks",  %REG_DWORD%,  0x00000001
+
+[Strings]
+MSFT           = "Microsoft"
+SCSIClassName  = "SCSI and RAID controllers"
+MPDeviceDesc   = "Demo StorPort Virtual Adapter"
+DiskId1        = "Virtual Miniport Device Installation Disk #1"
+rootstr        = "root\mp"
+BusFilter.SVCDESC = "BusFilter Service"
+
+;*******************************************
+;Handy macro substitutions (non-localizable)
+SPSVCINST_ASSOCSERVICE = 0x00000002
+SERVICE_KERNEL_DRIVER  = 1
+SERVICE_BOOT_START     = 0
+SERVICE_ERROR_NORMAL   = 1
+
+REG_DWORD              = 0x00010001
+REG_BINARY             = 0x00000001
+REG_SZ                 = 0x00000000

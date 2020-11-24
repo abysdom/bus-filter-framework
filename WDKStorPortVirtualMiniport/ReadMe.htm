@@ -1,0 +1,2410 @@
+<html xmlns:v="urn:schemas-microsoft-com:vml"
+xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:w="urn:schemas-microsoft-com:office:word"
+xmlns:m="http://schemas.microsoft.com/office/2004/12/omml"
+xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<meta name=ProgId content=Word.Document>
+<meta name=Generator content="Microsoft Word 14">
+<meta name=Originator content="Microsoft Word 14">
+<link rel=File-List href="ReadMe_files/filelist.xml">
+<title>StorPort Virtual Miniport Sample</title>
+<link rel=dataStoreItem href="ReadMe_files/item0007.xml"
+target="ReadMe_files/props008.xml">
+<link rel=themeData href="ReadMe_files/themedata.thmx">
+<link rel=colorSchemeMapping href="ReadMe_files/colorschememapping.xml">
+<!--[if gte mso 9]><xml>
+ <w:WordDocument>
+  <w:Zoom>110</w:Zoom>
+  <w:SpellingState>Clean</w:SpellingState>
+  <w:GrammarState>Clean</w:GrammarState>
+  <w:TrackMoves>false</w:TrackMoves>
+  <w:TrackFormatting/>
+  <w:ValidateAgainstSchemas/>
+  <w:SaveIfXMLInvalid>false</w:SaveIfXMLInvalid>
+  <w:IgnoreMixedContent>false</w:IgnoreMixedContent>
+  <w:AlwaysShowPlaceholderText>false</w:AlwaysShowPlaceholderText>
+  <w:DoNotPromoteQF/>
+  <w:LidThemeOther>EN-US</w:LidThemeOther>
+  <w:LidThemeAsian>X-NONE</w:LidThemeAsian>
+  <w:LidThemeComplexScript>X-NONE</w:LidThemeComplexScript>
+  <w:Compatibility>
+   <w:BreakWrappedTables/>
+   <w:SnapToGridInCell/>
+   <w:WrapTextWithPunct/>
+   <w:UseAsianBreakRules/>
+   <w:DontGrowAutofit/>
+   <w:SplitPgBreakAndParaMark/>
+   <w:DontVertAlignCellWithSp/>
+   <w:DontBreakConstrainedForcedTables/>
+   <w:DontVertAlignInTxbx/>
+   <w:Word11KerningPairs/>
+   <w:CachedColBalance/>
+  </w:Compatibility>
+  <w:BrowserLevel>MicrosoftInternetExplorer4</w:BrowserLevel>
+  <m:mathPr>
+   <m:mathFont m:val="Cambria Math"/>
+   <m:brkBin m:val="before"/>
+   <m:brkBinSub m:val="&#45;-"/>
+   <m:smallFrac m:val="off"/>
+   <m:dispDef/>
+   <m:lMargin m:val="0"/>
+   <m:rMargin m:val="0"/>
+   <m:defJc m:val="centerGroup"/>
+   <m:wrapIndent m:val="1440"/>
+   <m:intLim m:val="subSup"/>
+   <m:naryLim m:val="undOvr"/>
+  </m:mathPr></w:WordDocument>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <w:LatentStyles DefLockedState="false" DefUnhideWhenUsed="true"
+  DefSemiHidden="true" DefQFormat="false" DefPriority="99"
+  LatentStyleCount="267">
+  <w:LsdException Locked="false" Priority="0" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="Normal"/>
+  <w:LsdException Locked="false" Priority="9" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="heading 1"/>
+  <w:LsdException Locked="false" Priority="9" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="heading 2"/>
+  <w:LsdException Locked="false" Priority="9" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="heading 3"/>
+  <w:LsdException Locked="false" Priority="9" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="heading 4"/>
+  <w:LsdException Locked="false" Priority="9" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="heading 5"/>
+  <w:LsdException Locked="false" Priority="9" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="heading 6"/>
+  <w:LsdException Locked="false" Priority="9" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="heading 7"/>
+  <w:LsdException Locked="false" Priority="9" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="heading 8"/>
+  <w:LsdException Locked="false" Priority="9" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="heading 9"/>
+  <w:LsdException Locked="false" Priority="39" Name="toc 1"/>
+  <w:LsdException Locked="false" Priority="39" Name="toc 2"/>
+  <w:LsdException Locked="false" Priority="39" Name="toc 3"/>
+  <w:LsdException Locked="false" Priority="39" Name="toc 4"/>
+  <w:LsdException Locked="false" Priority="39" Name="toc 5"/>
+  <w:LsdException Locked="false" Priority="39" Name="toc 6"/>
+  <w:LsdException Locked="false" Priority="39" Name="toc 7"/>
+  <w:LsdException Locked="false" Priority="39" Name="toc 8"/>
+  <w:LsdException Locked="false" Priority="39" Name="toc 9"/>
+  <w:LsdException Locked="false" Priority="35" QFormat="true" Name="caption"/>
+  <w:LsdException Locked="false" Priority="10" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="Title"/>
+  <w:LsdException Locked="false" Priority="1" Name="Default Paragraph Font"/>
+  <w:LsdException Locked="false" Priority="11" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="Subtitle"/>
+  <w:LsdException Locked="false" Priority="22" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="Strong"/>
+  <w:LsdException Locked="false" Priority="20" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="Emphasis"/>
+  <w:LsdException Locked="false" Priority="59" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Table Grid"/>
+  <w:LsdException Locked="false" UnhideWhenUsed="false" Name="Placeholder Text"/>
+  <w:LsdException Locked="false" Priority="1" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="No Spacing"/>
+  <w:LsdException Locked="false" Priority="60" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Shading"/>
+  <w:LsdException Locked="false" Priority="61" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light List"/>
+  <w:LsdException Locked="false" Priority="62" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Grid"/>
+  <w:LsdException Locked="false" Priority="63" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 1"/>
+  <w:LsdException Locked="false" Priority="64" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 2"/>
+  <w:LsdException Locked="false" Priority="65" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 1"/>
+  <w:LsdException Locked="false" Priority="66" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 2"/>
+  <w:LsdException Locked="false" Priority="67" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 1"/>
+  <w:LsdException Locked="false" Priority="68" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 2"/>
+  <w:LsdException Locked="false" Priority="69" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 3"/>
+  <w:LsdException Locked="false" Priority="70" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Dark List"/>
+  <w:LsdException Locked="false" Priority="71" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Shading"/>
+  <w:LsdException Locked="false" Priority="72" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful List"/>
+  <w:LsdException Locked="false" Priority="73" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Grid"/>
+  <w:LsdException Locked="false" Priority="60" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Shading Accent 1"/>
+  <w:LsdException Locked="false" Priority="61" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light List Accent 1"/>
+  <w:LsdException Locked="false" Priority="62" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Grid Accent 1"/>
+  <w:LsdException Locked="false" Priority="63" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 1 Accent 1"/>
+  <w:LsdException Locked="false" Priority="64" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 2 Accent 1"/>
+  <w:LsdException Locked="false" Priority="65" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 1 Accent 1"/>
+  <w:LsdException Locked="false" UnhideWhenUsed="false" Name="Revision"/>
+  <w:LsdException Locked="false" Priority="34" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="List Paragraph"/>
+  <w:LsdException Locked="false" Priority="29" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="Quote"/>
+  <w:LsdException Locked="false" Priority="30" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="Intense Quote"/>
+  <w:LsdException Locked="false" Priority="66" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 2 Accent 1"/>
+  <w:LsdException Locked="false" Priority="67" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 1 Accent 1"/>
+  <w:LsdException Locked="false" Priority="68" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 2 Accent 1"/>
+  <w:LsdException Locked="false" Priority="69" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 3 Accent 1"/>
+  <w:LsdException Locked="false" Priority="70" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Dark List Accent 1"/>
+  <w:LsdException Locked="false" Priority="71" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Shading Accent 1"/>
+  <w:LsdException Locked="false" Priority="72" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful List Accent 1"/>
+  <w:LsdException Locked="false" Priority="73" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Grid Accent 1"/>
+  <w:LsdException Locked="false" Priority="60" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Shading Accent 2"/>
+  <w:LsdException Locked="false" Priority="61" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light List Accent 2"/>
+  <w:LsdException Locked="false" Priority="62" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Grid Accent 2"/>
+  <w:LsdException Locked="false" Priority="63" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 1 Accent 2"/>
+  <w:LsdException Locked="false" Priority="64" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 2 Accent 2"/>
+  <w:LsdException Locked="false" Priority="65" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 1 Accent 2"/>
+  <w:LsdException Locked="false" Priority="66" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 2 Accent 2"/>
+  <w:LsdException Locked="false" Priority="67" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 1 Accent 2"/>
+  <w:LsdException Locked="false" Priority="68" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 2 Accent 2"/>
+  <w:LsdException Locked="false" Priority="69" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 3 Accent 2"/>
+  <w:LsdException Locked="false" Priority="70" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Dark List Accent 2"/>
+  <w:LsdException Locked="false" Priority="71" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Shading Accent 2"/>
+  <w:LsdException Locked="false" Priority="72" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful List Accent 2"/>
+  <w:LsdException Locked="false" Priority="73" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Grid Accent 2"/>
+  <w:LsdException Locked="false" Priority="60" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Shading Accent 3"/>
+  <w:LsdException Locked="false" Priority="61" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light List Accent 3"/>
+  <w:LsdException Locked="false" Priority="62" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Grid Accent 3"/>
+  <w:LsdException Locked="false" Priority="63" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 1 Accent 3"/>
+  <w:LsdException Locked="false" Priority="64" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 2 Accent 3"/>
+  <w:LsdException Locked="false" Priority="65" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 1 Accent 3"/>
+  <w:LsdException Locked="false" Priority="66" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 2 Accent 3"/>
+  <w:LsdException Locked="false" Priority="67" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 1 Accent 3"/>
+  <w:LsdException Locked="false" Priority="68" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 2 Accent 3"/>
+  <w:LsdException Locked="false" Priority="69" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 3 Accent 3"/>
+  <w:LsdException Locked="false" Priority="70" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Dark List Accent 3"/>
+  <w:LsdException Locked="false" Priority="71" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Shading Accent 3"/>
+  <w:LsdException Locked="false" Priority="72" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful List Accent 3"/>
+  <w:LsdException Locked="false" Priority="73" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Grid Accent 3"/>
+  <w:LsdException Locked="false" Priority="60" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Shading Accent 4"/>
+  <w:LsdException Locked="false" Priority="61" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light List Accent 4"/>
+  <w:LsdException Locked="false" Priority="62" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Grid Accent 4"/>
+  <w:LsdException Locked="false" Priority="63" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 1 Accent 4"/>
+  <w:LsdException Locked="false" Priority="64" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 2 Accent 4"/>
+  <w:LsdException Locked="false" Priority="65" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 1 Accent 4"/>
+  <w:LsdException Locked="false" Priority="66" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 2 Accent 4"/>
+  <w:LsdException Locked="false" Priority="67" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 1 Accent 4"/>
+  <w:LsdException Locked="false" Priority="68" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 2 Accent 4"/>
+  <w:LsdException Locked="false" Priority="69" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 3 Accent 4"/>
+  <w:LsdException Locked="false" Priority="70" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Dark List Accent 4"/>
+  <w:LsdException Locked="false" Priority="71" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Shading Accent 4"/>
+  <w:LsdException Locked="false" Priority="72" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful List Accent 4"/>
+  <w:LsdException Locked="false" Priority="73" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Grid Accent 4"/>
+  <w:LsdException Locked="false" Priority="60" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Shading Accent 5"/>
+  <w:LsdException Locked="false" Priority="61" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light List Accent 5"/>
+  <w:LsdException Locked="false" Priority="62" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Grid Accent 5"/>
+  <w:LsdException Locked="false" Priority="63" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 1 Accent 5"/>
+  <w:LsdException Locked="false" Priority="64" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 2 Accent 5"/>
+  <w:LsdException Locked="false" Priority="65" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 1 Accent 5"/>
+  <w:LsdException Locked="false" Priority="66" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 2 Accent 5"/>
+  <w:LsdException Locked="false" Priority="67" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 1 Accent 5"/>
+  <w:LsdException Locked="false" Priority="68" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 2 Accent 5"/>
+  <w:LsdException Locked="false" Priority="69" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 3 Accent 5"/>
+  <w:LsdException Locked="false" Priority="70" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Dark List Accent 5"/>
+  <w:LsdException Locked="false" Priority="71" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Shading Accent 5"/>
+  <w:LsdException Locked="false" Priority="72" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful List Accent 5"/>
+  <w:LsdException Locked="false" Priority="73" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Grid Accent 5"/>
+  <w:LsdException Locked="false" Priority="60" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Shading Accent 6"/>
+  <w:LsdException Locked="false" Priority="61" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light List Accent 6"/>
+  <w:LsdException Locked="false" Priority="62" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Grid Accent 6"/>
+  <w:LsdException Locked="false" Priority="63" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 1 Accent 6"/>
+  <w:LsdException Locked="false" Priority="64" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 2 Accent 6"/>
+  <w:LsdException Locked="false" Priority="65" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 1 Accent 6"/>
+  <w:LsdException Locked="false" Priority="66" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 2 Accent 6"/>
+  <w:LsdException Locked="false" Priority="67" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 1 Accent 6"/>
+  <w:LsdException Locked="false" Priority="68" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 2 Accent 6"/>
+  <w:LsdException Locked="false" Priority="69" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 3 Accent 6"/>
+  <w:LsdException Locked="false" Priority="70" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Dark List Accent 6"/>
+  <w:LsdException Locked="false" Priority="71" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Shading Accent 6"/>
+  <w:LsdException Locked="false" Priority="72" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful List Accent 6"/>
+  <w:LsdException Locked="false" Priority="73" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Grid Accent 6"/>
+  <w:LsdException Locked="false" Priority="19" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="Subtle Emphasis"/>
+  <w:LsdException Locked="false" Priority="21" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="Intense Emphasis"/>
+  <w:LsdException Locked="false" Priority="31" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="Subtle Reference"/>
+  <w:LsdException Locked="false" Priority="32" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="Intense Reference"/>
+  <w:LsdException Locked="false" Priority="33" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="Book Title"/>
+  <w:LsdException Locked="false" Priority="37" Name="Bibliography"/>
+  <w:LsdException Locked="false" Priority="39" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="TOC Heading"/>
+ </w:LatentStyles>
+</xml><![endif]-->
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:Cambria;
+	panose-1:2 4 5 3 5 4 6 3 2 4;
+	mso-font-charset:0;
+	mso-generic-font-family:roman;
+	mso-font-pitch:variable;
+	mso-font-signature:-536870145 1073743103 0 0 415 0;}
+@font-face
+	{font-family:Calibri;
+	panose-1:2 15 5 2 2 2 4 3 2 4;
+	mso-font-charset:0;
+	mso-generic-font-family:swiss;
+	mso-font-pitch:variable;
+	mso-font-signature:-520092929 1073786111 9 0 415 0;}
+@font-face
+	{font-family:Tahoma;
+	panose-1:2 11 6 4 3 5 4 4 2 4;
+	mso-font-charset:0;
+	mso-generic-font-family:swiss;
+	mso-font-pitch:variable;
+	mso-font-signature:-520081665 -1073717157 41 0 66047 0;}
+@font-face
+	{font-family:Verdana;
+	panose-1:2 11 6 4 3 5 4 4 2 4;
+	mso-font-charset:0;
+	mso-generic-font-family:swiss;
+	mso-font-pitch:variable;
+	mso-font-signature:-1593833729 1073750107 16 0 415 0;}
+@font-face
+	{font-family:Consolas;
+	panose-1:2 11 6 9 2 2 4 3 2 4;
+	mso-font-charset:0;
+	mso-generic-font-family:modern;
+	mso-font-pitch:fixed;
+	mso-font-signature:-520092929 1073806591 9 0 415 0;}
+@font-face
+	{font-family:"MS Sans Serif";
+	panose-1:0 0 0 0 0 0 0 0 0 0;
+	mso-font-alt:"Times New Roman";
+	mso-font-charset:0;
+	mso-generic-font-family:roman;
+	mso-font-format:other;
+	mso-font-pitch:auto;
+	mso-font-signature:0 0 0 0 0 0;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-parent:"";
+	margin-top:0in;
+	margin-right:0in;
+	margin-bottom:10.0pt;
+	margin-left:0in;
+	line-height:115%;
+	mso-pagination:widow-orphan;
+	font-size:11.0pt;
+	font-family:"Calibri","sans-serif";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+h1
+	{mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-link:"Heading 1 Char";
+	margin-top:24.0pt;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:0in;
+	margin-bottom:.0001pt;
+	line-height:115%;
+	mso-pagination:widow-orphan;
+	mso-outline-level:1;
+	font-size:14.0pt;
+	font-family:"Cambria","serif";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;
+	mso-bidi-font-family:"Times New Roman";
+	font-weight:bold;}
+h2
+	{mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-link:"Heading 2 Char";
+	margin-top:10.0pt;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:0in;
+	margin-bottom:.0001pt;
+	line-height:115%;
+	mso-pagination:widow-orphan;
+	mso-outline-level:2;
+	font-size:13.0pt;
+	font-family:"Cambria","serif";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;
+	mso-bidi-font-family:"Times New Roman";
+	font-weight:bold;}
+h3
+	{mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-link:"Heading 3 Char";
+	margin-top:10.0pt;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:0in;
+	margin-bottom:.0001pt;
+	line-height:110%;
+	mso-pagination:widow-orphan;
+	mso-outline-level:3;
+	font-size:11.0pt;
+	font-family:"Cambria","serif";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;
+	mso-bidi-font-family:"Times New Roman";
+	font-weight:bold;}
+h4
+	{mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-link:"Heading 4 Char";
+	margin-top:10.0pt;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:0in;
+	margin-bottom:.0001pt;
+	line-height:115%;
+	mso-pagination:widow-orphan;
+	mso-outline-level:4;
+	font-size:11.0pt;
+	font-family:"Cambria","serif";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;
+	mso-bidi-font-family:"Times New Roman";
+	font-weight:bold;
+	font-style:italic;}
+h5
+	{mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-link:"Heading 5 Char";
+	margin-top:10.0pt;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:0in;
+	margin-bottom:.0001pt;
+	line-height:115%;
+	mso-pagination:widow-orphan;
+	mso-outline-level:5;
+	font-size:11.0pt;
+	font-family:"Cambria","serif";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;
+	mso-bidi-font-family:"Times New Roman";
+	color:#7F7F7F;
+	font-weight:bold;}
+h6
+	{mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-link:"Heading 6 Char";
+	margin:0in;
+	margin-bottom:.0001pt;
+	line-height:110%;
+	mso-pagination:widow-orphan;
+	mso-outline-level:6;
+	font-size:11.0pt;
+	font-family:"Cambria","serif";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;
+	mso-bidi-font-family:"Times New Roman";
+	color:#7F7F7F;
+	font-weight:bold;
+	font-style:italic;}
+p.MsoHeading7, li.MsoHeading7, div.MsoHeading7
+	{mso-style-noshow:yes;
+	mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-link:"Heading 7 Char";
+	margin:0in;
+	margin-bottom:.0001pt;
+	line-height:115%;
+	mso-pagination:widow-orphan;
+	mso-outline-level:7;
+	font-size:11.0pt;
+	font-family:"Cambria","serif";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;
+	mso-bidi-font-family:Calibri;
+	font-style:italic;}
+p.MsoHeading8, li.MsoHeading8, div.MsoHeading8
+	{mso-style-noshow:yes;
+	mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-link:"Heading 8 Char";
+	margin:0in;
+	margin-bottom:.0001pt;
+	line-height:115%;
+	mso-pagination:widow-orphan;
+	mso-outline-level:8;
+	font-size:10.0pt;
+	font-family:"Cambria","serif";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;
+	mso-bidi-font-family:Calibri;}
+p.MsoHeading9, li.MsoHeading9, div.MsoHeading9
+	{mso-style-noshow:yes;
+	mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-link:"Heading 9 Char";
+	margin:0in;
+	margin-bottom:.0001pt;
+	line-height:115%;
+	mso-pagination:widow-orphan;
+	mso-outline-level:9;
+	font-size:10.0pt;
+	font-family:"Cambria","serif";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;
+	mso-bidi-font-family:Calibri;
+	letter-spacing:.25pt;
+	font-style:italic;}
+p.MsoFootnoteText, li.MsoFootnoteText, div.MsoFootnoteText
+	{mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-link:"Footnote Text Char";
+	margin:0in;
+	margin-bottom:.0001pt;
+	line-height:normal;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	font-family:"Calibri","sans-serif";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+p.MsoCommentText, li.MsoCommentText, div.MsoCommentText
+	{mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-link:"Comment Text Char";
+	margin-top:0in;
+	margin-right:0in;
+	margin-bottom:10.0pt;
+	margin-left:0in;
+	line-height:normal;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	font-family:"Calibri","sans-serif";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+span.MsoFootnoteReference
+	{mso-style-noshow:yes;
+	mso-style-priority:99;
+	vertical-align:super;}
+p.MsoTitle, li.MsoTitle, div.MsoTitle
+	{mso-style-noshow:yes;
+	mso-style-priority:10;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-link:"Title Char";
+	margin-top:0in;
+	margin-right:0in;
+	margin-bottom:10.0pt;
+	margin-left:0in;
+	line-height:normal;
+	mso-pagination:widow-orphan;
+	font-size:26.0pt;
+	font-family:"Cambria","serif";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;
+	mso-bidi-font-family:Calibri;
+	letter-spacing:.25pt;}
+p.MsoSubtitle, li.MsoSubtitle, div.MsoSubtitle
+	{mso-style-noshow:yes;
+	mso-style-priority:11;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-link:"Subtitle Char";
+	margin-top:0in;
+	margin-right:0in;
+	margin-bottom:30.0pt;
+	margin-left:0in;
+	line-height:115%;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Cambria","serif";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;
+	mso-bidi-font-family:Calibri;
+	letter-spacing:.65pt;
+	font-style:italic;}
+a:link, span.MsoHyperlink
+	{mso-style-noshow:yes;
+	mso-style-priority:99;
+	color:blue;
+	text-decoration:underline;
+	text-underline:single;}
+a:visited, span.MsoHyperlinkFollowed
+	{mso-style-noshow:yes;
+	mso-style-priority:99;
+	color:purple;
+	text-decoration:underline;
+	text-underline:single;}
+em
+	{mso-style-priority:20;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	letter-spacing:.5pt;
+	border:none windowtext 1.0pt;
+	mso-border-alt:none windowtext 0in;
+	padding:0in;
+	font-weight:bold;}
+p
+	{mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-margin-top-alt:auto;
+	margin-right:0in;
+	mso-margin-bottom-alt:auto;
+	margin-left:0in;
+	line-height:115%;
+	mso-pagination:widow-orphan;
+	font-size:11.0pt;
+	font-family:"Calibri","sans-serif";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+pre
+	{mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-link:"HTML Preformatted Char";
+	margin-top:0in;
+	margin-right:0in;
+	margin-bottom:10.0pt;
+	margin-left:0in;
+	line-height:115%;
+	mso-pagination:widow-orphan;
+	tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt;
+	font-size:10.0pt;
+	font-family:"Courier New";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+p.MsoCommentSubject, li.MsoCommentSubject, div.MsoCommentSubject
+	{mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-link:"Comment Subject Char";
+	margin-top:0in;
+	margin-right:0in;
+	margin-bottom:10.0pt;
+	margin-left:0in;
+	line-height:normal;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	font-family:"Calibri","sans-serif";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;
+	font-weight:bold;}
+p.MsoAcetate, li.MsoAcetate, div.MsoAcetate
+	{mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-link:"Balloon Text Char";
+	margin-top:0in;
+	margin-right:0in;
+	margin-bottom:10.0pt;
+	margin-left:0in;
+	line-height:115%;
+	mso-pagination:widow-orphan;
+	font-size:8.0pt;
+	font-family:"Tahoma","sans-serif";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+p.MsoNoSpacing, li.MsoNoSpacing, div.MsoNoSpacing
+	{mso-style-noshow:yes;
+	mso-style-priority:1;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	margin:0in;
+	margin-bottom:.0001pt;
+	line-height:normal;
+	mso-pagination:widow-orphan;
+	font-size:11.0pt;
+	font-family:"Calibri","sans-serif";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+p.MsoRMPane, li.MsoRMPane, div.MsoRMPane
+	{mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-unhide:no;
+	margin-top:0in;
+	margin-right:0in;
+	margin-bottom:10.0pt;
+	margin-left:0in;
+	line-height:115%;
+	mso-pagination:widow-orphan;
+	font-size:11.0pt;
+	font-family:"Calibri","sans-serif";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+p.MsoListParagraph, li.MsoListParagraph, div.MsoListParagraph
+	{mso-style-noshow:yes;
+	mso-style-priority:34;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	margin-top:0in;
+	margin-right:0in;
+	margin-bottom:10.0pt;
+	margin-left:.5in;
+	line-height:115%;
+	mso-pagination:widow-orphan;
+	font-size:11.0pt;
+	font-family:"Calibri","sans-serif";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+p.MsoQuote, li.MsoQuote, div.MsoQuote
+	{mso-style-noshow:yes;
+	mso-style-priority:29;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-link:"Quote Char";
+	margin-top:10.0pt;
+	margin-right:.25in;
+	margin-bottom:0in;
+	margin-left:.25in;
+	margin-bottom:.0001pt;
+	line-height:115%;
+	mso-pagination:widow-orphan;
+	font-size:11.0pt;
+	font-family:"Calibri","sans-serif";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;
+	font-style:italic;}
+p.MsoIntenseQuote, li.MsoIntenseQuote, div.MsoIntenseQuote
+	{mso-style-noshow:yes;
+	mso-style-priority:30;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-link:"Intense Quote Char";
+	margin-top:10.0pt;
+	margin-right:.8in;
+	margin-bottom:14.0pt;
+	margin-left:.7in;
+	text-align:justify;
+	line-height:115%;
+	mso-pagination:widow-orphan;
+	font-size:11.0pt;
+	font-family:"Calibri","sans-serif";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;
+	font-weight:bold;
+	font-style:italic;}
+span.MsoSubtleEmphasis
+	{mso-style-priority:19;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	font-style:italic;}
+span.MsoIntenseEmphasis
+	{mso-style-priority:21;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	font-weight:bold;}
+span.MsoSubtleReference
+	{mso-style-priority:31;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	font-variant:small-caps;}
+span.MsoIntenseReference
+	{mso-style-priority:32;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	font-variant:small-caps;
+	letter-spacing:.25pt;
+	text-decoration:underline;
+	text-underline:single;}
+span.MsoBookTitle
+	{mso-style-priority:33;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	font-variant:small-caps;
+	letter-spacing:.25pt;
+	font-style:italic;}
+p.MsoTocHeading, li.MsoTocHeading, div.MsoTocHeading
+	{mso-style-noshow:yes;
+	mso-style-priority:39;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	margin-top:24.0pt;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:0in;
+	margin-bottom:.0001pt;
+	line-height:115%;
+	mso-pagination:widow-orphan;
+	font-size:14.0pt;
+	font-family:"Cambria","serif";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;
+	mso-bidi-font-family:Calibri;
+	font-weight:bold;}
+span.Heading1Char
+	{mso-style-name:"Heading 1 Char";
+	mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:"Heading 1";
+	font-family:"Cambria","serif";
+	mso-ascii-font-family:Cambria;
+	mso-hansi-font-family:Cambria;
+	font-weight:bold;}
+span.Heading2Char
+	{mso-style-name:"Heading 2 Char";
+	mso-style-noshow:yes;
+	mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:"Heading 2";
+	font-family:"Cambria","serif";
+	mso-ascii-font-family:Cambria;
+	mso-hansi-font-family:Cambria;
+	font-weight:bold;}
+span.Heading3Char
+	{mso-style-name:"Heading 3 Char";
+	mso-style-noshow:yes;
+	mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:"Heading 3";
+	font-family:"Cambria","serif";
+	mso-ascii-font-family:Cambria;
+	mso-hansi-font-family:Cambria;
+	font-weight:bold;}
+span.Heading4Char
+	{mso-style-name:"Heading 4 Char";
+	mso-style-noshow:yes;
+	mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:"Heading 4";
+	font-family:"Cambria","serif";
+	mso-ascii-font-family:Cambria;
+	mso-hansi-font-family:Cambria;
+	font-weight:bold;
+	font-style:italic;}
+span.Heading5Char
+	{mso-style-name:"Heading 5 Char";
+	mso-style-noshow:yes;
+	mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:"Heading 5";
+	font-family:"Cambria","serif";
+	mso-ascii-font-family:Cambria;
+	mso-hansi-font-family:Cambria;
+	color:#7F7F7F;
+	font-weight:bold;}
+span.Heading6Char
+	{mso-style-name:"Heading 6 Char";
+	mso-style-noshow:yes;
+	mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:"Heading 6";
+	font-family:"Cambria","serif";
+	mso-ascii-font-family:Cambria;
+	mso-hansi-font-family:Cambria;
+	color:#7F7F7F;
+	font-weight:bold;
+	font-style:italic;}
+span.HTMLPreformattedChar
+	{mso-style-name:"HTML Preformatted Char";
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:"HTML Preformatted";
+	font-family:Consolas;
+	mso-ascii-font-family:Consolas;
+	mso-hansi-font-family:Consolas;
+	mso-bidi-font-family:Consolas;}
+span.Heading7Char
+	{mso-style-name:"Heading 7 Char";
+	mso-style-noshow:yes;
+	mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:"Heading 7";
+	font-family:"Cambria","serif";
+	mso-ascii-font-family:Cambria;
+	mso-hansi-font-family:Cambria;
+	font-style:italic;}
+span.Heading8Char
+	{mso-style-name:"Heading 8 Char";
+	mso-style-noshow:yes;
+	mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:"Heading 8";
+	font-family:"Cambria","serif";
+	mso-ascii-font-family:Cambria;
+	mso-hansi-font-family:Cambria;}
+span.Heading9Char
+	{mso-style-name:"Heading 9 Char";
+	mso-style-noshow:yes;
+	mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:"Heading 9";
+	font-family:"Cambria","serif";
+	mso-ascii-font-family:Cambria;
+	mso-hansi-font-family:Cambria;
+	letter-spacing:.25pt;
+	font-style:italic;}
+span.FootnoteTextChar
+	{mso-style-name:"Footnote Text Char";
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:"Footnote Text";
+	font-family:"Calibri","sans-serif";
+	mso-ascii-font-family:Calibri;
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;
+	mso-hansi-font-family:Calibri;
+	mso-bidi-font-family:Calibri;}
+span.CommentTextChar
+	{mso-style-name:"Comment Text Char";
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:"Comment Text";
+	font-family:"Calibri","sans-serif";
+	mso-ascii-font-family:Calibri;
+	mso-hansi-font-family:Calibri;
+	mso-bidi-font-family:Calibri;}
+span.TitleChar
+	{mso-style-name:"Title Char";
+	mso-style-priority:10;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:Title;
+	font-family:"Cambria","serif";
+	mso-ascii-font-family:Cambria;
+	mso-hansi-font-family:Cambria;
+	letter-spacing:.25pt;}
+span.SubtitleChar
+	{mso-style-name:"Subtitle Char";
+	mso-style-priority:11;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:Subtitle;
+	font-family:"Cambria","serif";
+	mso-ascii-font-family:Cambria;
+	mso-hansi-font-family:Cambria;
+	letter-spacing:.65pt;
+	font-style:italic;}
+span.CommentSubjectChar
+	{mso-style-name:"Comment Subject Char";
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:"Comment Subject";
+	font-family:"Calibri","sans-serif";
+	mso-ascii-font-family:Calibri;
+	mso-hansi-font-family:Calibri;
+	mso-bidi-font-family:Calibri;
+	font-weight:bold;}
+span.BalloonTextChar
+	{mso-style-name:"Balloon Text Char";
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:"Balloon Text";
+	font-family:"Tahoma","sans-serif";
+	mso-ascii-font-family:Tahoma;
+	mso-hansi-font-family:Tahoma;
+	mso-bidi-font-family:Tahoma;}
+span.QuoteChar
+	{mso-style-name:"Quote Char";
+	mso-style-priority:29;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:Quote;
+	font-style:italic;}
+span.IntenseQuoteChar
+	{mso-style-name:"Intense Quote Char";
+	mso-style-priority:30;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:"Intense Quote";
+	font-weight:bold;
+	font-style:italic;}
+p.msotitlecxspfirst, li.msotitlecxspfirst, div.msotitlecxspfirst
+	{mso-style-name:msotitlecxspfirst;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-unhide:no;
+	margin:0in;
+	margin-bottom:.0001pt;
+	line-height:normal;
+	mso-pagination:widow-orphan;
+	font-size:26.0pt;
+	font-family:"Cambria","serif";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;
+	mso-bidi-font-family:Calibri;
+	letter-spacing:.25pt;}
+p.msotitlecxspmiddle, li.msotitlecxspmiddle, div.msotitlecxspmiddle
+	{mso-style-name:msotitlecxspmiddle;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-unhide:no;
+	margin:0in;
+	margin-bottom:.0001pt;
+	line-height:normal;
+	mso-pagination:widow-orphan;
+	font-size:26.0pt;
+	font-family:"Cambria","serif";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;
+	mso-bidi-font-family:Calibri;
+	letter-spacing:.25pt;}
+p.msotitlecxsplast, li.msotitlecxsplast, div.msotitlecxsplast
+	{mso-style-name:msotitlecxsplast;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-unhide:no;
+	margin-top:0in;
+	margin-right:0in;
+	margin-bottom:10.0pt;
+	margin-left:0in;
+	line-height:normal;
+	mso-pagination:widow-orphan;
+	font-size:26.0pt;
+	font-family:"Cambria","serif";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;
+	mso-bidi-font-family:Calibri;
+	letter-spacing:.25pt;}
+p.msolistparagraphcxspfirst, li.msolistparagraphcxspfirst, div.msolistparagraphcxspfirst
+	{mso-style-name:msolistparagraphcxspfirst;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-unhide:no;
+	margin-top:0in;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:.5in;
+	margin-bottom:.0001pt;
+	line-height:115%;
+	mso-pagination:widow-orphan;
+	font-size:11.0pt;
+	font-family:"Calibri","sans-serif";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+p.msolistparagraphcxspmiddle, li.msolistparagraphcxspmiddle, div.msolistparagraphcxspmiddle
+	{mso-style-name:msolistparagraphcxspmiddle;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-unhide:no;
+	margin-top:0in;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:.5in;
+	margin-bottom:.0001pt;
+	line-height:115%;
+	mso-pagination:widow-orphan;
+	font-size:11.0pt;
+	font-family:"Calibri","sans-serif";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+p.msolistparagraphcxsplast, li.msolistparagraphcxsplast, div.msolistparagraphcxsplast
+	{mso-style-name:msolistparagraphcxsplast;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-unhide:no;
+	margin-top:0in;
+	margin-right:0in;
+	margin-bottom:10.0pt;
+	margin-left:.5in;
+	line-height:115%;
+	mso-pagination:widow-orphan;
+	font-size:11.0pt;
+	font-family:"Calibri","sans-serif";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+p.msotocheadingcxspfirst, li.msotocheadingcxspfirst, div.msotocheadingcxspfirst
+	{mso-style-name:msotocheadingcxspfirst;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-unhide:no;
+	margin-top:24.0pt;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:0in;
+	margin-bottom:.0001pt;
+	line-height:115%;
+	mso-pagination:widow-orphan;
+	font-size:14.0pt;
+	font-family:"Cambria","serif";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;
+	mso-bidi-font-family:Calibri;
+	font-weight:bold;}
+p.msotocheadingcxspmiddle, li.msotocheadingcxspmiddle, div.msotocheadingcxspmiddle
+	{mso-style-name:msotocheadingcxspmiddle;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-unhide:no;
+	margin:0in;
+	margin-bottom:.0001pt;
+	line-height:115%;
+	mso-pagination:widow-orphan;
+	font-size:14.0pt;
+	font-family:"Cambria","serif";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;
+	mso-bidi-font-family:Calibri;
+	font-weight:bold;}
+p.msotocheadingcxsplast, li.msotocheadingcxsplast, div.msotocheadingcxsplast
+	{mso-style-name:msotocheadingcxsplast;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-unhide:no;
+	margin:0in;
+	margin-bottom:.0001pt;
+	line-height:115%;
+	mso-pagination:widow-orphan;
+	font-size:14.0pt;
+	font-family:"Cambria","serif";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;
+	mso-bidi-font-family:Calibri;
+	font-weight:bold;}
+p.msopapdefault, li.msopapdefault, div.msopapdefault
+	{mso-style-name:msopapdefault;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-unhide:no;
+	mso-margin-top-alt:auto;
+	margin-right:0in;
+	margin-bottom:10.0pt;
+	margin-left:0in;
+	line-height:115%;
+	mso-pagination:widow-orphan;
+	font-size:11.0pt;
+	font-family:"Calibri","sans-serif";
+	mso-fareast-font-family:"Times New Roman";
+	mso-fareast-theme-font:minor-fareast;}
+span.SpellE
+	{mso-style-name:"";
+	mso-spl-e:yes;}
+span.GramE
+	{mso-style-name:"";
+	mso-gram-e:yes;}
+.MsoChpDefault
+	{mso-style-type:export-only;
+	mso-default-props:yes;
+	font-size:10.0pt;
+	mso-ansi-font-size:10.0pt;
+	mso-bidi-font-size:10.0pt;}
+ /* Page Definitions */
+ @page
+	{mso-footnote-separator:url("ReadMe_files/header.htm") fs;
+	mso-footnote-continuation-separator:url("ReadMe_files/header.htm") fcs;
+	mso-endnote-separator:url("ReadMe_files/header.htm") es;
+	mso-endnote-continuation-separator:url("ReadMe_files/header.htm") ecs;}
+@page WordSection1
+	{size:8.5in 11.0in;
+	margin:1.0in 1.0in 1.0in 1.0in;
+	mso-header-margin:.5in;
+	mso-footer-margin:.5in;
+	mso-paper-source:0;}
+div.WordSection1
+	{page:WordSection1;}
+ /* List Definitions */
+ @list l0
+	{mso-list-id:3554011;
+	mso-list-type:hybrid;
+	mso-list-template-ids:-1899876232 -1226425772 67698713 67698715 67698703 67698713 67698715 67698703 67698713 67698715;}
+@list l0:level1
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l0:level2
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l0:level3
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	text-indent:-9.0pt;}
+@list l0:level4
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l0:level5
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l0:level6
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	text-indent:-9.0pt;}
+@list l0:level7
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l0:level8
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l0:level9
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	text-indent:-9.0pt;}
+@list l1
+	{mso-list-id:291905449;
+	mso-list-type:hybrid;
+	mso-list-template-ids:-1899876232 -1226425772 67698713 67698715 67698703 67698713 67698715 67698703 67698713 67698715;}
+@list l1:level1
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:.25in;
+	text-indent:-.25in;}
+@list l1:level2
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:.75in;
+	text-indent:-.25in;}
+@list l1:level3
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	margin-left:1.25in;
+	text-indent:-9.0pt;}
+@list l1:level4
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:1.75in;
+	text-indent:-.25in;}
+@list l1:level5
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:2.25in;
+	text-indent:-.25in;}
+@list l1:level6
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	margin-left:2.75in;
+	text-indent:-9.0pt;}
+@list l1:level7
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:3.25in;
+	text-indent:-.25in;}
+@list l1:level8
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:3.75in;
+	text-indent:-.25in;}
+@list l1:level9
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	margin-left:4.25in;
+	text-indent:-9.0pt;}
+@list l2
+	{mso-list-id:663094967;
+	mso-list-type:hybrid;
+	mso-list-template-ids:-1552904950 67698703 67698713 67698715 67698703 67698713 67698715 67698703 67698713 67698715;}
+@list l2:level1
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l2:level2
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l2:level3
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	text-indent:-9.0pt;}
+@list l2:level4
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l2:level5
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l2:level6
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	text-indent:-9.0pt;}
+@list l2:level7
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l2:level8
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l2:level9
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	text-indent:-9.0pt;}
+@list l3
+	{mso-list-id:808665613;
+	mso-list-type:hybrid;
+	mso-list-template-ids:228352410 67698703 67698713 67698715 67698703 67698713 67698715 67698703 67698713 67698715;}
+@list l3:level1
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l3:level2
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l3:level3
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	text-indent:-9.0pt;}
+@list l3:level4
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l3:level5
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l3:level6
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	text-indent:-9.0pt;}
+@list l3:level7
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l3:level8
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l3:level9
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	text-indent:-9.0pt;}
+@list l4
+	{mso-list-id:1233271800;
+	mso-list-type:hybrid;
+	mso-list-template-ids:-1303447690 67698703 67698713 67698715 67698703 67698713 67698715 67698703 67698713 67698715;}
+@list l4:level1
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l4:level2
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l4:level3
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	text-indent:-9.0pt;}
+@list l4:level4
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l4:level5
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l4:level6
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	text-indent:-9.0pt;}
+@list l4:level7
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l4:level8
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l4:level9
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	text-indent:-9.0pt;}
+@list l5
+	{mso-list-id:1398211023;
+	mso-list-type:hybrid;
+	mso-list-template-ids:-1899876232 -1226425772 67698713 67698715 67698703 67698713 67698715 67698703 67698713 67698715;}
+@list l5:level1
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l5:level2
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l5:level3
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	text-indent:-9.0pt;}
+@list l5:level4
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l5:level5
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l5:level6
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	text-indent:-9.0pt;}
+@list l5:level7
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l5:level8
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l5:level9
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	text-indent:-9.0pt;}
+@list l6
+	{mso-list-id:1667785684;
+	mso-list-type:hybrid;
+	mso-list-template-ids:-353086616 67698703 67698713 67698715 67698703 67698713 67698715 67698703 67698713 67698715;}
+@list l6:level1
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l6:level2
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l6:level3
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	text-indent:-9.0pt;}
+@list l6:level4
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l6:level5
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l6:level6
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	text-indent:-9.0pt;}
+@list l6:level7
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l6:level8
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l6:level9
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	text-indent:-9.0pt;}
+@list l7
+	{mso-list-id:1770275420;
+	mso-list-type:hybrid;
+	mso-list-template-ids:-310863980 67698703 67698713 67698715 67698703 67698713 67698715 67698703 67698713 67698715;}
+@list l7:level1
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l7:level2
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l7:level3
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	text-indent:-9.0pt;}
+@list l7:level4
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l7:level5
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l7:level6
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	text-indent:-9.0pt;}
+@list l7:level7
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l7:level8
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l7:level9
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	text-indent:-9.0pt;}
+@list l8
+	{mso-list-id:2071079058;
+	mso-list-type:hybrid;
+	mso-list-template-ids:799586094 742537370 67698713 67698715 67698703 67698713 67698715 67698703 67698713 67698715;}
+@list l8:level1
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l8:level2
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l8:level3
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	text-indent:-9.0pt;}
+@list l8:level4
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l8:level5
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l8:level6
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	text-indent:-9.0pt;}
+@list l8:level7
+	{mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l8:level8
+	{mso-level-number-format:alpha-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-.25in;}
+@list l8:level9
+	{mso-level-number-format:roman-lower;
+	mso-level-tab-stop:none;
+	mso-level-number-position:right;
+	text-indent:-9.0pt;}
+ol
+	{margin-bottom:0in;}
+ul
+	{margin-bottom:0in;}
+-->
+</style>
+<!--[if gte mso 10]>
+<style>
+ /* Style Definitions */
+ table.MsoNormalTable
+	{mso-style-name:"Table Normal";
+	mso-tstyle-rowband-size:0;
+	mso-tstyle-colband-size:0;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-parent:"";
+	mso-padding-alt:0in 5.4pt 0in 5.4pt;
+	mso-para-margin:0in;
+	mso-para-margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	font-family:"Times New Roman","serif";}
+</style>
+<![endif]--><!--[if gte mso 9]><xml>
+ <o:shapedefaults v:ext="edit" spidmax="1026"/>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <o:shapelayout v:ext="edit">
+  <o:idmap v:ext="edit" data="1"/>
+ </o:shapelayout></xml><![endif]-->
+</head>
+
+<body lang=EN-US link=blue vlink=purple style='tab-interval:.5in'>
+
+<div class=WordSection1>
+
+<h1 align=center style='text-align:center'><span style='font-size:16.0pt;
+line-height:115%;mso-fareast-font-family:"Times New Roman"'>Sample <span
+class=SpellE>StorPort</span> Virtual Miniport<o:p></o:p></span></h1>
+
+<p><a name=sum></a>The sample is a <span class=SpellE>StorPort</span> virtual
+miniport that presents the appearance of 1 or more <span class=SpellE>Fibre</span>
+Channel Host Bus Adapters (HBA). Under an HBA, the sample creates LUNs/disks, which
+can be formatted and used by a file system such as NTFS.</p>
+
+<p>A <span class=SpellE>StorPort</span> virtual miniport is much like a <span
+class=SpellE>StorPort</span> real miniport. A virtual miniport differs in
+several ways:</p>
+
+<p style='margin-left:.5in;text-indent:-.25in;mso-list:l7 level1 lfo2'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>1.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>The
+virtual miniport does not control hardware in a way supported by <span
+class=SpellE>StorPort</span>. It may conceivably control hardware by other
+means.</p>
+
+<p style='margin-left:.5in;text-indent:-.25in;mso-list:l7 level1 lfo2'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>2.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Since
+there is no <span class=SpellE>StorPort</span> support for hardware control,
+the miniport does not use DMA or DMA operations (via <span class=SpellE>StorPort</span>
+<span class=GramE>APIs, that</span> is). There is no Interrupt object or lock.</p>
+
+<p style='margin-left:.5in;text-indent:-.25in;mso-list:l7 level1 lfo2'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>3.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>The
+miniport can employ any API documented in the WDK for WDM drivers.</p>
+
+<p>A virtual miniport is like a real miniport in important ways:</p>
+
+<p style='margin-left:.5in;text-indent:-.25in;mso-list:l6 level1 lfo4'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>1.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+class=SpellE>StorPort</span> as port driver handles PnP and power operations.</p>
+
+<p style='margin-left:.5in;text-indent:-.25in;mso-list:l6 level1 lfo4'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>2.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+class=SpellE>StorPort</span> supports the handling of other I/<span
+class=SpellE>Os</span> with the miniport’s support (through callbacks). That handling
+makes it possible for miniport-provided LUNs to be handled much as any other
+disk might be handled, including having a drive letter, mounting a file system
+and doing open, read/write, close and other kinds of I/O.</p>
+
+<p style='margin-left:.5in;text-indent:-.25in;mso-list:l6 level1 lfo4'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>3.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+class=SpellE>StorPort</span> handles the details of I/O queuing when and as
+needed (e.g., <span class=GramE>queue depth</span>, pausing, resuming).</p>
+
+<p style='margin-left:.5in;text-indent:-.25in;mso-list:l6 level1 lfo4'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>4.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Along
+with <span class=SpellE>ClassPnP</span>, <span class=SpellE>StorPort</span> can
+retry <span class=GramE>I/<span class=SpellE>Os</span></span>.</p>
+
+<p>The sample assumes some familiarity with <span class=SpellE>StorPort</span>
+miniports. Sample documentation is minimal, consisting of this file and of
+comments in the sample’s buildable files. The WDK should be studied for more
+information about miniports.</p>
+
+<h3 style='margin-top:30.0pt'><span style='font-family:"Verdana","sans-serif";
+mso-fareast-font-family:"Times New Roman"'>The files</span><span
+style='mso-fareast-font-family:"Times New Roman"'><o:p></o:p></span></h3>
+
+<p>These are the sample files, with some important routines or pieces noted:</p>
+
+<p style='margin-left:.5in;text-indent:-.25in;mso-list:l4 level1 lfo6'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>1.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+class=SpellE>mp.c</span></p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:1.0in;
+margin-bottom:.0001pt;text-indent:-.25in;mso-list:l4 level2 lfo6'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>a.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+class=SpellE><span class=GramE>DriverEntry</span></span><span class=GramE>(</span>)<br>
+Gets some resources, call <span class=SpellE>StorPortInitialize</span>().</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:1.0in;
+margin-bottom:.0001pt;text-indent:-.25in;mso-list:l4 level2 lfo6'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>b.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+class=SpellE><span class=GramE>MpHwFindAdapter</span></span><span class=GramE>(</span>)<br>
+Gets more resources, sets configuration parameters.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:1.0in;
+margin-bottom:.0001pt;text-indent:-.25in;mso-list:l4 level2 lfo6'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>c.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+class=SpellE><span class=GramE>MpHwStartIo</span></span><span class=GramE>(</span>)<br>
+Entry point for an I/O. This calls the appropriate support routine, e.g., <span
+class=SpellE><span class=GramE>ScsiExecuteMain</span></span><span class=GramE>(</span>).</p>
+
+<p style='margin-left:.5in;text-indent:-.25in;mso-list:l4 level1 lfo6'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>2.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+class=SpellE>scsi.c</span></p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:1.0in;
+margin-bottom:.0001pt;text-indent:-.25in;mso-list:l4 level2 lfo6'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>a.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+class=SpellE><span class=GramE>ScsiExecuteMain</span></span><span class=GramE>(</span>)<br>
+Handles SCSI SRBs with <span class=SpellE>opcodes</span> needed to support file
+system operations by calling subroutines. Fails SRBs with other <span
+class=SpellE>opcodes</span>.<br>
+Note: In a real-world virtual miniport, it may be necessary to handle other <span
+class=SpellE>opcodes</span>.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:1.0in;
+margin-bottom:.0001pt;text-indent:-.25in;mso-list:l4 level2 lfo6'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>b.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+class=SpellE><span class=GramE>ScsiOpInquiry</span></span><span class=GramE>(</span>)<br>
+Handles Inquiry, including creating a new LUN as needed.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:1.0in;
+margin-bottom:.0001pt;text-indent:-.25in;mso-list:l4 level2 lfo6'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>c.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+class=SpellE><span class=GramE>ScsiOpVPD</span></span><span class=GramE>(</span>)<br>
+Handles Vital Product Data.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:1.0in;
+margin-bottom:.0001pt;text-indent:-.25in;mso-list:l4 level2 lfo6'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>d.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+class=SpellE><span class=GramE>ScsiOpRead</span></span><span class=GramE>(</span>)<br>
+Beginning of a SCSI Read operation.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:1.0in;
+margin-bottom:.0001pt;text-indent:-.25in;mso-list:l4 level2 lfo6'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>e.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+class=SpellE><span class=GramE>ScsiOpWrite</span></span><span class=GramE>(</span>)<br>
+Beginning of a SCSI Write operation.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:1.0in;
+margin-bottom:.0001pt;text-indent:-.25in;mso-list:l4 level2 lfo6'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>f.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span class=SpellE><span class=GramE>ScsiReadWriteSetup</span></span><span
+class=GramE>(</span>)<br>
+Sets up a work element for SCSI Read or Write and <span class=SpellE>enqueues</span>
+the element.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:1.0in;
+margin-bottom:.0001pt;text-indent:-.25in;mso-list:l4 level2 lfo6'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>g.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+class=SpellE><span class=GramE>ScsiOpReportLuns</span></span><span class=GramE>(</span>)<br>
+Handles Report LUNs.</p>
+
+<p style='margin-left:.5in;text-indent:-.25in;mso-list:l4 level1 lfo6'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>3.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+class=SpellE>wmi.c</span></p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:1.0in;
+margin-bottom:.0001pt;text-indent:-.25in;mso-list:l4 level2 lfo6'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>a.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+class=SpellE><span class=GramE>HandleWmiSrb</span></span><span class=GramE>(</span>)<br>
+Handles WMI SRBs, possibly by calling a subroutine.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:1.0in;
+margin-bottom:.0001pt;text-indent:-.25in;mso-list:l4 level2 lfo6'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>b.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+class=SpellE><span class=GramE>QueryWmiDataBlock</span></span><span
+class=GramE>(</span>)<br>
+Supports WMI Query Data Block.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:1.0in;
+margin-bottom:.0001pt;text-indent:-.25in;mso-list:l4 level2 lfo6'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>c.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+class=SpellE><span class=GramE>ExecuteWmiMethod</span></span><span class=GramE>(</span>)<br>
+Supports WMI Execute Method.</p>
+
+<p style='margin-left:.5in;text-indent:-.25in;mso-list:l4 level1 lfo6'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>4.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+class=SpellE>utils.c</span></p>
+
+<p style='margin-left:1.0in;text-indent:-.25in;mso-list:l4 level2 lfo6'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>a.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+class=SpellE><span class=GramE>MpQueryRegParameters</span></span><span
+class=GramE>(</span>)<br>
+Does registry lookup of parameters.</p>
+
+<p style='margin-left:.5in;text-indent:-.25in;mso-list:l4 level1 lfo6'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>5.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+class=SpellE>WkRtn.c</span></p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:5.0pt;margin-left:1.0in;
+text-indent:-.25in;mso-list:l4 level2 lfo6'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>a.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+class=SpellE><span class=GramE>MpGeneralWkRtn</span></span><span class=GramE>(</span>)<br>
+Handles queued work elements by calling <span class=SpellE>MpWkRtn</span>.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:5.0pt;margin-left:1.0in;
+text-indent:-.25in;mso-list:l4 level2 lfo6'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>b.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+class=SpellE><span class=GramE>MpWkRtn</span></span><span class=GramE>(</span>)<br>
+Handles work elements, completes them.</p>
+
+<p style='margin-left:.5in;text-indent:-.25in;mso-list:l4 level1 lfo6'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>6.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>sources:
+Build directives</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:1.0in;
+margin-bottom:.0001pt;text-indent:-.25in;mso-list:l4 level2 lfo6'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>a.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Warning
+level; optimization level.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:1.0in;
+margin-bottom:.0001pt;text-indent:-.25in;mso-list:l4 level2 lfo6'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>b.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Files
+to build.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:1.0in;
+margin-bottom:.0001pt;text-indent:-.25in;mso-list:l4 level2 lfo6'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>c.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Include
+and <span class=SpellE>targetlib</span> directories.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:1.0in;
+margin-bottom:.0001pt;text-indent:-.25in;mso-list:l4 level2 lfo6'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>d.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>WPP
+directives.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:1.0in;
+margin-bottom:.0001pt;text-indent:-.25in;mso-list:l4 level2 lfo6'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>e.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>.<span
+class=SpellE>inx</span> and MOF handling.</p>
+
+<p style='margin-left:.5in;text-indent:-.25in;mso-list:l4 level1 lfo6'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>7.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>makefile.inc:
+More build directives</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:1.0in;
+margin-bottom:.0001pt;text-indent:-.25in;mso-list:l4 level2 lfo6'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>a.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Building
+.<span class=SpellE>inf</span> file.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:1.0in;
+margin-bottom:.0001pt;text-indent:-.25in;mso-list:l4 level2 lfo6'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>b.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>MOF
+handling.</p>
+
+<p style='margin-left:.5in;text-indent:-.25in;mso-list:l4 level1 lfo6'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>8.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Header
+files under the <span class=SpellE><span class=GramE>inc</span></span>
+subdirectory.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:1.0in;
+margin-bottom:.0001pt;text-indent:-.25in;mso-list:l4 level2 lfo6'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>a.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+class=SpellE><span class=GramE>mp.h</span></span><br>
+Main header file.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:1.0in;
+margin-bottom:.0001pt;text-indent:-.25in;mso-list:l4 level2 lfo6'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>b.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+class=SpellE><span class=GramE>mpwmi.h</span></span><br>
+Generated by build.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:1.0in;
+margin-bottom:.0001pt;text-indent:-.25in;mso-list:l4 level2 lfo6'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>c.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+class=GramE>trace</span>.<br>
+WPP directives.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:1.0in;
+margin-bottom:.0001pt;text-indent:-.25in;mso-list:l4 level2 lfo6'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>d.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+class=GramE>trcmp.ini</span><br>
+More WPP directives.</p>
+
+<p style='margin-left:.5in;text-indent:-.25in;mso-list:l4 level1 lfo6'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>9.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+class=SpellE>mp.inx</span>:</p>
+
+<p style='margin-left:.75in'><span class=GramE>Template for building mp.inf.</span>
+Values under <span class=SpellE>pnpsafe_isa_addreg</span> cause registry
+settings.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:1.0in;
+margin-bottom:.0001pt;text-indent:-.25in;mso-list:l4 level2 lfo6'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>a.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+class=SpellE>VirtualDiskSize</span><br>
+Size of an in-memory LUN/disk in bytes. If this doesn’t match <span
+class=SpellE>PhysicalDiskSize</span>, <span class=SpellE>PhysicalDiskSize</span>
+will override.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:1.0in;
+margin-bottom:.0001pt;text-indent:-.25in;mso-list:l4 level2 lfo6'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>b.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+class=SpellE>PhysicalDiskSize</span><br>
+Size of an in-memory LUN/disk in bytes.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:1.0in;
+margin-bottom:.0001pt;text-indent:-.25in;mso-list:l4 level2 lfo6'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>c.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+class=SpellE>NbrLUNsperHBA</span><br>
+Number of in-memory LUNs/disks.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:1.0in;
+margin-bottom:.0001pt;text-indent:-.25in;mso-list:l4 level2 lfo6'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>d.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+class=SpellE>CombineVirtDisks</span><br>
+Combine the data buffers for in-memory LUNs/disks if set to 1.</p>
+
+<p style='margin-left:.5in;text-indent:-.25in;mso-list:l4 level1 lfo6'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>10.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp; </span></span></span><![endif]><span
+class=SpellE>mp.mof</span>: WMI class directives.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:1.0in;
+margin-bottom:.0001pt'>MSFC class directives are done by including <span
+class=SpellE>hbaapi.mof</span>, which isn’t in the sample but which should be
+copied from %<span class=SpellE>WinDir</span>%\system32\<span class=SpellE>wbem</span>
+on the target system before building.</p>
+
+<p style='margin-left:.5in;text-indent:-.25in;mso-list:l4 level1 lfo6'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>11.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp; </span></span></span><![endif]><span
+class=SpellE>mp.rc</span>: Resource <span class=GramE>file</span>, including <span
+class=SpellE>mp.bmf</span>, the binary (built) form of <span class=SpellE>mp.mof</span>.</p>
+
+<p style='margin-left:.5in;text-indent:-.25in;mso-list:l4 level1 lfo6'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>12.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp; </span></span></span><![endif]>ReadMe.htm:
+This file.</p>
+
+<h3 style='margin-top:30.0pt'><span style='font-family:"Verdana","sans-serif";
+mso-fareast-font-family:"Times New Roman"'>Building</span><span
+style='mso-fareast-font-family:"Times New Roman"'><o:p></o:p></span></h3>
+
+<p>The sample should be built with the Win7 WDK (7600.16385.1) or later. One
+can build for Win2003, Vista/Win2008 or Win7/Win2008 R2, for x86 or x64, for
+free or checked. (Win8 Developer Preview has been found to work with the sample
+built for Win7 x64 free.) The build should complete without errors or warnings.</p>
+
+<p style='margin-left:.5in;text-indent:-.25in;mso-list:l2 level1 lfo8'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>1.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Open
+a build window.</p>
+
+<p style='margin-left:.5in;text-indent:-.25in;mso-list:l2 level1 lfo8'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>2.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Go
+the sample directory.</p>
+
+<p style='margin-left:.5in;text-indent:-.25in;mso-list:l2 level1 lfo8'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>3.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Copy
+<span class=SpellE>hbaapi.mof</span> from %<span class=SpellE>WinDir</span>%\system32\<span
+class=SpellE>wbem</span> to the sample directory.</p>
+
+<p style='margin-left:.5in;text-indent:-.25in;mso-list:l2 level1 lfo8'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>4.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>For
+a full build, do <span class=SpellE><b style='mso-bidi-font-weight:normal'>bcz</b></span>.
+For a build processing only files changed since the last full build, do <span
+class=SpellE><span class=GramE><b style='mso-bidi-font-weight:normal'>bz</b></span></span>.</p>
+
+<p style='margin-left:.5in;text-indent:-.25in;mso-list:l2 level1 lfo8'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>5.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>If
+the target system is Win2008 x64 or any later x64 system, the driver binary
+mp.sys must be signed, e.g., test-signed. Signing is not covered here.</p>
+
+<h3 style='margin-top:30.0pt'><span style='font-family:"Verdana","sans-serif";
+mso-fareast-font-family:"Times New Roman"'>Installing</span><span
+style='mso-fareast-font-family:"Times New Roman"'><o:p></o:p></span></h3>
+
+<p style='margin-left:.5in;text-indent:-.25in;mso-list:l1 level1 lfo10'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>1.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Once
+the build and signing (if needed) are done, copy these files to the test (<span
+class=SpellE>debuggee</span>) system in a working directory: </p>
+
+<p style='margin-left:1.0in'>mp.sys, mp.inf, the appropriate WDF <span
+class=SpellE>coinstaller</span> (e.g., WdfCoInstaller01009.dll for WDK 7600)
+and devcon.exe</p>
+
+<p style='margin-left:.5in'>The WDF <span class=SpellE>coinstaller</span> can
+be found under the appropriate architecture directory in the WDK, e.g.,
+c:\WinDDK\7600.16385.1\redist\wdf\amd64. Similarly, devcon.exe can be found in
+the WDK, e.g., c:\WinDDK\7600.16385.1\tools\devcon\amd64.</p>
+
+<p style='margin-left:.5in;text-indent:-.25in;mso-list:l1 level1 lfo10'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>2.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Login
+to the test system with administrator privileges.</p>
+
+<p style='margin-left:.5in;text-indent:-.25in;mso-list:l1 level1 lfo10'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>3.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>If
+the driver is test-signed, do <span class=SpellE><b style='mso-bidi-font-weight:
+normal'>bcdedit</b></span><b style='mso-bidi-font-weight:normal'> /set <span
+class=SpellE>testsigning</span> on</b> in an elevated window and reboot.</p>
+
+<p style='margin-left:.5in;text-indent:-.25in;mso-list:l1 level1 lfo10'><a
+name=Install></a><![if !supportLists]><span style='mso-fareast-font-family:
+Calibri'><span style='mso-list:Ignore'>4.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]>In an elevated window on the test system, where
+the current directory is the working directory, do <span class=SpellE><b
+style='mso-bidi-font-weight:normal'>devcon</b></span><b style='mso-bidi-font-weight:
+normal'> install mp.inf root\<span class=SpellE><span class=GramE>mp</span></span></b><span
+class=GramE>.</span> If the system is x64 and if the driver binary is
+test-signed, say OK to the prompt to install.</p>
+
+<p style='margin-left:.5in;text-indent:-.25in;mso-list:l1 level1 lfo10'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>5.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>If
+one wants a second (or third …) instance of the virtual HBA, repeat step 4)
+above. (There will not be a prompt about installing a test-signed driver on a
+second or later installation.)</p>
+
+<h3 style='margin-top:30.0pt'><span style='font-family:"Verdana","sans-serif";
+mso-fareast-font-family:"Times New Roman"'>Uninstalling</span><span
+style='mso-fareast-font-family:"Times New Roman"'><o:p></o:p></span></h3>
+
+<p style='margin-left:.5in;text-indent:-.25in;mso-list:l5 level1 lfo12'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>1.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Login
+as an administrator to the test system.</p>
+
+<p style='margin-left:.5in;text-indent:-.25in;mso-list:l5 level1 lfo12'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>2.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>In
+an elevated window, do <span class=SpellE><b style='mso-bidi-font-weight:normal'>devcon</b></span><b
+style='mso-bidi-font-weight:normal'> remove root\<span class=SpellE>mp</span></b>
+to uninstall the <span class=GramE>miniport.</span></p>
+
+<p style='margin-left:.5in;text-indent:-.25in;mso-list:l5 level1 lfo12'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>3.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>In
+an elevated window, <span class=GramE>do</span> <span class=SpellE><b
+style='mso-bidi-font-weight:normal'>sc</b></span><b style='mso-bidi-font-weight:
+normal'> delete <span class=SpellE>mp</span> </b>to remove the driver service.</p>
+
+<p style='margin-left:.5in;text-indent:-.25in;mso-list:l5 level1 lfo12'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>4.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Delete
+mp.sys from %<span class=SpellE>WinDir</span>%\system32\drivers.</p>
+
+<p style='margin-left:.5in;text-indent:-.25in;mso-list:l5 level1 lfo12'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>5.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Reboot.</p>
+
+<h3 style='margin-top:30.0pt'><span style='font-family:"Verdana","sans-serif";
+mso-fareast-font-family:"Times New Roman"'>Exercising the sample</span><span
+style='mso-fareast-font-family:"Times New Roman"'><o:p></o:p></span></h3>
+
+<p style='margin-left:.25in'>The following assumes that the test system is
+Win7/Win2008 R2 and that one or more instances of the virtual HBA have been
+installed (see <a href="#Install">installation by <span class=SpellE>devcon</span></a>).</p>
+
+<p style='margin-left:.5in;text-indent:-.25in;mso-list:l0 level1 lfo14'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>1.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Login
+as an administrator to the test system.</p>
+
+<p style='margin-left:.5in;text-indent:-.25in;mso-list:l0 level1 lfo14'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>2.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Start
+Device Manager (e.g., <span class=SpellE>diskmgmt.msc</span>).</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:1.0in;
+margin-bottom:.0001pt;text-indent:-.25in;mso-list:l0 level2 lfo14'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>a.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>On
+one of the miniport’s LUNs, where the disk is described as “Unknown,”
+right-click and choose Online.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:1.0in;
+margin-bottom:.0001pt;text-indent:-.25in;mso-list:l0 level2 lfo14'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>b.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Right-click
+again in the same place and choose Initialize Disk.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:1.0in;
+margin-bottom:.0001pt;text-indent:-.25in;mso-list:l0 level2 lfo14'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>c.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Right-click
+on the same disk, where the <span class=GramE>disk is described as
+“Unallocated,” and choose</span> New Simple Volume. Follow the instructions.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:1.0in;
+margin-bottom:.0001pt;text-indent:-.25in;mso-list:l0 level2 lfo14'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>d.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Right-click
+on the same disk, where “New Volume” is shown, and <span class=GramE>choose</span>
+Explore, to start Windows Explorer on the newly formatted disk.</p>
+
+<p style='margin-left:.5in;text-indent:-.25in;mso-list:l0 level1 lfo14'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>3.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Start
+Windows Explorer</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:1.0in;
+margin-bottom:.0001pt;text-indent:-.25in;mso-list:l0 level2 lfo14'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>a.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Create
+a directory.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:1.0in;
+margin-bottom:.0001pt;text-indent:-.25in;mso-list:l0 level2 lfo14'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>b.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Under
+that directory, create a file.</p>
+
+<p style='margin-top:.25in;margin-right:0in;margin-bottom:6.0pt;margin-left:
+.5in;text-indent:-.25in;mso-list:l0 level1 lfo14'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>4.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Start
+Storage Explorer (<span class=SpellE>StorExpl.msc</span>). The miniport will
+appear under the Servers node. (Note: The miniport will not appear under <span
+class=SpellE>Fibre</span> Channel Fabrics.)</p>
+
+<p style='margin-top:6.0pt;margin-right:0in;margin-bottom:12.0pt;margin-left:
+.5in;text-indent:-.25in;mso-list:l0 level1 lfo14'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>5.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>In
+an elevated window, start wbemtest.exe.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:1.0in;
+margin-bottom:.0001pt;text-indent:-.25in;mso-list:l0 level2 lfo14'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>a.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Click
+on Connect and connect to root\WMI.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:1.0in;
+margin-bottom:.0001pt;text-indent:-.25in;mso-list:l0 level2 lfo14'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>b.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Click
+on <span class=SpellE>Enum</span> Classes and click OK.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:1.0in;
+margin-bottom:.0001pt;text-indent:-.25in;mso-list:l0 level2 lfo14'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>c.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Scroll
+down to the MSFC classes. Choose one, such as <span class=SpellE>MSFC_FibrePortHBAAttributes</span>.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:1.0in;
+margin-bottom:.0001pt;text-indent:-.25in;mso-list:l0 level2 lfo14'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>d.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Click
+on Instances.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:1.0in;
+margin-bottom:.0001pt;text-indent:-.25in;mso-list:l0 level2 lfo14'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>e.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Double-click
+on an instance.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:1.0in;
+margin-bottom:.0001pt;text-indent:-.25in;mso-list:l0 level2 lfo14'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>f.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]>Click on Show MOF and examine the data.</p>
+
+<h3 style='margin-top:30.0pt'><span style='font-family:"Verdana","sans-serif";
+mso-fareast-font-family:"Times New Roman"'>High-level logic</span><span
+style='mso-fareast-font-family:"Times New Roman"'><o:p></o:p></span></h3>
+
+<p style='margin-left:.5in;text-indent:-.25in;mso-list:l3 level1 lfo16'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>1.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+class=SpellE><span class=GramE>DriverEntry</span></span><span class=GramE>(</span>)
+gets control because the miniport is a WDM driver for the FDO device object
+enumerated off the PnP root. <span class=SpellE><span class=GramE>DriverEntry</span></span><span
+class=GramE>(</span>) calls <span class=SpellE>StorPortInitialize</span>() with
+initial configuration parameters. <span class=SpellE>StorPort</span> takes over
+the miniport’s entry points defined in the driver object, e.g., <span
+class=SpellE>AddDevice</span> and <span class=SpellE>InternalDeviceIoControl</span>
+(IRP_MJ_SCSI).</p>
+
+<p style='margin-left:.5in;text-indent:-.25in;mso-list:l3 level1 lfo16'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>2.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+class=SpellE><span class=GramE>MpHwFindAdapter</span></span><span class=GramE>(</span>)
+gets control as part of the initialization of a virtual HBA. (There is 1
+virtual HBA for each installed instance of the miniport.) More configuration
+parameters are set.</p>
+
+<p style='margin-left:.5in;text-indent:-.25in;mso-list:l3 level1 lfo16'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>3.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+class=SpellE><span class=GramE>MpHwStartIo</span></span><span class=GramE>(</span>)
+gets control for an I/O in the form of a SCSI Request Block (SRB). The routine
+calls appropriate subroutines.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:1.0in;
+margin-bottom:.0001pt;text-indent:-.25in;mso-list:l3 level2 lfo16'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>a.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+class=SpellE><span class=GramE>ScsiExecuteMain</span></span><span class=GramE>(</span>)
+is the subroutine called for SCSI-type (SRB_FUNCTION_EXECUTE_SCSI) SRBs.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:1.5in;
+margin-bottom:.0001pt;text-indent:-1.5in;mso-text-indent-alt:-9.0pt;mso-list:
+l3 level3 lfo16'><![if !supportLists]><span style='mso-fareast-font-family:
+Calibri'><span style='mso-list:Ignore'><span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>i.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span class=SpellE><span class=GramE>ScsiOpRead</span></span><span
+class=GramE>(</span>) and <span class=SpellE>ScsiOpWrite</span>() are called
+for SCSI Read and Write, respectively. Each calls <span class=SpellE><span
+class=GramE>ScsiReadWriteSetup</span></span><span class=GramE>(</span>).</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:1.5in;
+margin-bottom:.0001pt;text-indent:-1.5in;mso-text-indent-alt:-9.0pt;mso-list:
+l3 level3 lfo16'><![if !supportLists]><span style='mso-fareast-font-family:
+Calibri'><span style='mso-list:Ignore'><span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>ii.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span class=SpellE><span class=GramE>ScsiReadWriteSetup</span></span><span
+class=GramE>(</span>) creates a work element and <span class=SpellE>enqueues</span>
+it.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:1.5in;
+margin-bottom:.0001pt;text-indent:-1.5in;mso-text-indent-alt:-9.0pt;mso-list:
+l3 level3 lfo16'><![if !supportLists]><span style='mso-fareast-font-family:
+Calibri'><span style='mso-list:Ignore'><span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span>iii.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span class=SpellE><span class=GramE>MpGeneralWkRtn</span></span><span
+class=GramE>(</span>), running under a kernel-mode thread in System, <span
+class=SpellE>dequeues</span> a work element, does the work and calls <span
+class=SpellE>StorPortNotification</span>() to complete the I/O.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:1.0in;
+margin-bottom:.0001pt;text-indent:-.25in;mso-list:l3 level2 lfo16'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>b.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+class=SpellE><span class=GramE>HandleWmiSrb</span></span><span class=GramE>(</span>)
+is the subroutine called for WMI-type (SRB_FUNCTION_WMI) SRBs.</p>
+
+<p style='margin-top:0in;margin-right:0in;margin-bottom:0in;margin-left:1.0in;
+margin-bottom:.0001pt;text-indent:-.25in;mso-list:l3 level2 lfo16'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>c.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+class=SpellE><span class=GramE>MpHwHandlePnP</span></span><span class=GramE>(</span>)
+is the subroutine called for PnP-type (SRB_FUNCTION_PNP) SRBs.</p>
+
+<p style='margin-top:12.0pt;margin-right:0in;margin-bottom:0in;margin-left:
+.5in;margin-bottom:.0001pt'><span class=SpellE><span class=GramE>MpHwStartIo</span></span><span
+class=GramE>(</span>) completes the I/O if it is not completed elsewhere.</p>
+
+<p style='margin-top:12.0pt;margin-right:0in;margin-bottom:0in;margin-left:
+.5in;margin-bottom:.0001pt;text-indent:-.25in;mso-list:l3 level1 lfo16'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>4.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]><span
+class=SpellE><span class=GramE>MpHwFreeAdapterResources</span></span><span
+class=GramE>(</span>) gets control when the virtual HBA is being removed
+(Remove Device IRP).</p>
+
+<h3 style='margin-top:30.0pt'><span style='font-family:"Verdana","sans-serif";
+mso-fareast-font-family:"Times New Roman"'>Notes</span><span style='mso-fareast-font-family:
+"Times New Roman"'><o:p></o:p></span></h3>
+
+<p style='margin-left:.5in;text-indent:-.25in;mso-list:l8 level1 lfo18'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>1.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>The
+backing store for the LUNs is virtual memory. Consequently the contents are
+lost upon reboot or upon disabling the HBA.</p>
+
+<p style='margin-left:.5in;text-indent:-.25in;mso-list:l8 level1 lfo18'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>2.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Because
+there is no DMA object, <span class=SpellE>BuildIo</span>, Interrupt and DPC
+callbacks from <span class=SpellE>StorPort</span> won’t get control.</p>
+
+<p style='margin-left:.5in;text-indent:-.25in;mso-list:l8 level1 lfo18'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>3.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>The
+sample has support for MPIO testing in that it allows 2 (or more) virtual HBAs
+to share buffers for each LUN presented. It is probably best to ignore this
+feature, which was developed for certain tests. This feature is retained for
+completeness, but the file <span class=SpellE>mp.inx</span> does not create the
+registry flag needed to bring MPIO support into play.</p>
+
+<p style='margin-left:.5in;text-indent:-.25in;mso-list:l8 level1 lfo18'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>4.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>Support
+for virtual miniports was introduced as an update in Win2003 SP1; refer to <a
+href="http://support.microsoft.com/?kbid=943295">http://support.microsoft.com/?kbid=943295</a>.</p>
+
+<p style='margin-left:.5in;text-indent:-.25in;mso-list:l8 level1 lfo18'><![if !supportLists]><span
+style='mso-fareast-font-family:Calibri'><span style='mso-list:Ignore'>5.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span></span></span><![endif]>WPP
+tracing is supported. To get verbose tracing, do (in an elevated window
+beginning with Vista): <span class=SpellE><b style='mso-bidi-font-weight:normal'>tracelog</b></span><b
+style='mso-bidi-font-weight:normal'> /start <span class=SpellE>myMPTrace</span>
+/<span class=SpellE>guid</span> #C689C5E6-5219-4774-BE15-9B1F92F949FD /f <span
+class=SpellE>tracelogoutMP</span> /flags 0xFFFF /level 5 /min 32 /max 64 /<span
+class=SpellE>UseSystemTime</span> /b 2048</b><span style='mso-spacerun:yes'> 
+</span></p>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width=624
+ style='width:6.5in;mso-cellspacing:0in;mso-yfti-tbllook:1184;mso-padding-alt:
+ 0in 0in 0in 0in'>
+ <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;mso-yfti-lastrow:yes;
+  height:1.5pt'>
+  <td style='background:aqua;padding:.75pt .75pt .75pt .75pt;height:1.5pt'></td>
+ </tr>
+</table>
+
+<p style='tab-stops:45.8pt 91.6pt 137.4pt 183.2pt 229.0pt 274.8pt 320.6pt 366.4pt 412.2pt 458.0pt 503.8pt 549.6pt 595.4pt 641.2pt 687.0pt 732.8pt'><span
+style='font-size:7.5pt;line-height:115%;font-family:"MS Sans Serif","serif"'>© Microsoft
+Corporation 2011</span><span style='font-size:10.0pt;line-height:115%;
+font-family:"Verdana","sans-serif"'> </span></p>
+
+</div>
+
+</body>
+
+</html>

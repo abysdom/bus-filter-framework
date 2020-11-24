@@ -19,34 +19,46 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="ReadMe.txt" />
+    <ClCompile Include="..\mp.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\scsi.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\utils.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\WkRtn.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\wmi.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Device.h">
+    <ClInclude Include="..\inc\common.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Driver.h">
+    <ClInclude Include="..\inc\mp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Public.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Queue.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Trace.h">
+    <ClInclude Include="..\inc\trace.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Device.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Driver.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Queue.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
+    <Mofcomp Include="..\mp.mof">
+      <Filter>Driver Files</Filter>
+    </Mofcomp>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\mp.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\inc\trcmp.ini">
+      <Filter>Header Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

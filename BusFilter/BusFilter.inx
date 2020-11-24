@@ -12,6 +12,7 @@ DriverVer= ; TODO: set DriverVer in stampinf property pages
 
 [DestinationDirs]
 DefaultDestDir = 12
+BusFilter_Device_CoInstaller_CopyFiles = 11
 
 ; ================= Class section =====================
 
@@ -27,6 +28,7 @@ HKR,,Icon,,-5
 
 [SourceDisksFiles]
 BusFilter.sys  = 1,,
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1 ; make sure the number matches with SourceDisksNames
 
 ;*****************************************
 ; Install Section
@@ -60,8 +62,8 @@ ServiceBinary  = %12%\BusFilter.sys
 ;--- BusFilter_Device Coinstaller installation ------
 ;
 
-[DestinationDirs]
-BusFilter_Device_CoInstaller_CopyFiles = 11
+;[DestinationDirs]
+;BusFilter_Device_CoInstaller_CopyFiles = 11
 
 [BusFilter_Device.NT.CoInstallers]
 AddReg=BusFilter_Device_CoInstaller_AddReg
@@ -73,8 +75,8 @@ HKR,,CoInstallers32,0x00010000, "WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,WdfC
 [BusFilter_Device_CoInstaller_CopyFiles]
 WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll
 
-[SourceDisksFiles]
-WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1 ; make sure the number matches with SourceDisksNames
+;[SourceDisksFiles]
+;WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1 ; make sure the number matches with SourceDisksNames
 
 [BusFilter_Device.NT.Wdf]
 KmdfService =  BusFilter, BusFilter_wdfsect
