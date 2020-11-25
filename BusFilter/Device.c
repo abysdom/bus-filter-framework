@@ -75,19 +75,19 @@ Return Value:
     PDEVICE_CONTEXT deviceContext;
     WDFDEVICE device;
     NTSTATUS status;
-	UCHAR minorPnP = IRP_MN_QUERY_DEVICE_RELATIONS;
+    UCHAR minorPnP = IRP_MN_QUERY_DEVICE_RELATIONS;
 
     PAGED_CODE();
 
-	status = WdfDeviceInitAssignWdmIrpPreprocessCallback(DeviceInit,
-		BffPreprocessQueryBusRelations, IRP_MJ_PNP, &minorPnP, 1);
-	if (!NT_SUCCESS(status)) {
-		KdPrint(("%s: WdfDeviceInitAssignWdmIrpPreprocessCallback failed: %x\n",
-			__FUNCTION__, status));
-		return status;
-	}
+    status = WdfDeviceInitAssignWdmIrpPreprocessCallback(DeviceInit,
+        BffPreprocessQueryBusRelations, IRP_MJ_PNP, &minorPnP, 1);
+    if (!NT_SUCCESS(status)) {
+        KdPrint(("%s: WdfDeviceInitAssignWdmIrpPreprocessCallback failed: %x\n",
+            __FUNCTION__, status));
+        return status;
+    }
 
-	WdfFdoInitSetFilter(DeviceInit);
+    WdfFdoInitSetFilter(DeviceInit);
 
     WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&deviceAttributes, DEVICE_CONTEXT);
 
@@ -121,7 +121,7 @@ Return Value:
             NULL // ReferenceString
             );
 #else
-	status = BffAllocateContext(device);
+        status = BffAllocateContext(device);
 #endif
 
         if (NT_SUCCESS(status)) {

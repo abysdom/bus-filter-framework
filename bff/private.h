@@ -30,32 +30,32 @@
 //
 
 typedef struct _DEVICE_EXTENSION {
-	GUID Signature;
-	//
-	// Target Device Object
-	//
+    GUID Signature;
+    //
+    // Target Device Object
+    //
 
-	PDEVICE_OBJECT TargetDeviceObject;
+    PDEVICE_OBJECT TargetDeviceObject;
 
-	//
-	// Physical device object
-	//
-	PDEVICE_OBJECT PhysicalDeviceObject;
+    //
+    // Physical device object
+    //
+    PDEVICE_OBJECT PhysicalDeviceObject;
 
-	LIST_ENTRY List;
-	WDFDEVICE Parent;	// The upper filter of the parent bus
-	WDFOBJECT Child;
-	BOOLEAN Existing;
+    LIST_ENTRY List;
+    WDFDEVICE Parent;	// The upper filter of the parent bus
+    WDFOBJECT Child;
+    BOOLEAN Existing;
 } DEVICE_EXTENSION, *PDEVICE_EXTENSION;
 
 #define DEVICE_EXTENSION_SIZE sizeof(DEVICE_EXTENSION)
 
 typedef struct _BFF_DEVICE_CONTEXT {
-	//
-	// Back pointer to device object
-	//
+    //
+    // Back pointer to device object
+    //
 
-	PDEVICE_OBJECT DeviceObject;
+    PDEVICE_OBJECT DeviceObject;
 } BFF_DEVICE_CONTEXT, *PBFF_DEVICE_CONTEXT;
 
 WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(BFF_DEVICE_CONTEXT, BffGetDeviceContext)
@@ -65,8 +65,8 @@ WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(BFF_DEVICE_CONTEXT, BffGetDeviceContext)
 // a WDM device extension in the driver frameworks
 //
 typedef struct _BFF_PARENT_CONTEXT {
-	LIST_ENTRY List;	// Child list
-	KSPIN_LOCK Lock;	// Lock for child list
+    LIST_ENTRY List;	// Child list
+    KSPIN_LOCK Lock;	// Lock for child list
 } BFF_PARENT_CONTEXT, *PBFF_PARENT_CONTEXT;
 
 //

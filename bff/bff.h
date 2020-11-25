@@ -51,25 +51,25 @@ typedef BFF_DEVICE_REMOVE *PBFF_DEVICE_REMOVE;
 /** Data structure for configuration of a bus filter device object.
  */
 typedef struct _BFF_DEVICE_CONFIG {
-	///
-	/// Same as DeviceType parameter of IoCreateDevice (Mandatory)
-	///
-	DEVICE_TYPE DeviceType;
+    ///
+    /// Same as DeviceType parameter of IoCreateDevice (Mandatory)
+    ///
+    DEVICE_TYPE DeviceType;
 
-	///
-	/// Same as DeviceCharacteristics parameter of IoCreateDevice (Mandatory)
-	///
-	ULONG DeviceCharacteristics;
+    ///
+    /// Same as DeviceCharacteristics parameter of IoCreateDevice (Mandatory)
+    ///
+    ULONG DeviceCharacteristics;
 
-	///
-	/// Callback function for creation of a bus filter device object (Optional)
-	///
-	PBFF_DEVICE_ADD DeviceAdd;
+    ///
+    /// Callback function for creation of a bus filter device object (Optional)
+    ///
+    PBFF_DEVICE_ADD DeviceAdd;
 
-	///
-	/// Callback function for removal of a bus filter device object (Optional)
-	///
-	PBFF_DEVICE_REMOVE DeviceRemove;
+    ///
+    /// Callback function for removal of a bus filter device object (Optional)
+    ///
+    PBFF_DEVICE_REMOVE DeviceRemove;
 } BFF_DEVICE_CONFIG, *PBFF_DEVICE_CONFIG;
 
 /** Callback function for processing a PnP IRP. It must either complete that IRP
@@ -118,14 +118,14 @@ typedef BFF_DISPATCH_PNP *PBFF_DISPATCH_PNP;
  *  BffInitialize.
  */
 typedef struct _BFF_INITIALIZATION_DATA {
-	///
-	/// Size of this structure (Mandatory)
-	///
-	ULONG Size;
+    ///
+    /// Size of this structure (Mandatory)
+    ///
+    ULONG Size;
 
-	BFF_DEVICE_CONFIG DeviceConfig;
+    BFF_DEVICE_CONFIG DeviceConfig;
 
-	PBFF_DISPATCH_PNP PnPMinorFunction[IRP_MN_DEVICE_ENUMERATED+1];
+    PBFF_DISPATCH_PNP PnPMinorFunction[IRP_MN_DEVICE_ENUMERATED+1];
 } BFF_INITIALIZATION_DATA, *PBFF_INITIALIZATION_DATA;
 
 /***************************************************************************//**
@@ -148,8 +148,8 @@ typedef struct _BFF_INITIALIZATION_DATA {
  *				filter device object.
  */
 VOID BffSetInitializationData(PBFF_INITIALIZATION_DATA InitData,
-	DEVICE_TYPE Type, ULONG Characteristics,
-	PBFF_DEVICE_ADD DeviceAdd, PBFF_DEVICE_REMOVE DeviceRemove);
+    DEVICE_TYPE Type, ULONG Characteristics,
+    PBFF_DEVICE_ADD DeviceAdd, PBFF_DEVICE_REMOVE DeviceRemove);
 
 /** Initialize Bus Filter Framework with the initialization data. This routine
  *  must be invoked in DriverEntry after a call to WdfDriverCreate. Furthermore,
@@ -170,7 +170,7 @@ VOID BffSetInitializationData(PBFF_INITIALIZATION_DATA InitData,
  *			(e) Any other negative value for failure.
  */
 NTSTATUS BffInitialize(PDRIVER_OBJECT DriverObject,
-	PUNICODE_STRING RegistryPath, PBFF_INITIALIZATION_DATA InitData);
+    PUNICODE_STRING RegistryPath, PBFF_INITIALIZATION_DATA InitData);
 
 /** Allocate context space for an upper filter device object on behalf of Bus
  *  Filter Framework. This routine is typically called in the EvtDriverDeviceAdd

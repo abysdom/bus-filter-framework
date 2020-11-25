@@ -45,9 +45,9 @@ Environment:
 EXTERN_C_START
 
 typedef struct _BUS_FILTER_CONTEXT {
-	WDFDEVICE Parent;
-	BOOLEAN IsRegistered;
-	UNICODE_STRING SymbolicLink;
+    WDFDEVICE Parent;
+    BOOLEAN IsRegistered;
+    UNICODE_STRING SymbolicLink;
 } BUS_FILTER_CONTEXT, *PBUS_FILTER_CONTEXT;
 
 WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(BUS_FILTER_CONTEXT, BusFilterGetContext)
