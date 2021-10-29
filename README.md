@@ -8,3 +8,5 @@ Please navigate to [here](https://bus-filter-framework.blogspot.tw/p/documentati
 Please navigate to [here](https://bus-filter-framework.blogspot.tw/p/faq.html).
 # Donations
 If this piece of work eases your pains and you would like to encourage the author, [donations](https://bus-filter-framework.blogspot.com/p/donation.html) are welcome and appreciated!
+# License
+If you need a software license other than GNU GPL v3, please contact the author.
