@@ -141,8 +141,8 @@ BusFilterQueryID(WDFOBJECT BffDevice, PIRP Irp)
 
     if (!IoForwardIrpSynchronously(BffDeviceWdmGetAttachedDevice(BffDevice), Irp))
         Irp->IoStatus.Status = STATUS_NO_SUCH_DEVICE;
-    else if (NT_SUCCESS(Irp->IoStatus.Status)) {
-        WCHAR *newCompatibleIDs = ExAllocatePool(PagedPool, 200 * sizeof(WCHAR));
+    else if (NT_SUCCESS(Irp->IoStatus.Status) && Irp->IoStatus.Information) {
+        WCHAR *newCompatibleIDs = ExAllocatePoolWithTag(PagedPool, 200 * sizeof(WCHAR), 'tFFB');
         if (newCompatibleIDs) {
             WCHAR *newIDs = newCompatibleIDs;
             WCHAR *oldIDs = (WCHAR *)Irp->IoStatus.Information;
@@ -160,7 +160,7 @@ BusFilterQueryID(WDFOBJECT BffDevice, PIRP Irp)
                 oldIDs += wcslen(oldIDs)+1;
             }
             *newIDs = 0;
-            ExFreePool((PVOID)Irp->IoStatus.Information);
+            ExFreePoolWithTag((PVOID)Irp->IoStatus.Information, 0);
             Irp->IoStatus.Information = (ULONG_PTR)newCompatibleIDs;
         }
     }
