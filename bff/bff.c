@@ -410,13 +410,20 @@ BffCompleteQueryBusRelations(
             KeReleaseInStackQueuedSpinLock(&handle);
         }
 
-        for (i = 0; i < dr->Count; i++) {
-            NTSTATUS status = BffAddDevice(Device, dr->Objects[i]);
-            if (!NT_SUCCESS(status)) {
-                KdPrint(("%s: failed to add a child:%x\n", __FUNCTION__, status));
-                BffLogError(DeviceObject, IRP_MN_QUERY_DEVICE_RELATIONS, IO_ERR_INTERNAL_ERROR, status);
-                break;
-            }
+        if (dr) {
+	        for (i = 0; i < dr->Count; i++) {
+	            NTSTATUS status = BffAddDevice(Device, dr->Objects[i]);
+	            if (!NT_SUCCESS(status)) {
+	                KdPrint(("%s: failed to add a child:%x\n", __FUNCTION__, status));
+	                BffLogError(DeviceObject, IRP_MN_QUERY_DEVICE_RELATIONS, IO_ERR_INTERNAL_ERROR, status);
+	                break;
+	            }
+	        }
+        }
+        else
+        {
+	        KdPrint(("%s: failed to retreive device relations:%x\n", __FUNCTION__, Irp->IoStatus.Status));
+	        BffLogError(DeviceObject, IRP_MN_QUERY_DEVICE_RELATIONS, IO_ERR_INTERNAL_ERROR, Irp->IoStatus.Status);
         }
     }
 
