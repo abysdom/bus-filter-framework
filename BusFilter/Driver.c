@@ -106,7 +106,13 @@ BusFilterAddDevice(WDFDEVICE Device, WDFOBJECT BffDevice)
     WDF_OBJECT_ATTRIBUTES attr;
     PBUS_FILTER_CONTEXT busFilterContext;
     WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&attr, BUS_FILTER_CONTEXT);
-    attr.ParentObject = Device;
+    //
+    // According to WDF document:
+    // https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/wdfobject/nf-wdfobject-wdfobjectallocatecontext
+    // we shall not specify ParentObject here.
+    // Thanks to HSY, https://github.com/hsy2019cn
+    //
+    // attr.ParentObject = Device;
     status = WdfObjectAllocateContext(BffDevice, &attr, &busFilterContext);
     if (!NT_SUCCESS(status))
         KdPrint(("%s: failed to allocate BUS_FILTER_CONTEXT: %x\n", __FUNCTION__, status));
