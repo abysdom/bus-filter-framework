@@ -87,7 +87,7 @@ DriverEntry(
     // that DriverEntry will be invoked often in the life of a Windows boot.
     //
 
-    pMPDrvInfo = ExAllocatePoolWithTag(NonPagedPool, sizeof(MPDriverInfo), MP_TAG_GENERAL);
+    pMPDrvInfo = ExAllocatePool2(POOL_FLAG_NON_PAGED, sizeof(MPDriverInfo), MP_TAG_GENERAL);
 
     if (!pMPDrvInfo) {                                // No good?
         status = STATUS_INSUFFICIENT_RESOURCES;
@@ -351,7 +351,7 @@ MpHwReportAdapter(__in pHW_HBA_EXT pHBAExt)
            WnodeSizeInstanceName + 
            WnodeSizeDataBlock;
 
-    pWnode = ExAllocatePoolWithTag(NonPagedPool, size, MP_TAG_GENERAL);
+    pWnode = ExAllocatePool2(POOL_FLAG_NON_PAGED, size, MP_TAG_GENERAL);
 
     if (NULL!=pWnode) {                               // Good?
         RtlZeroMemory(pWnode, size);
@@ -443,7 +443,7 @@ MpHwReportLink(__in pHW_HBA_EXT pHBAExt)
            WnodeSizeInstanceName + 
            WnodeSizeDataBlock;
 
-    pWnode = ExAllocatePoolWithTag(NonPagedPool, size, MP_TAG_GENERAL);
+    pWnode = ExAllocatePool2(POOL_FLAG_NON_PAGED, size, MP_TAG_GENERAL);
 
     if (NULL!=pWnode) {                               // Good?
         RtlZeroMemory(pWnode, size);
@@ -529,7 +529,7 @@ MpHwReportLog(__in pHW_HBA_EXT pHBAExt)
            WnodeSizeInstanceName + 
            WnodeSizeDataBlock;
 
-    pWnode = ExAllocatePoolWithTag(NonPagedPool, size, MP_TAG_GENERAL);
+    pWnode = ExAllocatePool2(POOL_FLAG_NON_PAGED, size, MP_TAG_GENERAL);
 
     if (NULL!=pWnode) {                               // Good?
         RtlZeroMemory(pWnode, size);
@@ -983,7 +983,7 @@ MpCreateDeviceList(
         ExFreePoolWithTag(pHBAExt->pDeviceList, MP_TAG_GENERAL);
     }
 
-    pHBAExt->pDeviceList = ExAllocatePoolWithTag(NonPagedPool, len, MP_TAG_GENERAL);
+    pHBAExt->pDeviceList = ExAllocatePool2(POOL_FLAG_NON_PAGED, len, MP_TAG_GENERAL);
 
     if (!pHBAExt->pDeviceList) {
         status = STATUS_INSUFFICIENT_RESOURCES;

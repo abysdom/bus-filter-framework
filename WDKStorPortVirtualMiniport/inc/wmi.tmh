@@ -1,5 +1,5 @@
-// 4bbfc2ddae09055212c392b7ac293f2e Generated file. Do not edit.
-// File created by WPP compiler version 10.0.19041
+// dd35c61887a055f1ee56ba4767b4a799 Generated file. Do not edit.
+// File created by WPP compiler version 10.0.26100
 // from template km-default.tpl
 
 #pragma once
@@ -736,11 +736,23 @@ WppBinary(_In_reads_bytes_(Length) void const* Buffer, USHORT Length)
 
 // Functions
 #undef DoDebugTrace
+#ifdef __INTELLISENSE__
+#define DoDebugTrace(TRACELEVEL, MSG, ...) ((void)(MSG, ## __VA_ARGS__))
+#else
 #define DoDebugTrace WPP_(CALL)
+#endif
 #undef DoStorageTraceEtw
+#ifdef __INTELLISENSE__
+#define DoStorageTraceEtw(LVL, FLG, MSG, ...) ((void)(MSG, ## __VA_ARGS__))
+#else
 #define DoStorageTraceEtw WPP_(CALL)
+#endif
 #undef DoTraceMessage
+#ifdef __INTELLISENSE__
+#define DoTraceMessage(LEVEL, MSG, ...) ((void)(MSG, ## __VA_ARGS__))
+#else
 #define DoTraceMessage WPP_(CALL)
+#endif
 
 #ifdef __cplusplus
 } // extern "C"
