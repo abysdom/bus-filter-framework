@@ -1,5 +1,5 @@
-// 1c5e64726f5bc53ede5d5b13c56f49f2 Generated file. Do not edit.
-// File created by WPP compiler version 10.0.19041
+// a29fae53f9028091c16dc7d11a377c99 Generated file. Do not edit.
+// File created by WPP compiler version 10.0.26100
 // from template km-default.tpl
 
 #pragma once
@@ -3475,11 +3475,23 @@ WPP_RECORDER_SF_qq(
 
 // Functions
 #undef DoDebugTrace
+#ifdef __INTELLISENSE__
+#define DoDebugTrace(TRACELEVEL, MSG, ...) ((void)(MSG, ## __VA_ARGS__))
+#else
 #define DoDebugTrace WPP_(CALL)
+#endif
 #undef DoStorageTraceEtw
+#ifdef __INTELLISENSE__
+#define DoStorageTraceEtw(LVL, FLG, MSG, ...) ((void)(MSG, ## __VA_ARGS__))
+#else
 #define DoStorageTraceEtw WPP_(CALL)
+#endif
 #undef DoTraceMessage
+#ifdef __INTELLISENSE__
+#define DoTraceMessage(LEVEL, MSG, ...) ((void)(MSG, ## __VA_ARGS__))
+#else
 #define DoTraceMessage WPP_(CALL)
+#endif
 
 #ifdef __cplusplus
 } // extern "C"
