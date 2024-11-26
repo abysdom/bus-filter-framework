@@ -1,0 +1,122 @@
+;*******************************************************************************
+;   Bus Filter Framework (BFF)
+;
+;   A framework for KMDF-based upper filter drivers to behave as bus filters.
+;   You don't need to write WDM drivers any more!
+;
+;   https://bus-filter-framework.blogspot.com/
+;
+;   Copyright (C) 2017 Yang Yuanzhi <yangyuanzhi@gmail.com>
+;
+;   This program is free software: you can redistribute it and/or modify
+;   it under the terms of the GNU General Public License as published by
+;   the Free Software Foundation, either version 3 of the License, or
+;   (at your option) any later version.
+;
+;   This program is distributed in the hope that it will be useful,
+;   but WITHOUT ANY WARRANTY; without even the implied warranty of
+;   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;   GNU General Public License for more details.
+;
+;   You should have received a copy of the GNU General Public License
+;   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+;*******************************************************************************
+;
+; BusFilter.inf
+;
+
+[Version]
+Signature="$WINDOWS NT$"
+Class=hdc
+ClassGuid={4D36E96A-E325-11CE-BFC1-08002BE10318}
+Provider=%ManufacturerName%
+CatalogFile=BusFilter.cat
+DriverVer= ; TODO: set DriverVer in stampinf property pages
+PnpLockdown=1
+
+[DestinationDirs]
+DefaultDestDir = 12
+asm106x_CoInstaller_CopyFiles = 11
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+BusFilter.sys  = 1,,
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1 ; make sure the number matches with SourceDisksNames
+
+;*****************************************
+; Install Section
+;*****************************************
+
+[Manufacturer]
+%ManufacturerName%=Standard,NT$ARCH$
+
+[Standard.NT$ARCH$]
+%PCI\VEN_1B21&DEV_0613&SUBSYS_00071AB6.DeviceDesc%=asm106x, PCI\VEN_1B21&DEV_0613&SUBSYS_00071AB6; CalDigit T4 SATA Controller
+%PCI\VEN_1B21&DEV_0613&SUBSYS_00081AB6.DeviceDesc%=asm106x, PCI\VEN_1B21&DEV_0613&SUBSYS_00081AB6; CalDigit T3 SATA Controller
+
+[asm106x.NT]
+CopyFiles=Drivers_Dir
+Include=mshdc.inf
+Needs=msahci_Inst
+
+[Drivers_Dir]
+BusFilter.sys
+
+[asm106x.NT.HW]
+Include            = mshdc.inf,machine.inf
+Needs              = msahci_Inst.HW,PciIoSpaceNotRequired.HW
+AddReg=asm106x.NT.HW.AddReg
+
+[asm106x.NT.HW.AddReg]
+HKR,,"UpperFilters",0x00010000,"BusFilter"
+
+;-------------- Service installation
+[asm106x.NT.Services]
+Include=mshdc.inf
+Needs=msahci_Inst.Services
+AddService = BusFilter,, BusFilter_Service_Inst, BusFilter_EventLog_Inst
+
+; -------------- BusFilter driver install sections
+[BusFilter_Service_Inst]
+DisplayName    = %BusFilter.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\BusFilter.sys
+
+[BusFilter_EventLog_Inst]
+AddReg=BusFilter_EventLog_AddReg
+
+[BusFilter_EventLog_AddReg]
+HKR,,EventMessageFile,0x00020000,"%%SystemRoot%%\System32\IoLogMsg.dll;%%SystemRoot%%\System32\drivers\BusFilter.sys"
+HKR,,TypesSupported,0x00010001,7
+
+;
+;--- asm106x Coinstaller installation ------
+;
+
+[asm106x.NT.CoInstallers]
+AddReg=asm106x_CoInstaller_AddReg
+CopyFiles=asm106x_CoInstaller_CopyFiles
+
+[asm106x_CoInstaller_AddReg]
+HKR,,CoInstallers32,0x00010000, "WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,WdfCoInstaller"
+
+[asm106x_CoInstaller_CopyFiles]
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll
+
+[asm106x.NT.Wdf]
+KmdfService =  BusFilter, BusFilter_wdfsect
+
+[BusFilter_wdfsect]
+KmdfLibraryVersion = $KMDFVERSION$
+
+[Strings]
+SPSVCINST_ASSOCSERVICE= 0x00000002
+ManufacturerName="Bus Filter Framework" ;TODO: Replace with your manufacturer name
+DiskName = "BusFilter Installation Disk"
+PCI\VEN_1B21&DEV_0613&SUBSYS_00071AB6.DeviceDesc = "CalDigit T4 SATA Controller"
+PCI\VEN_1B21&DEV_0613&SUBSYS_00081AB6.DeviceDesc = "CalDigit T3 SATA Controller"
+BusFilter.SVCDESC = "BusFilter Service"
