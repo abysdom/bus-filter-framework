@@ -40,6 +40,7 @@ Environment:
 
 --*/
 
+#pragma once
 EXTERN_C_START
 
 //

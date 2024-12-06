@@ -41,6 +41,7 @@ Environment:
 
 --*/
 
+#pragma once
 //
 // Define an Interface Guid so that app can find the device and talk to it.
 //

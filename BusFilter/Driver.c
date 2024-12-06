@@ -40,6 +40,7 @@ Environment:
 
 --*/
 
+#include <initguid.h>
 #include "driver.h"
 #include "driver.tmh"
 #include "..\bff\bff.h"
