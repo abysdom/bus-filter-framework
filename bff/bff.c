@@ -173,8 +173,7 @@ Return Value:
 
 } // end BffDispatchAny()
 
-static FORCEINLINE VOID BffLogError(IN PDEVICE_OBJECT DeviceObject, IN ULONG UniqueId, IN NTSTATUS ErrorCode,
-                                    IN NTSTATUS Status)
+static VOID BffLogError(IN PDEVICE_OBJECT DeviceObject, IN ULONG UniqueId, IN NTSTATUS ErrorCode, IN NTSTATUS Status)
 /*++
 
 Routine Description:
