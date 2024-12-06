@@ -45,24 +45,25 @@ Environment:
 #include "..\bff\bff.h"
 
 #ifdef ALLOC_PRAGMA
-#pragma alloc_text (INIT, DriverEntry)
-#pragma alloc_text (PAGE, BusFilterEvtDeviceAdd)
-#pragma alloc_text (PAGE, BusFilterEvtDriverContextCleanup)
+#pragma alloc_text(INIT, DriverEntry)
+#pragma alloc_text(PAGE, BusFilterEvtDeviceAdd)
+#pragma alloc_text(PAGE, BusFilterEvtDriverContextCleanup)
 #endif
 
-
 NTSTATUS
-BusFilterDeviceEnumerated(
-    WDFOBJECT BffDevice,
-    PIRP Irp)
+BusFilterDeviceEnumerated(WDFOBJECT BffDevice, PIRP Irp)
 {
     PBUS_FILTER_CONTEXT busFilterContext = BusFilterGetContext(BffDevice);
     KIRQL irql = KeGetCurrentIrql();
-    if (irql != PASSIVE_LEVEL) {
+    if (irql != PASSIVE_LEVEL)
+    {
         KdPrint(("IRP_MN_DEVICE_ENUMERATED not at PASSIVE_LEVEL\n"));
     }
-    else {
-        NTSTATUS status = IoRegisterDeviceInterface(BffDeviceWdmGetPhysicalDevice(BffDevice), &GUID_DEVINTERFACE_BusFilter, NULL, &busFilterContext->SymbolicLink);
+    else
+    {
+        NTSTATUS status =
+            IoRegisterDeviceInterface(BffDeviceWdmGetPhysicalDevice(BffDevice), &GUID_DEVINTERFACE_BusFilter, NULL,
+                                      &busFilterContext->SymbolicLink);
         if (NT_SUCCESS(status))
             busFilterContext->IsRegistered = TRUE;
     }
@@ -75,13 +76,10 @@ BusFilterDeviceEnumerated(
 }
 
 NTSTATUS
-BusFilterStartDevice(
-    IN WDFOBJECT BffDevice,
-    IN PIRP Irp
-    )
+BusFilterStartDevice(IN WDFOBJECT BffDevice, IN PIRP Irp)
 {
     PBUS_FILTER_CONTEXT busFilterContext = BusFilterGetContext(BffDevice);
-    NTSTATUS            status;
+    NTSTATUS status;
 
     PAGED_CODE();
 
@@ -99,8 +97,7 @@ BusFilterStartDevice(
     return status;
 }
 
-static NTSTATUS
-BusFilterAddDevice(WDFDEVICE Device, WDFOBJECT BffDevice)
+static NTSTATUS BusFilterAddDevice(WDFDEVICE Device, WDFOBJECT BffDevice)
 {
     NTSTATUS status;
     WDF_OBJECT_ATTRIBUTES attr;
@@ -116,40 +113,43 @@ BusFilterAddDevice(WDFDEVICE Device, WDFOBJECT BffDevice)
     status = WdfObjectAllocateContext(BffDevice, &attr, &busFilterContext);
     if (!NT_SUCCESS(status))
         KdPrint(("%s: failed to allocate BUS_FILTER_CONTEXT: %x\n", __FUNCTION__, status));
-    else {
+    else
+    {
         ASSERT(BusFilterGetContext(BffDevice) == busFilterContext);
         busFilterContext->Parent = Device;
     }
     return status;
 }
 
-static VOID
-BusFilterRemoveDevice(WDFDEVICE Device, WDFOBJECT BffDevice)
+static VOID BusFilterRemoveDevice(WDFDEVICE Device, WDFOBJECT BffDevice)
 {
     PBUS_FILTER_CONTEXT busFilterContext = BusFilterGetContext(BffDevice);
-    if (busFilterContext->IsRegistered) {
+    if (busFilterContext->IsRegistered)
+    {
         IoSetDeviceInterfaceState(&busFilterContext->SymbolicLink, FALSE);
         RtlFreeUnicodeString(&busFilterContext->SymbolicLink);
     }
 }
 
-static NTSTATUS
-BusFilterQueryID(WDFOBJECT BffDevice, PIRP Irp)
+static NTSTATUS BusFilterQueryID(WDFOBJECT BffDevice, PIRP Irp)
 {
     NTSTATUS status;
     PIO_STACK_LOCATION stack = IoGetCurrentIrpStackLocation(Irp);
     ASSERT(stack->MajorFunction == IRP_MJ_PNP);
     ASSERT(stack->MinorFunction == IRP_MN_QUERY_ID);
-    if (stack->Parameters.QueryId.IdType != BusQueryCompatibleIDs) {
+    if (stack->Parameters.QueryId.IdType != BusQueryCompatibleIDs)
+    {
         IoSkipCurrentIrpStackLocation(Irp);
         return IoCallDriver(BffDeviceWdmGetAttachedDevice(BffDevice), Irp);
     }
 
     if (!IoForwardIrpSynchronously(BffDeviceWdmGetAttachedDevice(BffDevice), Irp))
         Irp->IoStatus.Status = STATUS_NO_SUCH_DEVICE;
-    else if (NT_SUCCESS(Irp->IoStatus.Status) && Irp->IoStatus.Information) {
+    else if (NT_SUCCESS(Irp->IoStatus.Status) && Irp->IoStatus.Information)
+    {
         WCHAR *newCompatibleIDs = ExAllocatePoolWithTag(PagedPool, 200 * sizeof(WCHAR), 'tFFB');
-        if (newCompatibleIDs) {
+        if (newCompatibleIDs)
+        {
             WCHAR *newIDs = newCompatibleIDs;
             WCHAR *oldIDs = (WCHAR *)Irp->IoStatus.Information;
             size_t length = wcslen(L"BffDevice") + 1;
@@ -159,11 +159,12 @@ BusFilterQueryID(WDFOBJECT BffDevice, PIRP Irp)
             // oldIDs is a multi-sz list, hence two NULL characters
             // terminated.
             //
-            while (oldIDs && *oldIDs && length + wcslen(oldIDs) + 2 <= 200) {
+            while (oldIDs && *oldIDs && length + wcslen(oldIDs) + 2 <= 200)
+            {
                 wcscpy(newIDs, oldIDs);
                 length += wcslen(oldIDs) + 1;
-                newIDs += wcslen(oldIDs)+1;
-                oldIDs += wcslen(oldIDs)+1;
+                newIDs += wcslen(oldIDs) + 1;
+                oldIDs += wcslen(oldIDs) + 1;
             }
             *newIDs = 0;
             ExFreePoolWithTag((PVOID)Irp->IoStatus.Information, 0);
@@ -180,10 +181,7 @@ BusFilterQueryID(WDFOBJECT BffDevice, PIRP Irp)
 }
 
 NTSTATUS
-DriverEntry(
-    _In_ PDRIVER_OBJECT  DriverObject,
-    _In_ PUNICODE_STRING RegistryPath
-    )
+DriverEntry(_In_ PDRIVER_OBJECT DriverObject, _In_ PUNICODE_STRING RegistryPath)
 /*++
 
 Routine Description:
@@ -222,7 +220,7 @@ Return Value:
     //
     // Initialize WPP Tracing
     //
-    WPP_INIT_TRACING( DriverObject, RegistryPath );
+    WPP_INIT_TRACING(DriverObject, RegistryPath);
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
 
@@ -233,25 +231,20 @@ Return Value:
     WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
     attributes.EvtCleanupCallback = BusFilterEvtDriverContextCleanup;
 
-    WDF_DRIVER_CONFIG_INIT(&config,
-                           BusFilterEvtDeviceAdd
-                           );
+    WDF_DRIVER_CONFIG_INIT(&config, BusFilterEvtDeviceAdd);
 
-    status = WdfDriverCreate(DriverObject,
-                             RegistryPath,
-                             &attributes,
-                             &config,
-                             WDF_NO_HANDLE
-                             );
+    status = WdfDriverCreate(DriverObject, RegistryPath, &attributes, &config, WDF_NO_HANDLE);
 
-    if (!NT_SUCCESS(status)) {
+    if (!NT_SUCCESS(status))
+    {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "WdfDriverCreate failed %!STATUS!", status);
         WPP_CLEANUP(DriverObject);
         return status;
     }
 
     status = BffInitialize(DriverObject, RegistryPath, &initData);
-    if (!NT_SUCCESS(status)) {
+    if (!NT_SUCCESS(status))
+    {
         KdPrint(("%s: failed to initialize BFF:%x\n", __FUNCTION__, status));
         WPP_CLEANUP(DriverObject);
         return status;
@@ -263,10 +256,7 @@ Return Value:
 }
 
 NTSTATUS
-BusFilterEvtDeviceAdd(
-    _In_    WDFDRIVER       Driver,
-    _Inout_ PWDFDEVICE_INIT DeviceInit
-    )
+BusFilterEvtDeviceAdd(_In_ WDFDRIVER Driver, _Inout_ PWDFDEVICE_INIT DeviceInit)
 /*++
 Routine Description:
 
@@ -301,10 +291,7 @@ Return Value:
     return status;
 }
 
-VOID
-BusFilterEvtDriverContextCleanup(
-    _In_ WDFOBJECT DriverObject
-    )
+VOID BusFilterEvtDriverContextCleanup(_In_ WDFOBJECT DriverObject)
 /*++
 Routine Description:
 
@@ -322,13 +309,12 @@ Return Value:
 {
     UNREFERENCED_PARAMETER(DriverObject);
 
-    PAGED_CODE ();
+    PAGED_CODE();
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
 
     //
     // Stop WPP Tracing
     //
-    WPP_CLEANUP( WdfDriverWdmGetDriverObject( (WDFDRIVER) DriverObject) );
-
+    WPP_CLEANUP(WdfDriverWdmGetDriverObject((WDFDRIVER)DriverObject));
 }

@@ -33,7 +33,7 @@ Module Name:
 Abstract:
 
    This file contains the device entry points and callbacks.
-    
+
 Environment:
 
     Kernel-mode Driver Framework
@@ -45,14 +45,11 @@ Environment:
 #include "..\bff\bff.h"
 
 #ifdef ALLOC_PRAGMA
-#pragma alloc_text (PAGE, BusFilterCreateDevice)
+#pragma alloc_text(PAGE, BusFilterCreateDevice)
 #endif
 
-
 NTSTATUS
-BusFilterCreateDevice(
-    _Inout_ PWDFDEVICE_INIT DeviceInit
-    )
+BusFilterCreateDevice(_Inout_ PWDFDEVICE_INIT DeviceInit)
 /*++
 
 Routine Description:
@@ -71,7 +68,7 @@ Return Value:
 
 --*/
 {
-    WDF_OBJECT_ATTRIBUTES   deviceAttributes;
+    WDF_OBJECT_ATTRIBUTES deviceAttributes;
     PDEVICE_CONTEXT deviceContext;
     WDFDEVICE device;
     NTSTATUS status;
@@ -79,11 +76,11 @@ Return Value:
 
     PAGED_CODE();
 
-    status = WdfDeviceInitAssignWdmIrpPreprocessCallback(DeviceInit,
-        BffPreprocessQueryBusRelations, IRP_MJ_PNP, &minorPnP, 1);
-    if (!NT_SUCCESS(status)) {
-        KdPrint(("%s: WdfDeviceInitAssignWdmIrpPreprocessCallback failed: %x\n",
-            __FUNCTION__, status));
+    status = WdfDeviceInitAssignWdmIrpPreprocessCallback(DeviceInit, BffPreprocessQueryBusRelations, IRP_MJ_PNP,
+                                                         &minorPnP, 1);
+    if (!NT_SUCCESS(status))
+    {
+        KdPrint(("%s: WdfDeviceInitAssignWdmIrpPreprocessCallback failed: %x\n", __FUNCTION__, status));
         return status;
     }
 
@@ -93,7 +90,8 @@ Return Value:
 
     status = WdfDeviceCreate(&DeviceInit, &deviceAttributes, &device);
 
-    if (NT_SUCCESS(status)) {
+    if (NT_SUCCESS(status))
+    {
         //
         // Get a pointer to the device context structure that we just associated
         // with the device object. We define this structure in the device.h
@@ -124,7 +122,8 @@ Return Value:
         status = BffAllocateContext(device);
 #endif
 
-        if (NT_SUCCESS(status)) {
+        if (NT_SUCCESS(status))
+        {
             //
             // Initialize the I/O Package and any Queues
             //
@@ -134,5 +133,3 @@ Return Value:
 
     return status;
 }
-
-

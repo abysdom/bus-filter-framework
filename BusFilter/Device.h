@@ -44,7 +44,8 @@ Environment:
 
 EXTERN_C_START
 
-typedef struct _BUS_FILTER_CONTEXT {
+typedef struct _BUS_FILTER_CONTEXT
+{
     WDFDEVICE Parent;
     BOOLEAN IsRegistered;
     UNICODE_STRING SymbolicLink;
@@ -58,7 +59,7 @@ WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(BUS_FILTER_CONTEXT, BusFilterGetContext)
 //
 typedef struct _DEVICE_CONTEXT
 {
-    ULONG PrivateDeviceData;  // just a placeholder
+    ULONG PrivateDeviceData; // just a placeholder
 
 } DEVICE_CONTEXT, *PDEVICE_CONTEXT;
 
@@ -73,8 +74,6 @@ WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(DEVICE_CONTEXT, DeviceGetContext)
 // Function to initialize the device and its callbacks
 //
 NTSTATUS
-BusFilterCreateDevice(
-    _Inout_ PWDFDEVICE_INIT DeviceInit
-    );
+BusFilterCreateDevice(_Inout_ PWDFDEVICE_INIT DeviceInit);
 
 EXTERN_C_END

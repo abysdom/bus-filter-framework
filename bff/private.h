@@ -29,7 +29,8 @@
 // Bus Filter Device Extension
 //
 
-typedef struct _DEVICE_EXTENSION {
+typedef struct _DEVICE_EXTENSION
+{
     GUID Signature;
     //
     // Target Device Object
@@ -43,14 +44,15 @@ typedef struct _DEVICE_EXTENSION {
     PDEVICE_OBJECT PhysicalDeviceObject;
 
     LIST_ENTRY List;
-    WDFDEVICE Parent;	// The upper filter of the parent bus
+    WDFDEVICE Parent; // The upper filter of the parent bus
     WDFOBJECT Child;
     BOOLEAN Existing;
 } DEVICE_EXTENSION, *PDEVICE_EXTENSION;
 
 #define DEVICE_EXTENSION_SIZE sizeof(DEVICE_EXTENSION)
 
-typedef struct _BFF_DEVICE_CONTEXT {
+typedef struct _BFF_DEVICE_CONTEXT
+{
     //
     // Back pointer to device object
     //
@@ -64,9 +66,10 @@ WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(BFF_DEVICE_CONTEXT, BffGetDeviceContext)
 // The device context performs the same job as
 // a WDM device extension in the driver frameworks
 //
-typedef struct _BFF_PARENT_CONTEXT {
-    LIST_ENTRY List;	// Child list
-    KSPIN_LOCK Lock;	// Lock for child list
+typedef struct _BFF_PARENT_CONTEXT
+{
+    LIST_ENTRY List; // Child list
+    KSPIN_LOCK Lock; // Lock for child list
 } BFF_PARENT_CONTEXT, *PBFF_PARENT_CONTEXT;
 
 //

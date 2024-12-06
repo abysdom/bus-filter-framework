@@ -44,13 +44,11 @@ Environment:
 #include "queue.tmh"
 
 #ifdef ALLOC_PRAGMA
-#pragma alloc_text (PAGE, BusFilterQueueInitialize)
+#pragma alloc_text(PAGE, BusFilterQueueInitialize)
 #endif
 
 NTSTATUS
-BusFilterQueueInitialize(
-    _In_ WDFDEVICE Device
-    )
+BusFilterQueueInitialize(_In_ WDFDEVICE Device)
 /*++
 
 Routine Description:
@@ -75,31 +73,24 @@ Return Value:
 {
     WDFQUEUE queue;
     NTSTATUS status;
-    WDF_IO_QUEUE_CONFIG    queueConfig;
+    WDF_IO_QUEUE_CONFIG queueConfig;
 
     PAGED_CODE();
-    
+
     //
     // Configure a default queue so that requests that are not
     // configure-fowarded using WdfDeviceConfigureRequestDispatching to goto
     // other queues get dispatched here.
     //
-    WDF_IO_QUEUE_CONFIG_INIT_DEFAULT_QUEUE(
-         &queueConfig,
-        WdfIoQueueDispatchParallel
-        );
+    WDF_IO_QUEUE_CONFIG_INIT_DEFAULT_QUEUE(&queueConfig, WdfIoQueueDispatchParallel);
 
     queueConfig.EvtIoDeviceControl = BusFilterEvtIoDeviceControl;
     queueConfig.EvtIoStop = BusFilterEvtIoStop;
 
-    status = WdfIoQueueCreate(
-                 Device,
-                 &queueConfig,
-                 WDF_NO_OBJECT_ATTRIBUTES,
-                 &queue
-                 );
+    status = WdfIoQueueCreate(Device, &queueConfig, WDF_NO_OBJECT_ATTRIBUTES, &queue);
 
-    if( !NT_SUCCESS(status) ) {
+    if (!NT_SUCCESS(status))
+    {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_QUEUE, "WdfIoQueueCreate failed %!STATUS!", status);
         return status;
     }
@@ -107,14 +98,8 @@ Return Value:
     return status;
 }
 
-VOID
-BusFilterEvtIoDeviceControl(
-    _In_ WDFQUEUE Queue,
-    _In_ WDFREQUEST Request,
-    _In_ size_t OutputBufferLength,
-    _In_ size_t InputBufferLength,
-    _In_ ULONG IoControlCode
-    )
+VOID BusFilterEvtIoDeviceControl(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In_ size_t OutputBufferLength,
+                                 _In_ size_t InputBufferLength, _In_ ULONG IoControlCode)
 /*++
 
 Routine Description:
@@ -140,22 +125,16 @@ Return Value:
 
 --*/
 {
-    TraceEvents(TRACE_LEVEL_INFORMATION, 
-                TRACE_QUEUE, 
-                "%!FUNC! Queue 0x%p, Request 0x%p OutputBufferLength %d InputBufferLength %d IoControlCode %d", 
-                Queue, Request, (int) OutputBufferLength, (int) InputBufferLength, IoControlCode);
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_QUEUE,
+                "%!FUNC! Queue 0x%p, Request 0x%p OutputBufferLength %d InputBufferLength %d IoControlCode %d", Queue,
+                Request, (int)OutputBufferLength, (int)InputBufferLength, IoControlCode);
 
     WdfRequestComplete(Request, STATUS_SUCCESS);
 
     return;
 }
 
-VOID
-BusFilterEvtIoStop(
-    _In_ WDFQUEUE Queue,
-    _In_ WDFREQUEST Request,
-    _In_ ULONG ActionFlags
-)
+VOID BusFilterEvtIoStop(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In_ ULONG ActionFlags)
 /*++
 
 Routine Description:
@@ -179,10 +158,8 @@ Return Value:
 
 --*/
 {
-    TraceEvents(TRACE_LEVEL_INFORMATION, 
-                TRACE_QUEUE, 
-                "%!FUNC! Queue 0x%p, Request 0x%p ActionFlags %d", 
-                Queue, Request, ActionFlags);
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_QUEUE, "%!FUNC! Queue 0x%p, Request 0x%p ActionFlags %d", Queue, Request,
+                ActionFlags);
 
     //
     // In most cases, the EvtIoStop callback function completes, cancels, or postpones
@@ -224,4 +201,3 @@ Return Value:
 
     return;
 }
-

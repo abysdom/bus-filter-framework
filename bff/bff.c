@@ -21,7 +21,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
-//#include <initguid.h>
+// #include <initguid.h>
 #include "bff.h"
 #include "private.h"
 #include "bffguid.h"
@@ -32,20 +32,19 @@ Global variables
 **/
 static PDRIVER_DISPATCH WdfMajorFunction[IRP_MJ_MAXIMUM_FUNCTION + 1];
 // {9B72BA39-1052-4D96-9EE8-500629E4EAF1}
-//DEFINE_GUID(GUID_BUS_FILTER_FRAMEWORK,
-//	0x9b72ba39, 0x1052, 0x4d96, 0x9e, 0xe8, 0x50, 0x6, 0x29, 0xe4, 0xea, 0xf1);
-//static GUID GUID_BUS_FILTER_FRAMEWORK = { 0x9b72ba39, 0x1052, 0x4d96, { 0x9e, 0xe8, 0x50, 0x6, 0x29, 0xe4, 0xea, 0xf1 } };
+// DEFINE_GUID(GUID_BUS_FILTER_FRAMEWORK,
+//  0x9b72ba39, 0x1052, 0x4d96, 0x9e, 0xe8, 0x50, 0x6, 0x29, 0xe4, 0xea, 0xf1);
+// static GUID GUID_BUS_FILTER_FRAMEWORK = { 0x9b72ba39, 0x1052, 0x4d96, { 0x9e, 0xe8, 0x50, 0x6, 0x29, 0xe4, 0xea, 0xf1
+// } };
 static BFF_INITIALIZATION_DATA BffInitializationData;
 
-static FORCEINLINE VOID
-BffRemoveDevice(IN PDEVICE_OBJECT DeviceObject)
+static FORCEINLINE VOID BffRemoveDevice(IN PDEVICE_OBJECT DeviceObject)
 /*++
 
 Routine Description:
 
-This routine is called when the device is to be removed.
-It will de-register itself from WMI first, detach itself from the
-stack before deleting itself.
+    This routine is called when the device is to be removed.
+    It will detach itself from the stack before deleting itself.
 
 Arguments:
 
@@ -108,8 +107,7 @@ Return Value:
     IoDeleteDevice(DeviceObject);
 }
 
-static FORCEINLINE NTSTATUS
-BffDispatchPnp(PDEVICE_OBJECT DeviceObject, PIRP Irp, UCHAR minor)
+static FORCEINLINE NTSTATUS BffDispatchPnp(PDEVICE_OBJECT DeviceObject, PIRP Irp, UCHAR minor)
 {
     PDEVICE_EXTENSION deviceExtension = DeviceObject->DeviceExtension;
 
@@ -130,12 +128,7 @@ BffDispatchPnp(PDEVICE_OBJECT DeviceObject, PIRP Irp, UCHAR minor)
     return IoCallDriver(deviceExtension->TargetDeviceObject, Irp);
 }
 
-static NTSTATUS
-BffDispatchAny(
-    IN PDEVICE_OBJECT DeviceObject,
-    IN PIRP Irp
-    )
-
+static NTSTATUS BffDispatchAny(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp)
 /*++
 
 Routine Description:
@@ -153,13 +146,13 @@ Return Value:
     NTSTATUS
 
 --*/
-
 {
     PDEVICE_EXTENSION deviceExtension = DeviceObject->DeviceExtension;
     PIO_STACK_LOCATION stack = IoGetCurrentIrpStackLocation(Irp);
     UCHAR major = stack->MajorFunction;
 
-    if (!IsEqualGUID(&deviceExtension->Signature, &GUID_BUS_FILTER_FRAMEWORK)) {
+    if (!IsEqualGUID(&deviceExtension->Signature, &GUID_BUS_FILTER_FRAMEWORK))
+    {
         //
         // This must be the upper filter device object managed by WDF.
         //
@@ -180,42 +173,32 @@ Return Value:
 
 } // end BffDispatchAny()
 
-static FORCEINLINE VOID
-BffLogError(
-    IN PDEVICE_OBJECT DeviceObject,
-    IN ULONG UniqueId,
-    IN NTSTATUS ErrorCode,
-    IN NTSTATUS Status
-    )
+static FORCEINLINE VOID BffLogError(IN PDEVICE_OBJECT DeviceObject, IN ULONG UniqueId, IN NTSTATUS ErrorCode,
+                                    IN NTSTATUS Status)
+/*++
 
-    /*++
-
-    Routine Description:
+Routine Description:
 
     Routine to log an error with the Error Logger
 
-    Arguments:
+Arguments:
 
     DeviceObject - the device object responsible for the error
     UniqueId     - an id for the error
     Status       - the status of the error
 
-    Return Value:
+Return Value:
 
     None
 
-    --*/
-
+--*/
 {
     PIO_ERROR_LOG_PACKET errorLogEntry;
 
-    errorLogEntry = (PIO_ERROR_LOG_PACKET)
-        IoAllocateErrorLogEntry(
-            DeviceObject,
-            (UCHAR)sizeof(IO_ERROR_LOG_PACKET)
-            );
+    errorLogEntry = (PIO_ERROR_LOG_PACKET)IoAllocateErrorLogEntry(DeviceObject, (UCHAR)sizeof(IO_ERROR_LOG_PACKET));
 
-    if (errorLogEntry != NULL) {
+    if (errorLogEntry != NULL)
+    {
         errorLogEntry->MajorFunctionCode = IRP_MJ_PNP;
         errorLogEntry->ErrorCode = ErrorCode;
         errorLogEntry->UniqueErrorValue = UniqueId;
@@ -224,23 +207,19 @@ BffLogError(
     }
 }
 
-static FORCEINLINE NTSTATUS
-BffAddDevice(
-    IN WDFDEVICE Device,
-    IN PDEVICE_OBJECT PhysicalDeviceObject
-    )
+static FORCEINLINE NTSTATUS BffAddDevice(IN WDFDEVICE Device, IN PDEVICE_OBJECT PhysicalDeviceObject)
 {
-    NTSTATUS                status;
-    PDEVICE_OBJECT		DeviceObject = WdfDeviceWdmGetDeviceObject(Device);
-    PDEVICE_OBJECT          filterDeviceObject;
-    PBFF_PARENT_CONTEXT	parentContext = BffGetParentContext(Device);
-    PDEVICE_EXTENSION	childExtension;
-    KLOCK_QUEUE_HANDLE	handle;
-    PLIST_ENTRY		entry;
-    BOOLEAN			duplicated = FALSE;
-    WDF_OBJECT_ATTRIBUTES	attr;
-    WDFOBJECT		child;
-    PBFF_DEVICE_CONTEXT	childContext;
+    NTSTATUS status;
+    PDEVICE_OBJECT DeviceObject = WdfDeviceWdmGetDeviceObject(Device);
+    PDEVICE_OBJECT filterDeviceObject;
+    PBFF_PARENT_CONTEXT parentContext = BffGetParentContext(Device);
+    PDEVICE_EXTENSION childExtension;
+    KLOCK_QUEUE_HANDLE handle;
+    PLIST_ENTRY entry;
+    BOOLEAN duplicated = FALSE;
+    WDF_OBJECT_ATTRIBUTES attr;
+    WDFOBJECT child;
+    PBFF_DEVICE_CONTEXT childContext;
 
     PAGED_CODE();
 
@@ -260,13 +239,11 @@ BffAddDevice(
     // Skip if PhysicalDeviceObject is an existing child.
     //
     KeAcquireInStackQueuedSpinLock(&parentContext->Lock, &handle);
-    for (entry = parentContext->List.Flink;
-        entry != &parentContext->List;
-        entry = entry->Flink) {
-        childExtension = CONTAINING_RECORD(entry,
-            DEVICE_EXTENSION, List);
-        if (childExtension->PhysicalDeviceObject ==
-            PhysicalDeviceObject) {
+    for (entry = parentContext->List.Flink; entry != &parentContext->List; entry = entry->Flink)
+    {
+        childExtension = CONTAINING_RECORD(entry, DEVICE_EXTENSION, List);
+        if (childExtension->PhysicalDeviceObject == PhysicalDeviceObject)
+        {
             duplicated = TRUE;
             childExtension->Existing = TRUE;
             break;
@@ -278,29 +255,26 @@ BffAddDevice(
         return STATUS_SUCCESS;
 
     //
-    // Create a filter device object for this device (disk).
+    // Create a filter device object for this device.
     //
 
-    KdPrint(("%s: Driver %X Device %X\n", __FUNCTION__,
-        DeviceObject->DriverObject, PhysicalDeviceObject));
+    KdPrint(("%s: Driver %X Device %X\n", __FUNCTION__, DeviceObject->DriverObject, PhysicalDeviceObject));
 
     WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&attr, BFF_DEVICE_CONTEXT);
     attr.ParentObject = Device;
     status = WdfObjectCreate(&attr, &child);
-    if (!NT_SUCCESS(status)) {
+    if (!NT_SUCCESS(status))
+    {
         KdPrint(("%s: failed to create WDF object for child device: %x\n", __FUNCTION__, status));
         return status;
     }
 
-    status = IoCreateDevice(DeviceObject->DriverObject,
-        DEVICE_EXTENSION_SIZE,
-        NULL,
-        BffInitializationData.DeviceConfig.DeviceType,
-        FILE_DEVICE_SECURE_OPEN | BffInitializationData.DeviceConfig.DeviceCharacteristics,
-        FALSE,
-        &filterDeviceObject);
+    status = IoCreateDevice(
+        DeviceObject->DriverObject, DEVICE_EXTENSION_SIZE, NULL, BffInitializationData.DeviceConfig.DeviceType,
+        FILE_DEVICE_SECURE_OPEN | BffInitializationData.DeviceConfig.DeviceCharacteristics, FALSE, &filterDeviceObject);
 
-    if (!NT_SUCCESS(status)) {
+    if (!NT_SUCCESS(status))
+    {
         KdPrint(("%s: Cannot create filterDeviceObject: %x\n", __FUNCTION__, status));
         goto deleteobj;
     }
@@ -325,27 +299,24 @@ BffAddDevice(
 
     childExtension->PhysicalDeviceObject = PhysicalDeviceObject;
 
-    childExtension->TargetDeviceObject =
-        IoAttachDeviceToDeviceStack(filterDeviceObject, PhysicalDeviceObject);
+    childExtension->TargetDeviceObject = IoAttachDeviceToDeviceStack(filterDeviceObject, PhysicalDeviceObject);
 
-    if (childExtension->TargetDeviceObject == NULL) {
-        KdPrint(("%s: Unable to attach %X to target %X\n", __FUNCTION__,
-            filterDeviceObject, PhysicalDeviceObject));
+    if (childExtension->TargetDeviceObject == NULL)
+    {
+        KdPrint(("%s: Unable to attach %X to target %X\n", __FUNCTION__, filterDeviceObject, PhysicalDeviceObject));
         status = STATUS_NO_SUCH_DEVICE;
         goto deletedev;
     }
 
-    filterDeviceObject->Flags |=
-        childExtension->TargetDeviceObject->Flags &
-        (DO_BUFFERED_IO | DO_DIRECT_IO |
-        DO_POWER_INRUSH | DO_POWER_PAGABLE);
+    filterDeviceObject->Flags |= childExtension->TargetDeviceObject->Flags &
+                                 (DO_BUFFERED_IO | DO_DIRECT_IO | DO_POWER_INRUSH | DO_POWER_PAGABLE);
 
-    if (BffInitializationData.DeviceConfig.DeviceAdd) {
-        status = BffInitializationData.DeviceConfig.DeviceAdd(Device,
-            child);
-        if (!NT_SUCCESS(status)) {
-            KdPrint(("%s: Client's DeviceAdd failed: %x\n",
-                __FUNCTION__, status));
+    if (BffInitializationData.DeviceConfig.DeviceAdd)
+    {
+        status = BffInitializationData.DeviceConfig.DeviceAdd(Device, child);
+        if (!NT_SUCCESS(status))
+        {
+            KdPrint(("%s: Client's DeviceAdd failed: %x\n", __FUNCTION__, status));
             goto detachdev;
         }
     }
@@ -354,7 +325,6 @@ BffAddDevice(
     childExtension->Existing = TRUE;
     InsertTailList(&parentContext->List, &childExtension->List);
     KeReleaseInStackQueuedSpinLock(&handle);
-
 
     //
     // Clear the DO_DEVICE_INITIALIZING flag
@@ -373,47 +343,44 @@ deleteobj:
     return status;
 }
 
-static NTSTATUS
-BffCompleteQueryBusRelations(
-    IN PDEVICE_OBJECT DeviceObject,
-    IN PIRP Irp,
-    IN WDFDEVICE Device
-    )
+static NTSTATUS BffCompleteQueryBusRelations(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp, IN WDFDEVICE Device)
 {
     if (Irp->PendingReturned)
         IoMarkIrpPending(Irp);
 
-    if (NT_SUCCESS(Irp->IoStatus.Status)) {
+    if (NT_SUCCESS(Irp->IoStatus.Status))
+    {
         PBFF_PARENT_CONTEXT parentContext = BffGetParentContext(Device);
         PDEVICE_RELATIONS dr = (PDEVICE_RELATIONS)Irp->IoStatus.Information;
         ULONG i;
 
-        if (parentContext) {
-            PDEVICE_EXTENSION	childExtension;
-            KLOCK_QUEUE_HANDLE	handle;
-            PLIST_ENTRY		entry;
+        if (parentContext)
+        {
+            PDEVICE_EXTENSION childExtension;
+            KLOCK_QUEUE_HANDLE handle;
+            PLIST_ENTRY entry;
 
             //
             // Assume that all child devices do not exist; if any
             // child device is found duplicated in BffAddDevice, it
             // will be reverted to 'existing' then.
             //
-            KeAcquireInStackQueuedSpinLock(&parentContext->Lock,
-                &handle);
-            for (entry = parentContext->List.Flink;
-                entry != &parentContext->List;
-                entry = entry->Flink) {
-                childExtension = CONTAINING_RECORD(entry,
-                    DEVICE_EXTENSION, List);
+            KeAcquireInStackQueuedSpinLock(&parentContext->Lock, &handle);
+            for (entry = parentContext->List.Flink; entry != &parentContext->List; entry = entry->Flink)
+            {
+                childExtension = CONTAINING_RECORD(entry, DEVICE_EXTENSION, List);
                 childExtension->Existing = FALSE;
             }
             KeReleaseInStackQueuedSpinLock(&handle);
         }
 
-        if (dr) {
-            for (i = 0; i < dr->Count; i++) {
+        if (dr)
+        {
+            for (i = 0; i < dr->Count; i++)
+            {
                 NTSTATUS status = BffAddDevice(Device, dr->Objects[i]);
-                if (!NT_SUCCESS(status)) {
+                if (!NT_SUCCESS(status))
+                {
                     KdPrint(("%s: failed to add a child:%x\n", __FUNCTION__, status));
                     BffLogError(DeviceObject, IRP_MN_QUERY_DEVICE_RELATIONS, IO_ERR_INTERNAL_ERROR, status);
                     break;
@@ -430,7 +397,7 @@ BffCompleteQueryBusRelations(
     return STATUS_CONTINUE_COMPLETION;
 }
 
-/***************************************************************************//**
+/*******************************************************************************
  * APIs for upper filter device objects.
  ******************************************************************************/
 /** Prepare the initialization data for BFF. Obviously, this routine must be
@@ -438,21 +405,19 @@ BffCompleteQueryBusRelations(
  *  InitData->PnPMinorFunction[IRP_MN_*] will be NULL-initialized. You may
  *  selectively re-initialize InitData->PnPMinorFunction[IRP_MN_*] with your own
  *  handlers before calling BffInitialize.
- *  @param InitData		The pointer to the initialization data,
- *				typically declared as a local variable.
- *  @param Type			The device type for creation of a bus filter
- *				device object.
- *  @param Characteristics	The device characteristics for creation of a bus
- *				filter device object.
- *  @param DeviceAdd		The callback function for creation of a bus
- *				filter device object.
- *  @param DeviceRemove		The callback function for removal of a bus
- *				filter device object.
+ *  @param InitData         The pointer to the initialization data,
+ *                          typically declared as a local variable.
+ *  @param Type             The device type for creation of a bus filter
+ *                          device object.
+ *  @param Characteristics  The device characteristics for creation of a bus
+ *                          filter device object.
+ *  @param DeviceAdd        The callback function for creation of a bus
+ *                          filter device object.
+ *  @param DeviceRemove     The callback function for removal of a bus
+ *                          filter device object.
  */
-VOID
-BffSetInitializationData(PBFF_INITIALIZATION_DATA InitData, DEVICE_TYPE Type,
-    ULONG Characteristics,
-    PBFF_DEVICE_ADD DeviceAdd, PBFF_DEVICE_REMOVE DeviceRemove)
+VOID BffSetInitializationData(PBFF_INITIALIZATION_DATA InitData, DEVICE_TYPE Type, ULONG Characteristics,
+                              PBFF_DEVICE_ADD DeviceAdd, PBFF_DEVICE_REMOVE DeviceRemove)
 {
     RtlZeroMemory(InitData, sizeof(BFF_INITIALIZATION_DATA));
     InitData->Size = sizeof(BFF_INITIALIZATION_DATA);
@@ -466,19 +431,19 @@ BffSetInitializationData(PBFF_INITIALIZATION_DATA InitData, DEVICE_TYPE Type,
  *  must be invoked in DriverEntry after a call to WdfDriverCreate. Furthermore,
  *  a BFF-based driver must be installed with a valid license key to unlock
  *  functionality of BFF.
- *  @param DriverObject	The same as DriverEntry's first parameter.
- *  @param RegistryPath	The same as DriverEntry's second parameter.
- *  @param InitData	The initialization data previously prepared by a call to
- *			BffSetInitializationData.
- *  @return		One of the following values:
- *			(a) 0 or any positive value for success;
- *			(b) STATUS_NOT_SUPPORTED if the driver has not called
- *			    WdfDriverCreate;
- *			(c) STATUS_INVALID_PARAMETER if an invalid parameter is
- *			    speciifed;
- *			(d) STATUS_INVALID_SIGNATURE if no valid license key in
- *			    registry; or
- *			(e) Any other negative value for failure.
+ *  @param DriverObject The same as DriverEntry's first parameter.
+ *  @param RegistryPath The same as DriverEntry's second parameter.
+ *  @param InitData     The initialization data previously prepared by a call to
+ *                      BffSetInitializationData.
+ *  @return             One of the following values:
+ *                      (a) 0 or any positive value for success;
+ *                      (b) STATUS_NOT_SUPPORTED if the driver has not called
+ *                          WdfDriverCreate;
+ *                      (c) STATUS_INVALID_PARAMETER if an invalid parameter is
+ *                          speciifed;
+ *                      (d) STATUS_INVALID_SIGNATURE if no valid license key in
+ *                          registry; or
+ *                      (e) Any other negative value for failure.
  */
 NTSTATUS
 BffInitialize(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath, PBFF_INITIALIZATION_DATA InitData)
@@ -494,31 +459,27 @@ BffInitialize(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath, PBFF_IN
         return STATUS_NOT_SUPPORTED;
 
     status = STATUS_INVALID_PARAMETER;
-    if (DriverObject && InitData &&
-        InitData->Size == sizeof(BFF_INITIALIZATION_DATA)) {
+    if (DriverObject && InitData && InitData->Size == sizeof(BFF_INITIALIZATION_DATA))
+    {
         ULONG ulIndex;
         PDRIVER_DISPATCH *dispatch;
         //
         // Create dispatch points
         //
-        for (ulIndex = 0, dispatch = DriverObject->MajorFunction;
-            ulIndex <= IRP_MJ_MAXIMUM_FUNCTION;
-            ulIndex++, dispatch++) {
+        for (ulIndex = 0, dispatch = DriverObject->MajorFunction; ulIndex <= IRP_MJ_MAXIMUM_FUNCTION;
+             ulIndex++, dispatch++)
+        {
             WdfMajorFunction[ulIndex] = *dispatch;
             *dispatch = BffDispatchAny;
         }
 
-        RtlCopyMemory(&BffInitializationData, InitData,
-            sizeof(BFF_INITIALIZATION_DATA));
+        RtlCopyMemory(&BffInitializationData, InitData, sizeof(BFF_INITIALIZATION_DATA));
         //
         // Clear illegal settings
         //
         BffInitializationData.DeviceConfig.DeviceCharacteristics &=
-            ~(FILE_AUTOGENERATED_DEVICE_NAME |
-            FILE_CHARACTERISTIC_TS_DEVICE |
-            FILE_CHARACTERISTIC_WEBDAV_DEVICE |
-            FILE_DEVICE_IS_MOUNTED |
-            FILE_VIRTUAL_VOLUME);
+            ~(FILE_AUTOGENERATED_DEVICE_NAME | FILE_CHARACTERISTIC_TS_DEVICE | FILE_CHARACTERISTIC_WEBDAV_DEVICE |
+              FILE_DEVICE_IS_MOUNTED | FILE_VIRTUAL_VOLUME);
         status = STATUS_SUCCESS;
     }
 
@@ -528,9 +489,9 @@ BffInitialize(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath, PBFF_IN
 /** Allocate context space for an upper filter device object on behalf of Bus
  *  Filter Framework. This routine is typically called in the EvtDriverDeviceAdd
  *  callback function.
- *  @param Device	The WDF device object representing an upper filter
- *			device object.
- *  @return		The value that WdfObjectAllocateContext returns.
+ *  @param Device   The WDF device object representing an upper filter
+ *                  device object.
+ *  @return         The value that WdfObjectAllocateContext returns.
  */
 NTSTATUS
 BffAllocateContext(WDFDEVICE Device)
@@ -540,7 +501,8 @@ BffAllocateContext(WDFDEVICE Device)
     WDF_OBJECT_ATTRIBUTES attr;
     WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&attr, BFF_PARENT_CONTEXT);
     status = WdfObjectAllocateContext(Device, &attr, &parentContext);
-    if (NT_SUCCESS(status)) {
+    if (NT_SUCCESS(status))
+    {
         ASSERT(BffGetParentContext(Device) == parentContext);
         InitializeListHead(&parentContext->List);
         KeInitializeSpinLock(&parentContext->Lock);
@@ -555,37 +517,35 @@ BffAllocateContext(WDFDEVICE Device)
  *  IRP_MN_QUERY_DEVICE_RELATIONS, or be invoked in an upper filter driver's
  *  EvtDeviceWdmIrpPreprocess callback function. In the latter case, the upper
  *  filter driver must return the value that this routine returns.
- *  @param Device	The WDF device object representing an upper filter
- *			device object.
- *  @param Irp		The IRP_MN_QUERY_DEVICE_RELATIONS I/O request packet.
- *  @return		The value that WdfDeviceWdmDispatchPreprocessedIrp
- *			returns.
+ *  @param Device   The WDF device object representing an upper filter
+ *                  device object.
+ *  @param Irp      The IRP_MN_QUERY_DEVICE_RELATIONS I/O request packet.
+ *  @return         The value that WdfDeviceWdmDispatchPreprocessedIrp returns.
  */
 NTSTATUS
 BffPreprocessQueryBusRelations(WDFDEVICE Device, PIRP Irp)
 {
     PIO_STACK_LOCATION stack = IoGetCurrentIrpStackLocation(Irp);
-    if (stack->MajorFunction != IRP_MJ_PNP ||
-        stack->MinorFunction != IRP_MN_QUERY_DEVICE_RELATIONS ||
+    if (stack->MajorFunction != IRP_MJ_PNP || stack->MinorFunction != IRP_MN_QUERY_DEVICE_RELATIONS ||
         stack->Parameters.QueryDeviceRelations.Type != BusRelations)
         IoSkipCurrentIrpStackLocation(Irp);
-    else {
+    else
+    {
         IoCopyCurrentIrpStackLocationToNext(Irp);
-        IoSetCompletionRoutine(Irp, BffCompleteQueryBusRelations,
-            Device, TRUE, TRUE, TRUE);
+        IoSetCompletionRoutine(Irp, BffCompleteQueryBusRelations, Device, TRUE, TRUE, TRUE);
     }
 
     return WdfDeviceWdmDispatchPreprocessedIrp(Device, Irp);
 }
 
-/***************************************************************************//**
+/*******************************************************************************
  * APIs for bus filter device objects.
  ******************************************************************************/
 /** Retrieve the WDM bus filter device object that is associated with the
  *  specified WDF object.
- *  @param BffDevice	The WDF object as a bus filter device object.
- *  @return		The WDM bus filter device object for success; NULL
- *			otherwise.
+ *  @param BffDevice    The WDF object as a bus filter device object.
+ *  @return             The WDM bus filter device object for success; NULL
+ *                      otherwise.
  */
 PDEVICE_OBJECT
 BffDeviceWdmGetDeviceObject(WDFOBJECT BffDevice)
@@ -598,15 +558,16 @@ BffDeviceWdmGetDeviceObject(WDFOBJECT BffDevice)
 
 /** Retrieve the next lower WDM device object in the device stack of the
  *  specified WDF object.
- *  @param BffDevice	The WDF object as a bus filter device object.
- *  @return		The next lower WDM device object for success; NULL
- *			otherwise.
+ *  @param BffDevice    The WDF object as a bus filter device object.
+ *  @return             The next lower WDM device object for success; NULL
+ *                      otherwise.
  */
 PDEVICE_OBJECT
 BffDeviceWdmGetAttachedDevice(WDFOBJECT BffDevice)
 {
     PBFF_DEVICE_CONTEXT childContext = BffGetDeviceContext(BffDevice);
-    if (childContext) {
+    if (childContext)
+    {
         PDEVICE_EXTENSION deviceExtension = childContext->DeviceObject->DeviceExtension;
         if (IsEqualGUID(&deviceExtension->Signature, &GUID_BUS_FILTER_FRAMEWORK))
             return deviceExtension->TargetDeviceObject;
@@ -615,14 +576,15 @@ BffDeviceWdmGetAttachedDevice(WDFOBJECT BffDevice)
 }
 
 /** Retrieve the PDO from the device stack of the specified WDF object.
- *  @param BffDevice	The WDF object as a bus filter device object.
- *  @return		The PDO for success; NULL otherwise.
+ *  @param BffDevice    The WDF object as a bus filter device object.
+ *  @return             The PDO for success; NULL otherwise.
  */
 PDEVICE_OBJECT
 BffDeviceWdmGetPhysicalDevice(WDFOBJECT BffDevice)
 {
     PBFF_DEVICE_CONTEXT childContext = BffGetDeviceContext(BffDevice);
-    if (childContext) {
+    if (childContext)
+    {
         PDEVICE_EXTENSION deviceExtension = childContext->DeviceObject->DeviceExtension;
         if (IsEqualGUID(&deviceExtension->Signature, &GUID_BUS_FILTER_FRAMEWORK))
             return deviceExtension->PhysicalDeviceObject;
