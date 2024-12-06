@@ -26,8 +26,5 @@
     <ClInclude Include="private.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="bffguid.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>

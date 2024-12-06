@@ -21,21 +21,17 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
-// #include <initguid.h>
+#include <initguid.h>
 #include "bff.h"
 #include "private.h"
-#include "bffguid.h"
 #include <ntstrsafe.h>
 
 /**
 Global variables
 **/
-static PDRIVER_DISPATCH WdfMajorFunction[IRP_MJ_MAXIMUM_FUNCTION + 1];
 // {9B72BA39-1052-4D96-9EE8-500629E4EAF1}
-// DEFINE_GUID(GUID_BUS_FILTER_FRAMEWORK,
-//  0x9b72ba39, 0x1052, 0x4d96, 0x9e, 0xe8, 0x50, 0x6, 0x29, 0xe4, 0xea, 0xf1);
-// static GUID GUID_BUS_FILTER_FRAMEWORK = { 0x9b72ba39, 0x1052, 0x4d96, { 0x9e, 0xe8, 0x50, 0x6, 0x29, 0xe4, 0xea, 0xf1
-// } };
+DEFINE_GUID(GUID_BUS_FILTER_FRAMEWORK, 0x9b72ba39, 0x1052, 0x4d96, 0x9e, 0xe8, 0x50, 0x6, 0x29, 0xe4, 0xea, 0xf1);
+static PDRIVER_DISPATCH WdfMajorFunction[IRP_MJ_MAXIMUM_FUNCTION + 1];
 static BFF_INITIALIZATION_DATA BffInitializationData;
 
 static FORCEINLINE VOID BffRemoveDevice(IN PDEVICE_OBJECT DeviceObject)

@@ -39,7 +39,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bff.h" />
-    <ClInclude Include="bffguid.h" />
     <ClInclude Include="private.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
