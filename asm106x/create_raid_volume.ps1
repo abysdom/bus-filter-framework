@@ -61,8 +61,6 @@ if ($raidType -eq "RAID5") {
 }
 
 # Step 6: Initialize, partition, and format the new virtual disk
-$disk = Get-Disk | Where-Object PartitionStyle -EQ "RAW" | Sort-Object -Property Size -Descending | Select-Object -First 1
-Initialize-Disk -Number $disk.Number
-New-Partition -DiskNumber $disk.Number -UseMaximumSize -AssignDriveLetter | Format-Volume -FileSystem NTFS -Confirm:$false
+Get-VirtualDisk –FriendlyName $volumeFriendlyName | Get-Disk | Initialize-Disk –Passthru | New-Partition –AssignDriveLetter –UseMaximumSize | Format-Volume
 
 Write-Host "RAID volume successfully created and formatted." -ForegroundColor Green
