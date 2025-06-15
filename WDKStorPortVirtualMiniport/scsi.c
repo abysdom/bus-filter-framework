@@ -217,7 +217,7 @@ ScsiAllocDiskBuf(
         goto Done;
     }
 
-    *ppDiskBuf = ExAllocatePool2(POOL_FLAG_NON_PAGED, requestedBytes, MP_TAG_GENERAL);
+    *ppDiskBuf = ExAllocatePoolWithTag(NonPagedPoolNx, requestedBytes, MP_TAG_GENERAL);
 
     if (!*ppDiskBuf) {
         DoStorageTraceEtw(DbgLvlErr, MpDemoDebugInfo, "DiskBuf memory allocation failed!\n");
@@ -279,7 +279,7 @@ ScsiGetMPIOExt(
     }
 
     if (pNextEntry==&pHBAExt->pMPDrvObj->ListMPIOExt) { // No match? That is, is this to be a new MPIO LUN extension?
-        pLUMPIOExt = ExAllocatePool2(POOL_FLAG_NON_PAGED, sizeof(HW_LU_EXTENSION_MPIO), MP_TAG_GENERAL);
+        pLUMPIOExt = ExAllocatePoolWithTag(NonPagedPoolNx, sizeof(HW_LU_EXTENSION_MPIO), MP_TAG_GENERAL);
 
         if (!pLUMPIOExt) {
             DoStorageTraceEtw(DbgLvlErr, MpDemoDebugInfo, "Failed to allocate HW_LU_EXTENSION_MPIO\n");
@@ -772,7 +772,7 @@ ScsiReadWriteSetup(
     }
 
     // Fallback: queue work item for larger or high-IRQL I/O
-    pWkRtnParms = (pMP_WorkRtnParms)ExAllocatePool2(POOL_FLAG_NON_PAGED, sizeof(MP_WorkRtnParms), MP_TAG_GENERAL);
+    pWkRtnParms = (pMP_WorkRtnParms)ExAllocatePoolWithTag(NonPagedPoolNx, sizeof(MP_WorkRtnParms), MP_TAG_GENERAL);
 
     if (NULL == pWkRtnParms) {
         DoStorageTraceEtw(DbgLvlErr, MpDemoDebugInfo, "ScsiReadWriteSetup Failed to allocate work parm structure\n");
