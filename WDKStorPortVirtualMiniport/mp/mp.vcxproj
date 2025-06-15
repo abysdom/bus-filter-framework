@@ -119,22 +119,18 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
     <IncludePath>$(ProjectDir);$(IncludePath);..\inc</IncludePath>
-    <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
     <IncludePath>$(ProjectDir);$(IncludePath);..\inc</IncludePath>
-    <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
     <IncludePath>$(ProjectDir);$(IncludePath);..\inc</IncludePath>
-    <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
     <IncludePath>$(ProjectDir);$(IncludePath);..\inc</IncludePath>
-    <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
@@ -220,12 +216,13 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <PreBuildEvent>
-      <Command>copy %WinDir%\system32\wbem\hbaapi.mof $(ProjectDir)</Command>
+      <Command>copy %WinDir%\system32\wbem\hbaapi.mof $(ProjectDir)
+expand ..\wdf-x86.cab -F:WdfCoInstaller01009.dll $(OutDir)\WdfCoInstaller01009.dll</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <PreBuildEvent>
-      <Message>Copying HbaApi.mof...</Message>
+      <Message>Copying HbaApi.mof and WdfCoInstaller01009.dll......</Message>
     </PreBuildEvent>
     <ClCompile>
       <PreprocessorDefinitions>_X86_=1;i386=1;STD_CALL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -245,20 +242,23 @@
       <SpecifyDriverVerDirectiveDate>true</SpecifyDriverVerDirectiveDate>
     </Inf>
     <PostBuildEvent>
-      <Command>copy ..\LICENSE-2.0.txt $(OutDir)</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
     <PostBuildEvent>
-      <Message>Copy LICENSE-2.0.txt...</Message>
+      <Message>
+      </Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <PreBuildEvent>
-      <Command>copy %WinDir%\system32\wbem\hbaapi.mof $(ProjectDir)</Command>
+      <Command>copy %WinDir%\system32\wbem\hbaapi.mof $(ProjectDir)
+expand ..\wdf-x86.cab -F:WdfCoInstaller01009.dll $(OutDir)\WdfCoInstaller01009.dll</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <PreBuildEvent>
-      <Message>Copying HbaApi.mof...</Message>
+      <Message>Copying HbaApi.mof and WdfCoInstaller01009.dll......</Message>
     </PreBuildEvent>
     <ClCompile>
       <PreprocessorDefinitions>_X86_=1;i386=1;STD_CALL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -278,10 +278,12 @@
       <SpecifyDriverVerDirectiveDate>true</SpecifyDriverVerDirectiveDate>
     </Inf>
     <PostBuildEvent>
-      <Command>copy ..\LICENSE-2.0.txt $(OutDir)</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
     <PostBuildEvent>
-      <Message>Copy LICENSE-2.0.txt...</Message>
+      <Message>
+      </Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
@@ -352,12 +354,13 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <PreBuildEvent>
-      <Command>copy %WinDir%\system32\wbem\hbaapi.mof $(ProjectDir)</Command>
+      <Command>copy %WinDir%\system32\wbem\hbaapi.mof $(ProjectDir)
+expand ..\wdf-x64.cab -F:WdfCoInstaller01009.dll $(OutDir)\WdfCoInstaller01009.dll</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <PreBuildEvent>
-      <Message>Copying HbaApi.mof...</Message>
+      <Message>Copying HbaApi.mof and WdfCoInstaller01009.dll......</Message>
     </PreBuildEvent>
     <ClCompile>
       <PreprocessorDefinitions>_WIN64;_AMD64_;AMD64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -376,21 +379,18 @@
     <Inf>
       <SpecifyDriverVerDirectiveDate>true</SpecifyDriverVerDirectiveDate>
     </Inf>
-    <PostBuildEvent>
-      <Command>copy ..\LICENSE-2.0.txt $(OutDir)</Command>
-    </PostBuildEvent>
-    <PostBuildEvent>
-      <Message>Copy LICENSE-2.0.txt...</Message>
-    </PostBuildEvent>
+    <PostBuildEvent />
+    <PostBuildEvent />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <PreBuildEvent>
-      <Command>copy %WinDir%\system32\wbem\hbaapi.mof $(ProjectDir)</Command>
+      <Command>copy %WinDir%\system32\wbem\hbaapi.mof $(ProjectDir)
+expand ..\wdf-x64.cab -F:WdfCoInstaller01009.dll $(OutDir)\WdfCoInstaller01009.dll</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <PreBuildEvent>
-      <Message>Copying HbaApi.mof...</Message>
+      <Message>Copying HbaApi.mof and WdfCoInstaller01009.dll......</Message>
     </PreBuildEvent>
     <ClCompile>
       <PreprocessorDefinitions>_WIN64;_AMD64_;AMD64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -409,12 +409,8 @@
     <Inf>
       <SpecifyDriverVerDirectiveDate>true</SpecifyDriverVerDirectiveDate>
     </Inf>
-    <PostBuildEvent>
-      <Command>copy ..\LICENSE-2.0.txt $(OutDir)</Command>
-    </PostBuildEvent>
-    <PostBuildEvent>
-      <Message>Copy LICENSE-2.0.txt...</Message>
-    </PostBuildEvent>
+    <PostBuildEvent />
+    <PostBuildEvent />
     <DriverSign />
     <DriverSign>
       <AdditionalOptions>/fd SHA256 %(AdditionalOptions)</AdditionalOptions>
