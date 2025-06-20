@@ -158,7 +158,7 @@ void
 ScsiAllocDiskBuf(                                                                                  
                  __in       pHW_HBA_EXT  pHBAExt,     // Adapter device-object extension from StorPort.
                  __in __out PUCHAR      *ppDiskBuf,
-                 __in __out PUSHORT      pMaxBlocks
+                 __in __out PULONG      pMaxBlocks
                 )
 {
     *ppDiskBuf = ExAllocatePool2(POOL_FLAG_NON_PAGED, pHBAExt->pMPDrvObj->MPRegInfo.PhysicalDiskSize, MP_TAG_GENERAL);
@@ -169,7 +169,7 @@ ScsiAllocDiskBuf(
         goto Done;
     }
 
-    *pMaxBlocks = (USHORT)(pHBAExt->pMPDrvObj->MPRegInfo.PhysicalDiskSize / MP_BLOCK_SIZE);
+    *pMaxBlocks = (ULONG)(pHBAExt->pMPDrvObj->MPRegInfo.PhysicalDiskSize / MP_BLOCK_SIZE);
 
 Done:
     return;

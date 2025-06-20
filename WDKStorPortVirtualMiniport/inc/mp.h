@@ -175,7 +175,7 @@ typedef struct _HW_LU_EXTENSION {                     // LUN extension allocated
     pHW_LU_EXTENSION_MPIO pLUMPIOExt;
     PUCHAR                pDiskBuf;
     ULONG                 LUFlags;
-    USHORT                MaxBlocks;
+    ULONG                MaxBlocks;
     USHORT                BlocksUsed;
     BOOLEAN               bIsMissing;                 // At present, this is set only by a kernel debugger, for testing.
     UCHAR                 DeviceType;
