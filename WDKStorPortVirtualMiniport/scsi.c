@@ -41,6 +41,35 @@
 
 #include "mp.h"
 #include "storport.h"
+#include <ntddk.h>
+#include <ntdef.h>
+#include <windef.h>
+
+typedef struct _SYSTEM_BASIC_INFORMATION {
+    ULONG Reserved;
+    ULONG TimerResolution;
+    ULONG PageSize;
+    ULONG NumberOfPhysicalPages;
+    ULONG LowestPhysicalPageNumber;
+    ULONG HighestPhysicalPageNumber;
+    ULONG AllocationGranularity;
+    ULONG MinimumUserModeAddress;
+    ULONG MaximumUserModeAddress;
+    KAFFINITY ActiveProcessorsAffinityMask;
+    CCHAR NumberOfProcessors;
+} SYSTEM_BASIC_INFORMATION;
+
+#define SystemBasicInformation 0
+
+NTSYSAPI
+NTSTATUS
+NTAPI
+ZwQuerySystemInformation(
+    ULONG SystemInformationClass,
+    PVOID SystemInformation,
+    ULONG SystemInformationLength,
+    PULONG ReturnLength
+);
 
 #pragma warning(push)
 #pragma warning(disable : 4204)                       /* Prevent C4204 messages from stortrce.h. */
@@ -155,21 +184,46 @@ Done:
 /*                                                                                                */     
 /**************************************************************************************************/     
 void
-ScsiAllocDiskBuf(                                                                                  
-                 __in       pHW_HBA_EXT  pHBAExt,     // Adapter device-object extension from StorPort.
-                 __in __out PUCHAR      *ppDiskBuf,
-                 __in __out PULONG      pMaxBlocks
-                )
+ScsiAllocDiskBuf(
+    __in pHW_HBA_EXT pHBAExt,
+    __out PVOID *ppDiskBuf,
+    __out PULONG pMaxBlocks
+)
 {
-    *ppDiskBuf = ExAllocatePool2(POOL_FLAG_NON_PAGED, pHBAExt->pMPDrvObj->MPRegInfo.PhysicalDiskSize, MP_TAG_GENERAL);
+    SIZE_T requestedBytes = pHBAExt->pMPDrvObj->MPRegInfo.PhysicalDiskSize;
+    SIZE_T totalRamBytes = 0;
+    *ppDiskBuf = NULL;
 
-    if (!*ppDiskBuf) {
-        DoStorageTraceEtw(DbgLvlErr, MpDemoDebugInfo, "DiskBuf memory allocation failed!\n");
+    // Query system basic information to get total physical RAM
+    SYSTEM_BASIC_INFORMATION sbi;
+    NTSTATUS status = ZwQuerySystemInformation(SystemBasicInformation, &sbi, sizeof(sbi), NULL);
+    if (NT_SUCCESS(status)) {
+        totalRamBytes = (SIZE_T)sbi.NumberOfPhysicalPages * sbi.PageSize;
+    }
 
+    // Prevent allocation of 0 bytes, which can cause Driver Verifier BSOD
+    if (requestedBytes == 0) {
+        DoStorageTraceEtw(DbgLvlErr, MpDemoDebugInfo,
+            "Refusing to allocate 0 bytes for DiskBuf. Allocation skipped to prevent Driver Verifier bugcheck.\n");
         goto Done;
     }
 
-    *pMaxBlocks = (ULONG)(pHBAExt->pMPDrvObj->MPRegInfo.PhysicalDiskSize / MP_BLOCK_SIZE);
+    // Only check if we successfully obtained total RAM
+    if (totalRamBytes && requestedBytes > totalRamBytes) {
+        DoStorageTraceEtw(DbgLvlErr, MpDemoDebugInfo,
+            "Requested DiskBuf (%llu bytes) exceeds total physical RAM (%llu bytes). Allocation skipped.\n",
+            requestedBytes, totalRamBytes);
+        goto Done;
+    }
+
+    *ppDiskBuf = ExAllocatePool2(POOL_FLAG_NON_PAGED, requestedBytes, MP_TAG_GENERAL);
+
+    if (!*ppDiskBuf) {
+        DoStorageTraceEtw(DbgLvlErr, MpDemoDebugInfo, "DiskBuf memory allocation failed!\n");
+        goto Done;
+    }
+
+    *pMaxBlocks = (ULONG)(requestedBytes / MP_BLOCK_SIZE);
 
 Done:
     return;
@@ -777,4 +831,3 @@ ScsiOpReportLuns(
 
     return status;
 }                                                     // End ScsiOpReportLuns.
-
