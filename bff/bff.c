@@ -107,11 +107,6 @@ static FORCEINLINE NTSTATUS BffDispatchPnp(PDEVICE_OBJECT DeviceObject, PIRP Irp
 {
     PDEVICE_EXTENSION deviceExtension = DeviceObject->DeviceExtension;
 
-    ASSERT(minor <= IRP_MN_DEVICE_ENUMERATED);
-    /* Both 0x0E and 0x18 are undefined minor functions. */
-    ASSERT(minor != 0x0E);
-    ASSERT(minor != 0x18);
-
     if (minor == IRP_MN_REMOVE_DEVICE)
         BffRemoveDevice(DeviceObject);
     else if (BffInitializationData.PnPMinorFunction[minor])
