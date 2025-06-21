@@ -435,6 +435,7 @@
     </FilesToPackage>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\fat32_format.c" />
     <ClCompile Include="..\mp.c" />
     <ClCompile Include="..\scsi.c" />
     <ClCompile Include="..\utils.c" />
@@ -443,6 +444,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\inc\common.h" />
+    <ClInclude Include="..\inc\fat32_format.h" />
     <ClInclude Include="..\inc\mp.h" />
     <ClInclude Include="..\inc\trace.h" />
   </ItemGroup>

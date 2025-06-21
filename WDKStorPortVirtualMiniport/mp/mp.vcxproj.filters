@@ -19,6 +19,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\fat32_format.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="..\mp.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -37,6 +40,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\inc\common.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\inc\fat32_format.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\inc\mp.h">
