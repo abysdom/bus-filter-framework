@@ -40,6 +40,7 @@
 #define MPScsiFile     "2.025"
 
 #include "mp.h"
+#include "fat32_format.h"
 #include "storport.h"
 #include <ntddk.h>
 #include <ntdef.h>
@@ -224,6 +225,9 @@ ScsiAllocDiskBuf(
     }
 
     *pMaxBlocks = (ULONG)(requestedBytes / MP_BLOCK_SIZE);
+
+    // Format as FAT32 (universal, any size)
+    FormatFat32Volume((UCHAR*)*ppDiskBuf, (ULONG)requestedBytes, "NEW VOLUME ");
 
 Done:
     return;
