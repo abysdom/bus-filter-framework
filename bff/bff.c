@@ -103,22 +103,6 @@ Return Value:
     IoDeleteDevice(DeviceObject);
 }
 
-static FORCEINLINE NTSTATUS BffDispatchPnp(PDEVICE_OBJECT DeviceObject, PIRP Irp, UCHAR minor)
-{
-    PDEVICE_EXTENSION deviceExtension = DeviceObject->DeviceExtension;
-
-    if (minor == IRP_MN_REMOVE_DEVICE)
-        BffRemoveDevice(DeviceObject);
-    else if (BffInitializationData.PnPMinorFunction[minor])
-        return BffInitializationData.PnPMinorFunction[minor](deviceExtension->Child, Irp);
-
-    //
-    // Forward to the parent bus driver
-    //
-    IoSkipCurrentIrpStackLocation(Irp);
-    return IoCallDriver(deviceExtension->TargetDeviceObject, Irp);
-}
-
 static NTSTATUS BffDispatchAny(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp)
 /*++
 
@@ -141,6 +125,7 @@ Return Value:
     PDEVICE_EXTENSION deviceExtension = DeviceObject->DeviceExtension;
     PIO_STACK_LOCATION stack = IoGetCurrentIrpStackLocation(Irp);
     UCHAR major = stack->MajorFunction;
+    UCHAR minor = stack->MinorFunction;
 
     if (!IsEqualGUID(&deviceExtension->Signature, &GUID_BUS_FILTER_FRAMEWORK))
     {
@@ -153,8 +138,14 @@ Return Value:
     //
     // This must be a Bus Filter device object.
     //
-    if (major == IRP_MJ_PNP)
-        return BffDispatchPnp(DeviceObject, Irp, stack->MinorFunction);
+    if (major == IRP_MJ_PNP && minor <= IRP_MN_DEVICE_ENUMERATED)
+    {
+        if (minor == IRP_MN_REMOVE_DEVICE)
+            BffRemoveDevice(DeviceObject);
+        else if (BffInitializationData.PnPMinorFunction[minor])
+            return BffInitializationData.PnPMinorFunction[minor](deviceExtension->Child, Irp);
+        // fall through if the PnP minor function doesn't exist.
+    }
 
     //
     // Forward to the parent bus driver
