@@ -40,6 +40,7 @@
 #define MPScsiFile     "2.025"
 
 #include "mp.h"
+#include "mbr.h"
 #include "storport.h"
 #include <ntddk.h>
 #include <ntdef.h>
@@ -224,6 +225,9 @@ ScsiAllocDiskBuf(
     }
 
     *pMaxBlocks = (ULONG)(requestedBytes / MP_BLOCK_SIZE);
+
+    // Fill the first sector with a valid MBR for Windows to see
+    FillDiskBufWithMBR((UCHAR*)*ppDiskBuf, (ULONG)requestedBytes);
 
 Done:
     return;

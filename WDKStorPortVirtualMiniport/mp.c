@@ -26,6 +26,7 @@
 #define MPDriverVer     "5.022"
 
 #include "mp.h"
+#include "mbr.h"
 
 #pragma warning(push)
 #pragma warning(disable : 4204)                       /* Prevent C4204 messages from stortrce.h. */

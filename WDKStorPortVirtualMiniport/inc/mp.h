@@ -36,6 +36,7 @@ Environment:
 #include <ntddscsi.h>
 #include <scsiwmi.h>
 #include "common.h"
+#include "mbr.h"
 
 #if       !defined(_MP_H_skip_includes)
 
