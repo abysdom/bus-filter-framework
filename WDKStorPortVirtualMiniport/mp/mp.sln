@@ -5,9 +5,9 @@ VisualStudioVersion = 16.0.36107.64
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mp", "mp.vcxproj", "{325A9717-AF6F-41B9-98A7-AECA1923E108}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bff", "..\bff\bff.vcxproj", "{A1E905CB-21AF-4167-87D9-90927A7A67C6}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bff", "..\..\bff\bff.vcxproj", "{A1E905CB-21AF-4167-87D9-90927A7A67C6}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BusFilter", "..\BusFilter\BusFilter.vcxproj", "{E65D39A3-0DA9-4A25-BA70-2A5092C2EC5E}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BusFilter", "..\..\BusFilter\BusFilter.vcxproj", "{E65D39A3-0DA9-4A25-BA70-2A5092C2EC5E}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "install", "..\install\install.vcxproj", "{F1030D64-1140-4EC8-8D65-C7821B7DD8A1}"
 EndProject
