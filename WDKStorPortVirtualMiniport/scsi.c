@@ -720,70 +720,82 @@ ScsiOpWrite(
 /**************************************************************************************************/     
 UCHAR
 ScsiReadWriteSetup(
-                   __in pHW_HBA_EXT          pHBAExt, // Adapter device-object extension from StorPort.
-                   __in pHW_LU_EXTENSION     pLUExt,  // LUN device-object extension from StorPort.        
-                   __in PSCSI_REQUEST_BLOCK  pSrb,
-                   __in MpWkRtnAction        WkRtnAction,
-                   __in PUCHAR               pResult
-                  )
+    __in pHW_HBA_EXT          pHBAExt, // Adapter device-object extension from StorPort.
+    __in pHW_LU_EXTENSION     pLUExt,  // LUN device-object extension from StorPort.        
+    __in PSCSI_REQUEST_BLOCK  pSrb,
+    __in MpWkRtnAction        WkRtnAction,
+    __in PUCHAR               pResult
+)
 {
-    PCDB                         pCdb = (PCDB)pSrb->Cdb;
-    ULONG                        startingSector,
-                                 sectorOffset;
-    USHORT                       numBlocks;
-    pMP_WorkRtnParms             pWkRtnParms;
+    PCDB   pCdb = (PCDB)pSrb->Cdb;
+    ULONG  startingSector, sectorOffset;
+    USHORT numBlocks;
+    pMP_WorkRtnParms pWkRtnParms;
 
     ASSERT(pLUExt != NULL);
 
-    *pResult = ResultDone;                            // Assume no queuing.
-        
+    *pResult = ResultDone;
+
     startingSector = pCdb->CDB10.LogicalBlockByte3       |
-                     pCdb->CDB10.LogicalBlockByte2 << 8  |
-                     pCdb->CDB10.LogicalBlockByte1 << 16 |
-                     pCdb->CDB10.LogicalBlockByte0 << 24;
-    numBlocks      = (USHORT)(pSrb->DataTransferLength/MP_BLOCK_SIZE);
+                     (pCdb->CDB10.LogicalBlockByte2 << 8)  |
+                     (pCdb->CDB10.LogicalBlockByte1 << 16) |
+                     (pCdb->CDB10.LogicalBlockByte0 << 24);
+    numBlocks      = (USHORT)(pSrb->DataTransferLength / MP_BLOCK_SIZE);
     sectorOffset   = startingSector * MP_BLOCK_SIZE;
 
     DoStorageTraceEtw(DbgLvlInfo, MpDemoDebugInfo, "ScsiReadWriteSetup action: %X, starting sector: 0x%X, number of blocks: 0x%X\n", WkRtnAction, startingSector, numBlocks);
     DoStorageTraceEtw(DbgLvlInfo, MpDemoDebugInfo, "ScsiReadWriteSetup pSrb: 0x%p, pSrb->DataBuffer: 0x%p\n", pSrb, pSrb->DataBuffer);
 
-    if ( startingSector >= pLUExt->MaxBlocks ) {      // Starting sector beyond the bounds?
+    if (startingSector >= pLUExt->MaxBlocks) {
         DoStorageTraceEtw(DbgLvlInfo, MpDemoDebugInfo, "*** ScsiReadWriteSetup Starting sector: %d, number of blocks: %d\n", startingSector, numBlocks);
-
-        return SRB_STATUS_INVALID_REQUEST;   
+        return SRB_STATUS_INVALID_REQUEST;
     }
 
-    pWkRtnParms =                                     // Allocate parm area for work routine.
-      (pMP_WorkRtnParms)ExAllocatePool2(POOL_FLAG_NON_PAGED, sizeof(MP_WorkRtnParms), MP_TAG_GENERAL);
-
-    if (NULL==pWkRtnParms) {
-      DoStorageTraceEtw(DbgLvlErr, MpDemoDebugInfo, "ScsiReadWriteSetup Failed to allocate work parm structure\n");
-
-      return SRB_STATUS_ERROR;
+    // Fast path: Only perform direct memory copy if at IRQL <= APC_LEVEL
+    if (KeGetCurrentIrql() <= APC_LEVEL && numBlocks * MP_BLOCK_SIZE <= 64 * 1024) {
+        PUCHAR diskBuf = (PUCHAR)pLUExt->pDiskBuf;
+        if (WkRtnAction == ActionRead) {
+            RtlCopyMemory(
+                pSrb->DataBuffer,
+                diskBuf + sectorOffset,
+                numBlocks * MP_BLOCK_SIZE
+            );
+        } else {
+            RtlCopyMemory(
+                diskBuf + sectorOffset,
+                pSrb->DataBuffer,
+                numBlocks * MP_BLOCK_SIZE
+            );
+        }
+        *pResult = ResultDone;
+        return SRB_STATUS_SUCCESS;
     }
 
-    RtlZeroMemory(pWkRtnParms, sizeof(MP_WorkRtnParms)); 
+    // Fallback: queue work item for larger or high-IRQL I/O
+    pWkRtnParms = (pMP_WorkRtnParms)ExAllocatePool2(POOL_FLAG_NON_PAGED, sizeof(MP_WorkRtnParms), MP_TAG_GENERAL);
 
-    pWkRtnParms->pHBAExt     = pHBAExt;
-    pWkRtnParms->pLUExt      = pLUExt;
-    pWkRtnParms->pSrb        = pSrb;
-    pWkRtnParms->Action      = ActionRead==WkRtnAction ? ActionRead : ActionWrite;
+    if (NULL == pWkRtnParms) {
+        DoStorageTraceEtw(DbgLvlErr, MpDemoDebugInfo, "ScsiReadWriteSetup Failed to allocate work parm structure\n");
+        return SRB_STATUS_ERROR;
+    }
+
+    RtlZeroMemory(pWkRtnParms, sizeof(MP_WorkRtnParms));
+
+    pWkRtnParms->pHBAExt = pHBAExt;
+    pWkRtnParms->pLUExt = pLUExt;
+    pWkRtnParms->pSrb = pSrb;
+    pWkRtnParms->Action = (WkRtnAction == ActionRead) ? ActionRead : ActionWrite;
 
     pWkRtnParms->pQueueWorkItem = IoAllocateWorkItem((PDEVICE_OBJECT)pHBAExt->pDrvObj);
 
-    if (NULL==pWkRtnParms->pQueueWorkItem) {
-      DoStorageTraceEtw(DbgLvlErr, MpDemoDebugInfo, "ScsiReadWriteSetup: Failed to allocate work item\n");
-
-      ExFreePoolWithTag(pWkRtnParms, MP_TAG_GENERAL);
-
-      return SRB_STATUS_ERROR;
+    if (NULL == pWkRtnParms->pQueueWorkItem) {
+        DoStorageTraceEtw(DbgLvlErr, MpDemoDebugInfo, "ScsiReadWriteSetup: Failed to allocate work item\n");
+        ExFreePoolWithTag(pWkRtnParms, MP_TAG_GENERAL);
+        return SRB_STATUS_ERROR;
     }
 
-    // Queue work item, which will run in the System process.
-
     IoQueueWorkItem(pWkRtnParms->pQueueWorkItem, MpGeneralWkRtn, DelayedWorkQueue, pWkRtnParms);
-
-    *pResult = ResultQueued;                          // Indicate queuing.
+    *pResult = ResultQueued;
 
     return SRB_STATUS_SUCCESS;
 }                                                     // End ScsiReadWriteSetup.
