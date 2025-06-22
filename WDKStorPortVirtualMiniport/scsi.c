@@ -350,16 +350,19 @@ Done:
 /**************************************************************************************************/     
 /*                                                                                                */     
 /**************************************************************************************************/     
+/**************************************************************************************************/     
+/*                                                                                                */     
+/* Robust SCSI INQUIRY data handling for correct device identity.                                 */     
+/**************************************************************************************************/     
 UCHAR
 ScsiOpInquiry(
-              __in pHW_HBA_EXT          pHBAExt,      // Adapter device-object extension from StorPort.
-              __in pHW_LU_EXTENSION     pLUExt,       // LUN device-object extension from StorPort.
-              __in PSCSI_REQUEST_BLOCK  pSrb
-             )
+    __in pHW_HBA_EXT          pHBAExt,      // Adapter device-object extension from StorPort.
+    __in pHW_LU_EXTENSION     pLUExt,       // LUN device-object extension from StorPort.
+    __in PSCSI_REQUEST_BLOCK  pSrb
+)
 {
-    PINQUIRYDATA          pInqData = pSrb->DataBuffer;// Point to Inquiry buffer.
-    UCHAR                 deviceType,
-                          status = SRB_STATUS_SUCCESS;
+    PINQUIRYDATA          pInqData = pSrb->DataBuffer; // Point to Inquiry buffer.
+    UCHAR                 deviceType, status = SRB_STATUS_SUCCESS;
     PCDB                  pCdb;
     pHW_LU_EXTENSION_MPIO pLUMPIOExt;
 #if defined(_AMD64_)
@@ -368,6 +371,13 @@ ScsiOpInquiry(
     KIRQL                 SaveIrql;
 #endif
 
+    // Robust fallback defaults (add 1 to size for NUL, but only copy field size)
+    static const UCHAR DefaultVendorId[9]   = "PSS_LAB ";
+    static const UCHAR DefaultProductId[17] = "PHANTOM DISK    ";
+    static const UCHAR DefaultProductRev[5] = "1.00";
+
+    UCHAR vendorId[8], productId[16], productRev[4];
+
     DoStorageTraceEtw(DbgLvlInfo, MpDemoDebugInfo, "Path: %d TID: %d Lun: %d\n",
                       pSrb->PathId, pSrb->TargetId, pSrb->Lun);
 
@@ -375,21 +385,19 @@ ScsiOpInquiry(
 
     deviceType = MpGetDeviceType(pHBAExt, pSrb->PathId, pSrb->TargetId, pSrb->Lun);
 
-    if (DEVICE_NOT_FOUND==deviceType) {
-       pSrb->DataTransferLength = 0;
-       status = SRB_STATUS_INVALID_LUN;
-
-       goto done;
+    if (DEVICE_NOT_FOUND == deviceType) {
+        pSrb->DataTransferLength = 0;
+        status = SRB_STATUS_INVALID_LUN;
+        goto done;
     }
 
     pCdb = (PCDB)pSrb->Cdb;
 
-    if (1==pCdb->CDB6INQUIRY3.EnableVitalProductData) {
+    if (1 == pCdb->CDB6INQUIRY3.EnableVitalProductData) {
         DoStorageTraceEtw(DbgLvlLoud, MpDemoDebugInfo, "Received VPD request for page 0x%x\n",
                           pCdb->CDB6INQUIRY.PageCode);
 
         status = ScsiOpVPD(pHBAExt, pLUExt, pSrb);
-
         goto done;
     }
 
@@ -397,53 +405,69 @@ ScsiOpInquiry(
     pInqData->RemovableMedia = FALSE;
     pInqData->CommandQueue = TRUE;
 
-    RtlMoveMemory(pInqData->VendorId, pHBAExt->VendorId, 8);
-    RtlMoveMemory(pInqData->ProductId, pHBAExt->ProductId, 16);
-    RtlMoveMemory(pInqData->ProductRevisionLevel, pHBAExt->ProductRevision, 4);
+    // --- Robust SCSI INQUIRY ID population ---
+    // Always fill with defaults first
+    RtlCopyMemory(vendorId, DefaultVendorId, 8);
+    RtlCopyMemory(productId, DefaultProductId, 16);
+    RtlCopyMemory(productRev, DefaultProductRev, 4);
 
-    if (deviceType!=DISK_DEVICE) {                    // Shouldn't happen.
+    // If the driver extension has valid VendorId/ProductId/ProductRevision, use those (space padded)
+    __try {
+        if (pHBAExt && pHBAExt->VendorId && pHBAExt->VendorId[0]) {
+            SIZE_T len = strnlen((const char*)pHBAExt->VendorId, 8);
+            RtlCopyMemory(vendorId, pHBAExt->VendorId, len);
+            if (len < 8) RtlFillMemory(vendorId + len, 8 - len, ' ');
+        }
+        if (pHBAExt && pHBAExt->ProductId && pHBAExt->ProductId[0]) {
+            SIZE_T len = strnlen((const char*)pHBAExt->ProductId, 16);
+            RtlCopyMemory(productId, pHBAExt->ProductId, len);
+            if (len < 16) RtlFillMemory(productId + len, 16 - len, ' ');
+        }
+        if (pHBAExt && pHBAExt->ProductRevision && pHBAExt->ProductRevision[0]) {
+            SIZE_T len = strnlen((const char*)pHBAExt->ProductRevision, 4);
+            RtlCopyMemory(productRev, pHBAExt->ProductRevision, len);
+            if (len < 4) RtlFillMemory(productRev + len, 4 - len, ' ');
+        }
+    } __except (EXCEPTION_EXECUTE_HANDLER) {
+        // Defensive: ignore exceptions, keep defaults
+    }
+
+    // Write to inquiry data (always exactly field size, no NUL)
+    RtlCopyMemory(pInqData->VendorId, vendorId, 8);
+    RtlCopyMemory(pInqData->ProductId, productId, 16);
+    RtlCopyMemory(pInqData->ProductRevisionLevel, productRev, 4);
+
+    // --- End robust population ---
+
+    if (deviceType != DISK_DEVICE) {
         goto done;
     }
 
     // Check if the device has already been seen.
-
     if (GET_FLAG(pLUExt->LUFlags, LU_DEVICE_INITIALIZED)) {
-        // This is an existing device.
-             
         goto done;
     }
 
-    //
     // A new LUN.
-    //
-
     pLUExt->DeviceType = deviceType;
     pLUExt->TargetId   = pSrb->TargetId;
     pLUExt->Lun        = pSrb->Lun;
 
     if (pHBAExt->pMPDrvObj->MPRegInfo.bCombineVirtDisks) { // MPIO support?
-        // Find the matching MPIO LUN descriptor or get a new one.
-
         pLUMPIOExt = ScsiGetMPIOExt(pHBAExt, pLUExt, pSrb);
-
-        if (!pLUMPIOExt) {                            // A problem?
+        if (!pLUMPIOExt) {
             pSrb->DataTransferLength = 0;
             status = SRB_STATUS_ERROR;
-
             goto done;
         }
-
         SET_FLAG(pLUExt->LUFlags, LU_MPIO_MAPPED);
-    }
-    else {                                            // No MPIO support.
+    } else {
         ScsiAllocDiskBuf(pHBAExt, &pLUExt->pDiskBuf, &pLUExt->MaxBlocks);
 
         if (!pLUExt->pDiskBuf) {
             DoStorageTraceEtw(DbgLvlErr, MpDemoDebugInfo, "Disk memory allocation failed!\n");
-
             pSrb->DataTransferLength = 0;
             status = SRB_STATUS_ERROR;
-
             goto done;
         }
     }
@@ -451,8 +475,7 @@ ScsiOpInquiry(
     SET_FLAG(pLUExt->LUFlags, LU_DEVICE_INITIALIZED);
 
 #if defined(_AMD64_)
-    KeAcquireInStackQueuedSpinLock(                   // Serialize the linked list of LUN extensions.              
-                                   &pHBAExt->LUListLock, &LockHandle);
+    KeAcquireInStackQueuedSpinLock(&pHBAExt->LUListLock, &LockHandle);
 #else
     KeAcquireSpinLock(&pHBAExt->LUListLock, &SaveIrql);
 #endif
@@ -460,7 +483,7 @@ ScsiOpInquiry(
     InsertTailList(&pHBAExt->LUList, &pLUExt->List);  // Add LUN extension to list in HBA extension.
 
 #if defined(_AMD64_)
-    KeReleaseInStackQueuedSpinLock(&LockHandle);      
+    KeReleaseInStackQueuedSpinLock(&LockHandle);
 #else
     KeReleaseSpinLock(&pHBAExt->LUListLock, SaveIrql);
 #endif
