@@ -42,19 +42,29 @@ BOOLEAN FormatFat32Volume(UCHAR* pDiskBuf, ULONG disk_size_bytes, const char* vo
     // Zero the buffer for MBR, partition gap, and reserved area
     RtlZeroMemory(pDiskBuf, (PARTITION_START_SECTOR + reserved_sectors) * SECTOR_SIZE);
 
-    // MBR (sector 0)
-    pDiskBuf[0x1BE] = 0x00; // Bootable flag
+    // --- MBR (sector 0) ---
+    // Mark partition as active (bootable): 0x80
+    pDiskBuf[0x1BE] = 0x80; // Bootable flag (active)
+    // CHS fields are not relevant for modern LBA, fill with typical values
+    pDiskBuf[0x1BE + 1] = 0x01; // head
+    pDiskBuf[0x1BE + 2] = 0x01; // sector
+    pDiskBuf[0x1BE + 3] = 0x00; // cylinder
     pDiskBuf[0x1BE + 4] = 0x0C; // Partition type: FAT32 LBA
+    pDiskBuf[0x1BE + 5] = 0xFE; // end head
+    pDiskBuf[0x1BE + 6] = 0xFF; // end sector
+    pDiskBuf[0x1BE + 7] = 0xFF; // end cylinder
     *(ULONG*)(pDiskBuf + 0x1BE + 8) = PARTITION_START_SECTOR; // LBA start
     *(ULONG*)(pDiskBuf + 0x1BE + 12) = partition_sectors;
     pDiskBuf[510] = 0x55; pDiskBuf[511] = 0xAA;
 
-    // FAT32 Boot Sector (at LBA PARTITION_START_SECTOR)
+    // --- FAT32 Boot Sector (at LBA PARTITION_START_SECTOR) ---
     UCHAR* bs = pDiskBuf + PARTITION_START_SECTOR * SECTOR_SIZE;
     RtlZeroMemory(bs, SECTOR_SIZE);
     bs[0] = 0xEB; bs[1] = 0x58; bs[2] = 0x90; // JMP short
     RtlCopyMemory(bs + 3, "MSWIN4.1", 8); // OEM Name
-    *(USHORT*)(bs + 11) = (USHORT)SECTOR_SIZE; // Bytes per sector
+
+    // Fix 1: Always specify 512 as bytes/sector in BPB
+    *(USHORT*)(bs + 11) = (USHORT)SECTOR_SIZE; // Bytes per sector (512)
     bs[13] = (UCHAR)sectors_per_cluster;
     *(USHORT*)(bs + 14) = (USHORT)reserved_sectors;
     bs[16] = (UCHAR)num_fats;
@@ -81,7 +91,7 @@ BOOLEAN FormatFat32Volume(UCHAR* pDiskBuf, ULONG disk_size_bytes, const char* vo
     RtlCopyMemory(bs + 82, "FAT32   ", 8); // File system type
     bs[510] = 0x55; bs[511] = 0xAA;
 
-    // FSInfo sector (at PARTITION_START_SECTOR + 2)
+    // --- FSInfo sector (at PARTITION_START_SECTOR + 2) ---
     UCHAR* fsinfo = pDiskBuf + (PARTITION_START_SECTOR + 2) * SECTOR_SIZE;
     RtlZeroMemory(fsinfo, SECTOR_SIZE);
     *(ULONG*)(fsinfo) = 0x41615252;       // Lead signature
@@ -90,15 +100,15 @@ BOOLEAN FormatFat32Volume(UCHAR* pDiskBuf, ULONG disk_size_bytes, const char* vo
     *(ULONG*)(fsinfo + 492) = 0x00000002; // Next free cluster
     *(USHORT*)(fsinfo + 510) = 0xAA55;
 
-    // Backup boot sector (at PARTITION_START_SECTOR + 6)
+    // --- Backup boot sector (at PARTITION_START_SECTOR + 6) ---
     UCHAR* backup_bs = pDiskBuf + (PARTITION_START_SECTOR + 6) * SECTOR_SIZE;
     RtlCopyMemory(backup_bs, bs, SECTOR_SIZE);
 
-    // Backup FSInfo sector (at PARTITION_START_SECTOR + 7)
+    // --- Backup FSInfo sector (at PARTITION_START_SECTOR + 7) ---
     UCHAR* backup_fsinfo = pDiskBuf + (PARTITION_START_SECTOR + 7) * SECTOR_SIZE;
     RtlCopyMemory(backup_fsinfo, fsinfo, SECTOR_SIZE);
 
-    // FAT tables (zeroed and initialized clusters 0, 1, and 2 as reserved/EOC)
+    // --- FAT tables (zeroed and initialized clusters 0, 1, and 2 as reserved/EOC) ---
     for (ULONG fat = 0; fat < num_fats; ++fat) {
         UCHAR* fat_area = pDiskBuf + (PARTITION_START_SECTOR + reserved_sectors + fat * fat_size) * SECTOR_SIZE;
         RtlZeroMemory(fat_area, fat_size * SECTOR_SIZE);
@@ -111,7 +121,7 @@ BOOLEAN FormatFat32Volume(UCHAR* pDiskBuf, ULONG disk_size_bytes, const char* vo
         fat_area[8] = 0xFF; fat_area[9] = 0xFF; fat_area[10] = 0xFF; fat_area[11] = 0x0F;
     }
 
-    // Compute first data sector for root directory
+    // --- Compute first data sector for root directory ---
     ULONG first_data_sector = PARTITION_START_SECTOR + reserved_sectors + (num_fats * fat_size);
     UCHAR* root_dir = pDiskBuf + first_data_sector * SECTOR_SIZE;
     RtlZeroMemory(root_dir, sectors_per_cluster * SECTOR_SIZE);
