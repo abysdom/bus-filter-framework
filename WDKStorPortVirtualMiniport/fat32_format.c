@@ -2,7 +2,8 @@
 #include <windef.h>
 
 #define SECTOR_SIZE 512
-#define PARTITION_START_SECTOR 63  // Start partition at sector 63 for best Windows compatibility
+#define PARTITION_ALIGNMENT_SECTORS 2048 // 1MB alignment for best performance
+#define PARTITION_START_SECTOR PARTITION_ALIGNMENT_SECTORS  // Start partition at 1MB boundary
 
 static void SetVolumeLabel(UCHAR* buf, const char* label) {
     for (int i = 0; i < 11; ++i)
