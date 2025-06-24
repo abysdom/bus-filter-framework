@@ -51,6 +51,16 @@ Environment:
 #pragma alloc_text(PAGE, BusFilterEvtDriverContextCleanup)
 #endif
 
+#ifndef NTDDI_WIN10_VB
+#define NTDDI_WIN10_VB 0x0A000008   // Windows 10, version 2004
+#endif
+
+#if NTDDI_VERSION >= NTDDI_WIN10_VB
+#define ALLOCATE_PAGED_POOL_WITH_TAG(size, tag) ExAllocatePool2(POOL_FLAG_PAGED, size, tag)
+#else
+#define ALLOCATE_PAGED_POOL_WITH_TAG(size, tag) ExAllocatePoolWithTag(PagedPool, size, tag)
+#endif
+
 NTSTATUS
 BusFilterDeviceEnumerated(WDFOBJECT BffDevice, PIRP Irp)
 {
@@ -148,7 +158,7 @@ static NTSTATUS BusFilterQueryID(WDFOBJECT BffDevice, PIRP Irp)
         Irp->IoStatus.Status = STATUS_NO_SUCH_DEVICE;
     else if (NT_SUCCESS(Irp->IoStatus.Status) && Irp->IoStatus.Information)
     {
-        WCHAR *newCompatibleIDs = ExAllocatePoolWithTag(PagedPool, 200 * sizeof(WCHAR), 'tFFB');
+        WCHAR *newCompatibleIDs = ALLOCATE_PAGED_POOL_WITH_TAG(200 * sizeof(WCHAR), 'tFFB');
         if (newCompatibleIDs)
         {
             WCHAR *newIDs = newCompatibleIDs;

@@ -18,7 +18,17 @@ Revision History:
 #ifndef _COMMON_H_
 #define _COMMON_H_
 
-#define DISK_DEVICE         0x00
+#ifndef NTDDI_WIN10_VB
+#define NTDDI_WIN10_VB 0x0A000008 // Windows 10, version 2004
+#endif
+
+#if NTDDI_VERSION >= NTDDI_WIN10_VB
+#define ALLOCATE_NON_PAGED_POOL(size) ExAllocatePool2(POOL_FLAG_NON_PAGED, size, MP_TAG_GENERAL)
+#else
+#define ALLOCATE_NON_PAGED_POOL(size) ExAllocatePoolWithTag(NonPagedPool, size, MP_TAG_GENERAL)
+#endif
+
+#define DISK_DEVICE 0x00
 
 typedef struct _MP_DEVICE_INFO {
     UCHAR    DeviceType;
