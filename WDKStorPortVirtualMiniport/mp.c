@@ -91,7 +91,11 @@ DriverEntry(
     // that DriverEntry will be invoked often in the life of a Windows boot.
     //
 
+<<<<<<< Updated upstream
     pMPDrvInfo = ALLOCATE_NON_PAGED_POOL(sizeof(MPDriverInfo));
+=======
+    pMPDrvInfo = ExAllocatePoolWithTag(NonPagedPool, sizeof(MPDriverInfo), MP_TAG_GENERAL);
+>>>>>>> Stashed changes
 
     if (!pMPDrvInfo) {                                // No good?
         status = STATUS_INSUFFICIENT_RESOURCES;
@@ -360,7 +364,11 @@ MpHwReportAdapter(__in pHW_HBA_EXT pHBAExt)
            WnodeSizeInstanceName + 
            WnodeSizeDataBlock;
 
+<<<<<<< Updated upstream
     pWnode = ALLOCATE_NON_PAGED_POOL(size);
+=======
+    pWnode = ExAllocatePoolWithTag(NonPagedPool, size, MP_TAG_GENERAL);
+>>>>>>> Stashed changes
 
     if (NULL!=pWnode) {                               // Good?
         RtlZeroMemory(pWnode, size);
@@ -452,7 +460,11 @@ MpHwReportLink(__in pHW_HBA_EXT pHBAExt)
            WnodeSizeInstanceName + 
            WnodeSizeDataBlock;
 
+<<<<<<< Updated upstream
     pWnode = ALLOCATE_NON_PAGED_POOL(size);
+=======
+    pWnode = ExAllocatePoolWithTag(NonPagedPool, size, MP_TAG_GENERAL);
+>>>>>>> Stashed changes
 
     if (NULL!=pWnode) {                               // Good?
         RtlZeroMemory(pWnode, size);
@@ -538,7 +550,11 @@ MpHwReportLog(__in pHW_HBA_EXT pHBAExt)
            WnodeSizeInstanceName + 
            WnodeSizeDataBlock;
 
+<<<<<<< Updated upstream
     pWnode = ALLOCATE_NON_PAGED_POOL(size);
+=======
+    pWnode = ExAllocatePoolWithTag(NonPagedPool, size, MP_TAG_GENERAL);
+>>>>>>> Stashed changes
 
     if (NULL!=pWnode) {                               // Good?
         RtlZeroMemory(pWnode, size);
@@ -992,7 +1008,11 @@ MpCreateDeviceList(
         ExFreePoolWithTag(pHBAExt->pDeviceList, MP_TAG_GENERAL);
     }
 
+<<<<<<< Updated upstream
     pHBAExt->pDeviceList = ALLOCATE_NON_PAGED_POOL(len);
+=======
+    pHBAExt->pDeviceList = ExAllocatePoolWithTag(NonPagedPool, len, MP_TAG_GENERAL);
+>>>>>>> Stashed changes
 
     if (!pHBAExt->pDeviceList) {
         status = STATUS_INSUFFICIENT_RESOURCES;

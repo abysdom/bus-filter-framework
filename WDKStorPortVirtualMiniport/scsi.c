@@ -42,6 +42,7 @@
 #include "mp.h"
 #include "fat32_format.h"
 #include "storport.h"
+#include "disk_backend.h"
 #include <ntddk.h>
 #include <ntdef.h>
 #include <windef.h>
@@ -79,23 +80,6 @@ ZwQuerySystemInformation(
 
 #include "trace.h"
 #include "scsi.tmh"
-
-// ================== RAM CACHING SUPPORT FUNCTION ==================
-NTSTATUS CacheTotalPhysicalMemory(VOID)
-{
-    SYSTEM_BASIC_INFORMATION sbi = {0};
-    ULONG retLen = 0;
-    NTSTATUS status = ZwQuerySystemInformation(SystemBasicInformation, &sbi, sizeof(sbi), &retLen);
-    if (NT_SUCCESS(status)) {
-        g_TotalPhysicalMemoryBytes = (ULONGLONG)sbi.NumberOfPhysicalPages * sbi.PageSize;
-        DbgPrint("Cached total physical RAM: %llu bytes\n", g_TotalPhysicalMemoryBytes);
-    } else {
-        g_TotalPhysicalMemoryBytes = 0;
-        DbgPrint("Failed to cache physical RAM, status 0x%08X\n", status);
-    }
-    return status;
-}
-// =========================================================
 
 /**************************************************************************************************/     
 /*                                                                                                */     
@@ -196,6 +180,92 @@ Done:
     return status;
 }                                                     // End ScsiExecuteMain.
 
+/**************************************************************************************************
+* Helper: flush the file backend after each write for persistence.
+**************************************************************************************************/
+static VOID FlushDiskBackend(DISK_BACKEND* backend) {
+    if (backend && backend->ops && backend->ops->Flush) {
+        backend->ops->Flush(backend->context);
+    }
+}
+
+/**************************************************************************************************
+* Helper: Prepare a RAM disk with persistent file backing.
+* If a file exists, load it into RAM. If not, format RAM (FAT32) and create the file.
+**************************************************************************************************/
+static BOOLEAN
+ScsiAllocRamWithFileBacking(
+    __in pHW_HBA_EXT pHBAExt,
+    __out PVOID *ppDiskBuf,
+    __out PULONG pMaxBlocks,
+    __out DISK_BACKEND **ppBackend
+)
+{
+    if (KeGetCurrentIrql() > PASSIVE_LEVEL) {
+        *ppDiskBuf = NULL;
+        *pMaxBlocks = 0;
+        if (ppBackend) *ppBackend = NULL;
+        return FALSE;
+    }
+
+    SIZE_T requestedBytes = pHBAExt->pMPDrvObj->MPRegInfo.PhysicalDiskSize;
+    *ppDiskBuf = NULL;
+    *pMaxBlocks = 0;
+    if (ppBackend) *ppBackend = NULL;
+
+    if (requestedBytes == 0) {
+        DoStorageTraceEtw(DbgLvlErr, MpDemoDebugInfo, "Requested DiskBuf size is 0! RAM disk will not be created.\n");
+        return FALSE;
+    }
+    if (requestedBytes > ((SIZE_T)8 * 1024 * 1024 * 1024ULL)) {
+        DoStorageTraceEtw(DbgLvlErr, MpDemoDebugInfo, "Requested DiskBuf size too large: %llu\n", requestedBytes);
+        return FALSE;
+    }
+
+    PVOID ramBuf = ExAllocatePoolWithTag(NonPagedPoolNx, requestedBytes, MP_TAG_GENERAL);
+    if (!ramBuf) {
+        DoStorageTraceEtw(DbgLvlErr, MpDemoDebugInfo, "Failed to allocate RAM buffer for DiskBuf\n");
+        return FALSE;
+    }
+
+    *ppDiskBuf = ramBuf;
+    *pMaxBlocks = (ULONG)(requestedBytes / MP_BLOCK_SIZE);
+
+    // Always format as FAT32, even for RAM-only mode
+    FormatFat32Volume((UCHAR*)ramBuf, (ULONG)requestedBytes, "NEW VOLUME ");
+
+    // Try file backend if DiskImagePath is set, else just RAM disk
+    UNICODE_STRING* diskImagePath = &pHBAExt->pMPDrvObj->MPRegInfo.DiskImagePath;
+    if (diskImagePath && diskImagePath->Length > 0 && diskImagePath->Buffer && diskImagePath->Buffer[0]) {
+        DISK_BACKEND* backend = ExAllocatePoolWithTag(NonPagedPoolNx, sizeof(DISK_BACKEND), MP_TAG_GENERAL);
+        if (backend) {
+            NTSTATUS status = FileDiskBackend_Create(
+                backend,
+                diskImagePath->Buffer,
+                requestedBytes,
+                TRUE // create if not exist
+            );
+            if (NT_SUCCESS(status)) {
+                NTSTATUS readStatus = backend->ops->Read(backend->context, 0, ramBuf, requestedBytes);
+                if (!NT_SUCCESS(readStatus)) {
+                    // File is empty/new, so persist the formatted FAT32 RAM disk
+                    backend->ops->Write(backend->context, 0, ramBuf, requestedBytes);
+                    if (backend->ops->Flush)
+                        backend->ops->Flush(backend->context);
+                }
+                if (ppBackend) *ppBackend = backend;
+                return TRUE;
+            } else {
+                ExFreePoolWithTag(backend, MP_TAG_GENERAL);
+            }
+        }
+    }
+
+    // RAM-only path: no file backend, just RAM disk
+    if (ppBackend) *ppBackend = NULL;
+    return TRUE;
+}
+
 /**************************************************************************************************/     
 /*                                                                                                */     
 /* Allocate a buffer to represent the in-memory disk.                                             */     
@@ -205,65 +275,52 @@ void
 ScsiAllocDiskBuf(
     __in pHW_HBA_EXT pHBAExt,
     __out PVOID *ppDiskBuf,
-    __out PULONG pMaxBlocks
+    __out PULONG pMaxBlocks,
+    __out_opt DISK_BACKEND **ppBackend // new parameter, optional for backward compatibility
 )
 {
-    extern ULONGLONG g_TotalPhysicalMemoryBytes; // Declared in mp.h/mp.c
-    ULONGLONG requestedBytes64 = pHBAExt->pMPDrvObj->MPRegInfo.PhysicalDiskSize;
-    SIZE_T requestedBytes = 0;
-    *ppDiskBuf = NULL;
-
-    // Debug log: requested disk size (64-bit)
-    DbgPrint("ScsiAllocDiskBuf: Requested PhysicalDiskSize = %llu bytes\n", requestedBytes64);
-
-#if !defined(_WIN64)
-    // On 32-bit builds, clamp to 4GB max
-    if (requestedBytes64 > (ULONGLONG)MAXUINT_PTR) {
-        DbgPrint("ScsiAllocDiskBuf: WARNING - Requested disk size %llu exceeds 32-bit allocation limit (%u bytes). Will be truncated.\n",
-            requestedBytes64, MAXUINT_PTR);
-        requestedBytes64 = (ULONGLONG)MAXUINT_PTR;
+    // Always create a RAM disk and persist to file if path given
+    DISK_BACKEND* backend = NULL;
+    BOOLEAN ok = ScsiAllocRamWithFileBacking(pHBAExt, ppDiskBuf, pMaxBlocks, &backend);
+    if (ppBackend) *ppBackend = backend;
+    else if (backend) ExFreePoolWithTag(backend, MP_TAG_GENERAL); // avoid leak if not wanted
+    if (!ok) {
+        *ppDiskBuf = NULL;
+        *pMaxBlocks = 0;
     }
-#endif
-
-    requestedBytes = (SIZE_T)requestedBytes64;
+<<<<<<< Updated upstream
 
     // Prevent allocation of 0 bytes, which can cause Driver Verifier BSOD
     if (requestedBytes == 0) {
-        DbgPrint("ScsiAllocDiskBuf: ERROR - Refusing to allocate 0 bytes for DiskBuf.\n");
         DoStorageTraceEtw(DbgLvlErr, MpDemoDebugInfo,
             "Refusing to allocate 0 bytes for DiskBuf. Allocation skipped to prevent Driver Verifier bugcheck.\n");
         goto Done;
     }
 
-    // Only check if we successfully obtained total RAM (cached at DriverEntry)
-    if (g_TotalPhysicalMemoryBytes && requestedBytes > g_TotalPhysicalMemoryBytes) {
-        DbgPrint("ScsiAllocDiskBuf: ERROR - Requested DiskBuf (%llu bytes) exceeds total physical RAM (%llu bytes). Allocation skipped.\n",
-            (ULONGLONG)requestedBytes, g_TotalPhysicalMemoryBytes);
+    // Only check if we successfully obtained total RAM
+    if (totalRamBytes && requestedBytes > totalRamBytes) {
         DoStorageTraceEtw(DbgLvlErr, MpDemoDebugInfo,
             "Requested DiskBuf (%llu bytes) exceeds total physical RAM (%llu bytes). Allocation skipped.\n",
-            (ULONGLONG)requestedBytes, g_TotalPhysicalMemoryBytes);
+            requestedBytes, totalRamBytes);
         goto Done;
     }
 
     *ppDiskBuf = ALLOCATE_NON_PAGED_POOL(requestedBytes);
 
     if (!*ppDiskBuf) {
-        DbgPrint("ScsiAllocDiskBuf: ERROR - DiskBuf memory allocation failed!\n");
         DoStorageTraceEtw(DbgLvlErr, MpDemoDebugInfo, "DiskBuf memory allocation failed!\n");
         goto Done;
     }
 
     *pMaxBlocks = (ULONG)(requestedBytes / MP_BLOCK_SIZE);
 
-    // Debug log: success
-    DbgPrint("ScsiAllocDiskBuf: Successfully allocated DiskBuf at %p, size = %llu bytes, MaxBlocks = %lu\n",
-        *ppDiskBuf, (ULONGLONG)requestedBytes, *pMaxBlocks);
-
     // Format as FAT32 (universal, any size)
     FormatFat32Volume((UCHAR*)*ppDiskBuf, (ULONG)requestedBytes, "NEW VOLUME ");
 
 Done:
     return;
+=======
+>>>>>>> Stashed changes
 }                                                     // End ScsiAllocDiskBuf.
 
 /**************************************************************************************************/     
@@ -312,7 +369,11 @@ ScsiGetMPIOExt(
     }
 
     if (pNextEntry==&pHBAExt->pMPDrvObj->ListMPIOExt) { // No match? That is, is this to be a new MPIO LUN extension?
+<<<<<<< Updated upstream
         pLUMPIOExt = ALLOCATE_NON_PAGED_POOL(sizeof(HW_LU_EXTENSION_MPIO));
+=======
+        pLUMPIOExt = ExAllocatePoolWithTag(NonPagedPoolNx, sizeof(HW_LU_EXTENSION_MPIO), MP_TAG_GENERAL);
+>>>>>>> Stashed changes
 
         if (!pLUMPIOExt) {
             DoStorageTraceEtw(DbgLvlErr, MpDemoDebugInfo, "Failed to allocate HW_LU_EXTENSION_MPIO\n");
@@ -330,7 +391,7 @@ ScsiGetMPIOExt(
 
         InitializeListHead(&pLUMPIOExt->LUExtList);
 
-        ScsiAllocDiskBuf(pHBAExt, &pLUMPIOExt->pDiskBuf, &pLUExt->MaxBlocks);
+        ScsiAllocDiskBuf(pHBAExt, &pLUExt->pDiskBuf, &pLUExt->MaxBlocks, &pLUExt->pDiskBackend);
 
         if (!pLUMPIOExt->pDiskBuf) {         
             DoStorageTraceEtw(DbgLvlErr, MpDemoDebugInfo, "Failed to allocate DiskBuf\n");
@@ -389,42 +450,33 @@ Done:
 /**************************************************************************************************/     
 UCHAR
 ScsiOpInquiry(
-    __in pHW_HBA_EXT          pHBAExt,      // Adapter device-object extension from StorPort.
-    __in pHW_LU_EXTENSION     pLUExt,       // LUN device-object extension from StorPort.
+    __in pHW_HBA_EXT          pHBAExt,
+    __in pHW_LU_EXTENSION     pLUExt,
     __in PSCSI_REQUEST_BLOCK  pSrb
 )
 {
-    PINQUIRYDATA          pInqData = pSrb->DataBuffer; // Point to Inquiry buffer.
+    PINQUIRYDATA          pInqData = pSrb->DataBuffer;
     UCHAR                 deviceType, status = SRB_STATUS_SUCCESS;
     PCDB                  pCdb;
-    pHW_LU_EXTENSION_MPIO pLUMPIOExt;
 #if defined(_AMD64_)
     KLOCK_QUEUE_HANDLE    LockHandle;
 #else
     KIRQL                 SaveIrql;
 #endif
 
-    // Robust fallback defaults (add 1 to size for NUL, but only copy field size)
     static const UCHAR DefaultVendorId[9]   = "PSS_LAB ";
     static const UCHAR DefaultProductId[17] = "PHANTOM DISK    ";
     static const UCHAR DefaultProductRev[5] = "1.00";
-
     UCHAR vendorId[8], productId[16], productRev[4];
 
     DoStorageTraceEtw(DbgLvlInfo, MpDemoDebugInfo, "Path: %d TID: %d Lun: %d\n",
                       pSrb->PathId, pSrb->TargetId, pSrb->Lun);
-
-    // Debug: Report entry to Inquiry
-    DbgPrint("ScsiOpInquiry: Path = %d, TID = %d, Lun = %d\n",
-        pSrb->PathId, pSrb->TargetId, pSrb->Lun);
 
     RtlZeroMemory((PUCHAR)pSrb->DataBuffer, pSrb->DataTransferLength);
 
     deviceType = MpGetDeviceType(pHBAExt, pSrb->PathId, pSrb->TargetId, pSrb->Lun);
 
     if (DEVICE_NOT_FOUND == deviceType) {
-        DbgPrint("ScsiOpInquiry: DEVICE_NOT_FOUND for Path = %d, TID = %d, Lun = %d\n",
-            pSrb->PathId, pSrb->TargetId, pSrb->Lun);
         pSrb->DataTransferLength = 0;
         status = SRB_STATUS_INVALID_LUN;
         goto done;
@@ -435,7 +487,6 @@ ScsiOpInquiry(
     if (1 == pCdb->CDB6INQUIRY3.EnableVitalProductData) {
         DoStorageTraceEtw(DbgLvlLoud, MpDemoDebugInfo, "Received VPD request for page 0x%x\n",
                           pCdb->CDB6INQUIRY.PageCode);
-
         status = ScsiOpVPD(pHBAExt, pLUExt, pSrb);
         goto done;
     }
@@ -444,13 +495,10 @@ ScsiOpInquiry(
     pInqData->RemovableMedia = FALSE;
     pInqData->CommandQueue = TRUE;
 
-    // --- Robust SCSI INQUIRY ID population ---
-    // Always fill with defaults first
     RtlCopyMemory(vendorId, DefaultVendorId, 8);
     RtlCopyMemory(productId, DefaultProductId, 16);
     RtlCopyMemory(productRev, DefaultProductRev, 4);
 
-    // If the driver extension has valid VendorId/ProductId/ProductRevision, use those (space padded)
     __try {
         if (pHBAExt && pHBAExt->VendorId && pHBAExt->VendorId[0]) {
             SIZE_T len = strnlen((const char*)pHBAExt->VendorId, 8);
@@ -468,48 +516,29 @@ ScsiOpInquiry(
             if (len < 4) RtlFillMemory(productRev + len, 4 - len, ' ');
         }
     } __except (EXCEPTION_EXECUTE_HANDLER) {
-        // Defensive: ignore exceptions, keep defaults
     }
 
-    // Write to inquiry data (always exactly field size, no NUL)
     RtlCopyMemory(pInqData->VendorId, vendorId, 8);
     RtlCopyMemory(pInqData->ProductId, productId, 16);
     RtlCopyMemory(pInqData->ProductRevisionLevel, productRev, 4);
-
-    // --- End robust population ---
 
     if (deviceType != DISK_DEVICE) {
         goto done;
     }
 
-    // Check if the device has already been seen.
     if (GET_FLAG(pLUExt->LUFlags, LU_DEVICE_INITIALIZED)) {
-        DbgPrint("ScsiOpInquiry: Device already initialized for Path = %d, TID = %d, Lun = %d\n",
-            pSrb->PathId, pSrb->TargetId, pSrb->Lun);
         goto done;
     }
 
-    // A new LUN.
     pLUExt->DeviceType = deviceType;
     pLUExt->TargetId   = pSrb->TargetId;
     pLUExt->Lun        = pSrb->Lun;
 
-    if (pHBAExt->pMPDrvObj->MPRegInfo.bCombineVirtDisks) { // MPIO support?
-        pLUMPIOExt = ScsiGetMPIOExt(pHBAExt, pLUExt, pSrb);
-        if (!pLUMPIOExt) {
-            DbgPrint("ScsiOpInquiry: ERROR - ScsiGetMPIOExt failed for Path = %d, TID = %d, Lun = %d\n",
-                pSrb->PathId, pSrb->TargetId, pSrb->Lun);
-            pSrb->DataTransferLength = 0;
-            status = SRB_STATUS_ERROR;
-            goto done;
-        }
-        SET_FLAG(pLUExt->LUFlags, LU_MPIO_MAPPED);
-    } else {
-        ScsiAllocDiskBuf(pHBAExt, &pLUExt->pDiskBuf, &pLUExt->MaxBlocks);
-
+    if (!pLUExt->pDiskBuf) {
+        DISK_BACKEND* backend = NULL;
+        ScsiAllocDiskBuf(pHBAExt, &pLUExt->pDiskBuf, &pLUExt->MaxBlocks, &backend);
+        pLUExt->pDiskBackend = backend;
         if (!pLUExt->pDiskBuf) {
-            DbgPrint("ScsiOpInquiry: ERROR - Disk memory allocation failed for Path = %d, TID = %d, Lun = %d\n",
-                pSrb->PathId, pSrb->TargetId, pSrb->Lun);
             DoStorageTraceEtw(DbgLvlErr, MpDemoDebugInfo, "Disk memory allocation failed!\n");
             pSrb->DataTransferLength = 0;
             status = SRB_STATUS_ERROR;
@@ -525,7 +554,7 @@ ScsiOpInquiry(
     KeAcquireSpinLock(&pHBAExt->LUListLock, &SaveIrql);
 #endif
 
-    InsertTailList(&pHBAExt->LUList, &pLUExt->List);  // Add LUN extension to list in HBA extension.
+    InsertTailList(&pHBAExt->LUList, &pLUExt->List);
 
 #if defined(_AMD64_)
     KeReleaseInStackQueuedSpinLock(&LockHandle);
@@ -533,8 +562,7 @@ ScsiOpInquiry(
     KeReleaseSpinLock(&pHBAExt->LUListLock, SaveIrql);
 #endif
 
-    DbgPrint("ScsiOpInquiry: New device created for Path = %d, TID = %d, Lun = %d\n",
-        pSrb->PathId, pSrb->TargetId, pSrb->Lun);
+    DoStorageTraceEtw(DbgLvlInfo, MpDemoDebugInfo, "New device created. %d:%d:%d\n", pSrb->PathId, pSrb->TargetId, pSrb->Lun);
 
 done:
     return status;
@@ -689,10 +717,8 @@ ScsiOpReadCapacity(
                   )
 {
     PREAD_CAPACITY_DATA  readCapacity = pSrb->DataBuffer;
-    ULONGLONG            diskSizeBytes = pHBAExt->pMPDrvObj->MPRegInfo.VirtualDiskSize;
-    ULONGLONG            maxBlocks64;
-    ULONG                maxBlocks;
-    ULONG                blockSize = MP_BLOCK_SIZE;
+    ULONG                maxBlocks,
+                         blockSize;
 
     UNREFERENCED_PARAMETER(pHBAExt);
     UNREFERENCED_PARAMETER(pLUExt);
@@ -701,39 +727,19 @@ ScsiOpReadCapacity(
 
     RtlZeroMemory((PUCHAR)pSrb->DataBuffer, pSrb->DataTransferLength );
 
-    // Claim 512-byte blocks (big-endian)
+    // Claim 512-byte blocks (big-endian).
+
+    blockSize = MP_BLOCK_SIZE;
+
     readCapacity->BytesPerBlock =
       (((PUCHAR)&blockSize)[0] << 24) |  (((PUCHAR)&blockSize)[1] << 16) |
       (((PUCHAR)&blockSize)[2] <<  8) | ((PUCHAR)&blockSize)[3];
 
-    // Calculate max blocks (one less than total, per SCSI spec)
-    maxBlocks64 = diskSizeBytes / MP_BLOCK_SIZE;
-    if (maxBlocks64 != 0) {
-        maxBlocks64 -= 1;
-    }
-
-#if !defined(_WIN64)
-    if (maxBlocks64 > (ULONGLONG)MAXULONG) {
-        DbgPrint("ScsiOpReadCapacity: WARNING - maxBlocks64 (%llu) exceeds 32-bit ULONG max (%lu). Truncating.\n",
-            maxBlocks64, MAXULONG);
-        maxBlocks = MAXULONG;
-    } else {
-        maxBlocks = (ULONG)maxBlocks64;
-    }
-#else
-    // 64-bit build: allow >4GB disks
-    if (maxBlocks64 > 0xFFFFFFFFULL) {
-        // Per SCSI READ CAPACITY(10), the largest LBA is 0xFFFFFFFF (32 bits)
-        // For larger disks, Windows will use the READ CAPACITY(16) command.
-        // Here, just return 0xFFFFFFFF to indicate >2TB disk, if desired.
-        maxBlocks = 0xFFFFFFFF;
-    } else {
-        maxBlocks = (ULONG)maxBlocks64;
-    }
-#endif
-
     DoStorageTraceEtw(DbgLvlInfo, MpDemoDebugInfo, "Block Size: 0x%x\n", blockSize);
-    DoStorageTraceEtw(DbgLvlLoud, MpDemoDebugInfo, "Max Blocks: 0x%x (from %llu)\n", maxBlocks, maxBlocks64);
+
+    maxBlocks = (pHBAExt->pMPDrvObj->MPRegInfo.VirtualDiskSize/MP_BLOCK_SIZE)-1;
+
+    DoStorageTraceEtw(DbgLvlLoud, MpDemoDebugInfo, "Max Blocks: 0x%x\n", maxBlocks);
 
     readCapacity->LogicalBlockAddress =
       (((PUCHAR)&maxBlocks)[0] << 24) | (((PUCHAR)&maxBlocks)[1] << 16) |
@@ -788,17 +794,18 @@ ScsiOpWrite(
 /**************************************************************************************************/     
 UCHAR
 ScsiReadWriteSetup(
-    __in pHW_HBA_EXT          pHBAExt, // Adapter device-object extension from StorPort.
-    __in pHW_LU_EXTENSION     pLUExt,  // LUN device-object extension from StorPort.        
+    __in pHW_HBA_EXT          pHBAExt,
+    __in pHW_LU_EXTENSION     pLUExt,
     __in PSCSI_REQUEST_BLOCK  pSrb,
     __in MpWkRtnAction        WkRtnAction,
     __in PUCHAR               pResult
 )
 {
+    UNREFERENCED_PARAMETER(pHBAExt);
+
     PCDB   pCdb = (PCDB)pSrb->Cdb;
     ULONG  startingSector, sectorOffset;
     USHORT numBlocks;
-    pMP_WorkRtnParms pWkRtnParms;
 
     ASSERT(pLUExt != NULL);
 
@@ -811,34 +818,42 @@ ScsiReadWriteSetup(
     numBlocks      = (USHORT)(pSrb->DataTransferLength / MP_BLOCK_SIZE);
     sectorOffset   = startingSector * MP_BLOCK_SIZE;
 
-    DoStorageTraceEtw(DbgLvlInfo, MpDemoDebugInfo, "ScsiReadWriteSetup action: %X, starting sector: 0x%X, number of blocks: 0x%X\n", WkRtnAction, startingSector, numBlocks);
-    DoStorageTraceEtw(DbgLvlInfo, MpDemoDebugInfo, "ScsiReadWriteSetup pSrb: 0x%p, pSrb->DataBuffer: 0x%p\n", pSrb, pSrb->DataBuffer);
-
     if (startingSector >= pLUExt->MaxBlocks) {
-        DoStorageTraceEtw(DbgLvlInfo, MpDemoDebugInfo, "*** ScsiReadWriteSetup Starting sector: %d, number of blocks: %d\n", startingSector, numBlocks);
         return SRB_STATUS_INVALID_REQUEST;
     }
 
-    // Fast path: Only perform direct memory copy if at IRQL <= APC_LEVEL
-    if (KeGetCurrentIrql() <= APC_LEVEL && numBlocks * MP_BLOCK_SIZE <= 64 * 1024) {
-        PUCHAR diskBuf = (PUCHAR)pLUExt->pDiskBuf;
-        if (WkRtnAction == ActionRead) {
-            RtlCopyMemory(
+    PUCHAR diskBuf = (PUCHAR)pLUExt->pDiskBuf;
+
+    if (WkRtnAction == ActionRead) {
+        RtlCopyMemory(
+            pSrb->DataBuffer,
+            diskBuf + sectorOffset,
+            numBlocks * MP_BLOCK_SIZE
+        );
+        *pResult = ResultDone;
+        return SRB_STATUS_SUCCESS;
+    } else if (WkRtnAction == ActionWrite) {
+        RtlCopyMemory(
+            diskBuf + sectorOffset,
+            pSrb->DataBuffer,
+            numBlocks * MP_BLOCK_SIZE
+        );
+        if (pLUExt->pDiskBackend) {
+            NTSTATUS status = pLUExt->pDiskBackend->ops->Write(
+                pLUExt->pDiskBackend->context,
+                sectorOffset,
                 pSrb->DataBuffer,
-                diskBuf + sectorOffset,
                 numBlocks * MP_BLOCK_SIZE
             );
-        } else {
-            RtlCopyMemory(
-                diskBuf + sectorOffset,
-                pSrb->DataBuffer,
-                numBlocks * MP_BLOCK_SIZE
-            );
+            if (NT_SUCCESS(status) && pLUExt->pDiskBackend->ops->Flush) {
+                pLUExt->pDiskBackend->ops->Flush(pLUExt->pDiskBackend->context);
+            }
         }
         *pResult = ResultDone;
         return SRB_STATUS_SUCCESS;
     }
 
+<<<<<<< Updated upstream
     // Fallback: queue work item for larger or high-IRQL I/O
     pWkRtnParms = (pMP_WorkRtnParms)ALLOCATE_NON_PAGED_POOL(sizeof(MP_WorkRtnParms));
 
@@ -866,6 +881,9 @@ ScsiReadWriteSetup(
     *pResult = ResultQueued;
 
     return SRB_STATUS_SUCCESS;
+=======
+    return SRB_STATUS_INVALID_REQUEST;
+>>>>>>> Stashed changes
 }                                                     // End ScsiReadWriteSetup.
 
 /**************************************************************************************************/     
@@ -903,9 +921,6 @@ ScsiOpReportLuns(
 
     UNREFERENCED_PARAMETER(pLUExt);
 
-    // Debug: Entering ReportLuns
-    DbgPrint("ScsiOpReportLuns: Entered. NbrLUNsperHBA = %lu\n", pHBAExt->NbrLUNsperHBA);
-
     if (FALSE==pHBAExt->bReportAdapterDone) {         // This opcode will be one of the earliest I/O requests for a new HBA (and may be received later, too).
         MpHwReportAdapter(pHBAExt);                   // WMIEvent test.
 
@@ -936,7 +951,6 @@ ScsiOpReportLuns(
                     GoodLunIdx++;
                 }
             }
-            DbgPrint("ScsiOpReportLuns: Reported %lu LUN(s)\n", GoodLunIdx);
         }
     }
 

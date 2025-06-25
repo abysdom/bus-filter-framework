@@ -36,6 +36,7 @@ Environment:
 #include <ntddscsi.h>
 #include <scsiwmi.h>
 #include "common.h"
+#include "disk_backend.h"
 
 #if       !defined(_MP_H_skip_includes)
 
@@ -96,6 +97,8 @@ typedef struct _MP_REG_INFO {
     UNICODE_STRING   VendorId;
     UNICODE_STRING   ProductId;
     UNICODE_STRING   ProductRevision;
+    UNICODE_STRING   DiskImagePath;     // Path to disk image for persistent backend
+
     ULONG            BreakOnEntry;       // Break into debugger
     ULONG            DebugLevel;         // Debug log level
     ULONG            InitiatorID;        // Adapter's target ID
@@ -181,6 +184,8 @@ typedef struct _HW_LU_EXTENSION {                     // LUN extension allocated
     UCHAR                 DeviceType;
     UCHAR                 TargetId;
     UCHAR                 Lun;
+    struct _DISK_BACKEND* pDiskBackend;              // Pointer to file backend for persistence
+
 } HW_LU_EXTENSION, * pHW_LU_EXTENSION;
 
 typedef struct _HW_SRB_EXTENSION {
