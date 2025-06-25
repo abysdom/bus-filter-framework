@@ -288,7 +288,6 @@ ScsiAllocDiskBuf(
         *ppDiskBuf = NULL;
         *pMaxBlocks = 0;
     }
-<<<<<<< Updated upstream
 
     // Prevent allocation of 0 bytes, which can cause Driver Verifier BSOD
     if (requestedBytes == 0) {
@@ -319,8 +318,6 @@ ScsiAllocDiskBuf(
 
 Done:
     return;
-=======
->>>>>>> Stashed changes
 }                                                     // End ScsiAllocDiskBuf.
 
 /**************************************************************************************************/     
@@ -850,7 +847,6 @@ ScsiReadWriteSetup(
         return SRB_STATUS_SUCCESS;
     }
 
-<<<<<<< Updated upstream
     // Fallback: queue work item for larger or high-IRQL I/O
     pWkRtnParms = (pMP_WorkRtnParms)ALLOCATE_NON_PAGED_POOL(sizeof(MP_WorkRtnParms));
 
@@ -878,9 +874,6 @@ ScsiReadWriteSetup(
     *pResult = ResultQueued;
 
     return SRB_STATUS_SUCCESS;
-=======
-    return SRB_STATUS_INVALID_REQUEST;
->>>>>>> Stashed changes
 }                                                     // End ScsiReadWriteSetup.
 
 /**************************************************************************************************/     
