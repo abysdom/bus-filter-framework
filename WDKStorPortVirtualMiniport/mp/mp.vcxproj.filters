@@ -40,6 +40,9 @@
     <ClCompile Include="..\wmi.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\disk_backend.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\inc\common.h">
