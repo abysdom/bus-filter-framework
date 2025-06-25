@@ -222,7 +222,7 @@ ScsiAllocRamWithFileBacking(
         return FALSE;
     }
 
-    PVOID ramBuf = ExAllocatePoolWithTag(NonPagedPoolNx, requestedBytes, MP_TAG_GENERAL);
+    PVOID ramBuf = ALLOCATE_NON_PAGED_POOL(requestedBytes);
     if (!ramBuf) {
         DoStorageTraceEtw(DbgLvlErr, MpDemoDebugInfo, "Failed to allocate RAM buffer for DiskBuf\n");
         return FALSE;
@@ -237,7 +237,7 @@ ScsiAllocRamWithFileBacking(
     // Try file backend if DiskImagePath is set, else just RAM disk
     UNICODE_STRING* diskImagePath = &pHBAExt->pMPDrvObj->MPRegInfo.DiskImagePath;
     if (diskImagePath && diskImagePath->Length > 0 && diskImagePath->Buffer && diskImagePath->Buffer[0]) {
-        DISK_BACKEND* backend = ExAllocatePoolWithTag(NonPagedPoolNx, sizeof(DISK_BACKEND), MP_TAG_GENERAL);
+        DISK_BACKEND* backend = ALLOCATE_NON_PAGED_POOL(sizeof(DISK_BACKEND));
         if (backend) {
             NTSTATUS status = FileDiskBackend_Create(
                 backend,
@@ -369,11 +369,8 @@ ScsiGetMPIOExt(
     }
 
     if (pNextEntry==&pHBAExt->pMPDrvObj->ListMPIOExt) { // No match? That is, is this to be a new MPIO LUN extension?
-<<<<<<< Updated upstream
+
         pLUMPIOExt = ALLOCATE_NON_PAGED_POOL(sizeof(HW_LU_EXTENSION_MPIO));
-=======
-        pLUMPIOExt = ExAllocatePoolWithTag(NonPagedPoolNx, sizeof(HW_LU_EXTENSION_MPIO), MP_TAG_GENERAL);
->>>>>>> Stashed changes
 
         if (!pLUMPIOExt) {
             DoStorageTraceEtw(DbgLvlErr, MpDemoDebugInfo, "Failed to allocate HW_LU_EXTENSION_MPIO\n");
