@@ -209,8 +209,6 @@ Return Value:
         DbgPrint("MpQueryRegParameters: Final NbrVirtDisks = %lu, NbrLUNsperHBA = %lu\n",
             pRegInfo->NbrVirtDisks, pRegInfo->NbrLUNsperHBA);
         return;
-    }
-}                                                     // End MpQueryRegParameters().
 
 use_defaults:
     pRegInfo->BreakOnEntry      = defRegInfo.BreakOnEntry;
@@ -225,3 +223,5 @@ use_defaults:
     pRegInfo->NbrLUNsperHBA     = defRegInfo.NbrLUNsperHBA;
     pRegInfo->bCombineVirtDisks = defRegInfo.bCombineVirtDisks;
     DbgPrint("MpQueryRegParameters: Registry read failed, using defaults.\n");
+    }
+}                                                     // End MpQueryRegParameters().
