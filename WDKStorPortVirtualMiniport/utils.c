@@ -31,6 +31,19 @@
 
 #include "utils.tmh"
 
+#ifndef LOCAL_MAX_PATH
+#define LOCAL_MAX_PATH 260
+
+NTSYSAPI
+BOOLEAN
+NTAPI
+RtlDosPathNameToNtPathName_U(
+    PCWSTR DosName,
+    PUNICODE_STRING NtName,
+    PCWSTR *FilePart,
+    PRTL_RELATIVE_NAME_U RelativeName
+);
+
 /**************************************************************************************************/ 
 /*                                                                                                */ 
 /* Note: DoStorageTraceETW may not be used here, since tracing won't have been set up.            */ 
@@ -105,9 +118,9 @@ static BOOLEAN NormalizeDiskImagePathToNtPath(PUNICODE_STRING Win32Path, PUNICOD
 {
     if (!Win32Path || !Win32Path->Buffer || Win32Path->Length == 0) return FALSE;
     UNICODE_STRING ntStrOut;
-    WCHAR tempBuf[MAX_PATH];
+    WCHAR tempBuf[LOCAL_MAX_PATH];
     SIZE_T wlen = Win32Path->Length / sizeof(WCHAR);
-    if (wlen >= MAX_PATH) return FALSE;
+    if (wlen >= LOCAL_MAX_PATH) return FALSE;
     RtlZeroMemory(tempBuf, sizeof(tempBuf));
     RtlCopyMemory(tempBuf, Win32Path->Buffer, Win32Path->Length);
     tempBuf[wlen] = 0;
