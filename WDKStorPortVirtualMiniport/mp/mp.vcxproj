@@ -424,15 +424,7 @@
     <PostBuildEvent />
    </ItemDefinitionGroup>
   <ItemGroup>
-    <FilesToPackage Include="$(OutDir)$(TargetName).cer" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      <PackageRelativeDirectory>
-      </PackageRelativeDirectory>
-    </FilesToPackage>
-    <FilesToPackage Include="$(OutDir)$(TargetName).cer" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-      <PackageRelativeDirectory>
-      </PackageRelativeDirectory>
-    </FilesToPackage>
-    <FilesToPackage Include="$(TargetPath)">
+   <FilesToPackage Include="$(TargetPath)">
       <PackageRelativeDirectory>
       </PackageRelativeDirectory>
     </FilesToPackage>
