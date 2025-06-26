@@ -400,13 +400,10 @@ pHW_LU_EXTENSION_MPIO
 ScsiGetMPIOExt(
                __in pHW_HBA_EXT          pHBAExt,     // Adapter device-object extension from StorPort.
                __in pHW_LU_EXTENSION     pLUExt,      // LUN device-object extension from StorPort.
-               __in pHW_HBA_EXT          pHBAExt,
-               __in pHW_LU_EXTENSION     pLUExt,
                __in PSCSI_REQUEST_BLOCK  pSrb
               )
 {
     pHW_LU_EXTENSION_MPIO pLUMPIOExt = NULL;          // Prevent C4701.
-    pHW_LU_EXTENSION_MPIO pLUMPIOExt = NULL;
 #if defined(_AMD64_)
     KLOCK_QUEUE_HANDLE    LockHandle,
                           LockHandle2;
