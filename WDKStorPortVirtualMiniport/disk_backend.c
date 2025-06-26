@@ -41,10 +41,10 @@ static const DISK_BACKEND_OPS RamDiskOps = {
 };
 
 NTSTATUS RamDiskBackend_Create(DISK_BACKEND* backend, ULONG64 size) {
-    RAMDISK_CTX* ctx = ExAllocatePoolWithTag(NonPagedPool, sizeof(RAMDISK_CTX), 'RDBK');
+    RAMDISK_CTX* ctx = ALLOCATE_NON_PAGED_POOL(sizeof(RAMDISK_CTX));
     if (!ctx) return STATUS_INSUFFICIENT_RESOURCES;
-    ctx->buffer = ExAllocatePoolWithTag(NonPagedPool, (SIZE_T)size, 'RDBK');
-    if (!ctx->buffer) { ExFreePoolWithTag(ctx, 'RDBK'); return STATUS_INSUFFICIENT_RESOURCES; }
+    ctx->buffer = ALLOCATE_NON_PAGED_POOL((SIZE_T)size);
+    if (!ctx->buffer) {  ExFreePool(ctx); return STATUS_INSUFFICIENT_RESOURCES; }
     ctx->size = size;
     backend->context = ctx;
     backend->ops = &RamDiskOps;
@@ -109,7 +109,7 @@ NTSTATUS FileDiskBackend_Create(DISK_BACKEND* backend, const wchar_t* path, ULON
         ZwSetInformationFile(hFile, &iosb, &eofInfo, sizeof(eofInfo), FileEndOfFileInformation);
     }
 
-    FILEDISK_CTX* ctx = ExAllocatePoolWithTag(NonPagedPool, sizeof(FILEDISK_CTX), 'FDBK');
+    FILEDISK_CTX* ctx = ALLOCATE_NON_PAGED_POOL(sizeof(FILEDISK_CTX));
     if (!ctx) { ZwClose(hFile); return STATUS_INSUFFICIENT_RESOURCES; }
     ctx->fileHandle = hFile;
     ctx->size = size;
