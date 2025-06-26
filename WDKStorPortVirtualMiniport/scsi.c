@@ -46,6 +46,7 @@
 #include <ntddk.h>
 #include <ntdef.h>
 #include <windef.h>
+#include <limits.h>
 
 typedef struct _SYSTEM_BASIC_INFORMATION {
     ULONG Reserved;
