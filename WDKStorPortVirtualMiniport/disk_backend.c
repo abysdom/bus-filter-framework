@@ -1,5 +1,6 @@
 #include "disk_backend.h"
 #include <ntstrsafe.h>
+#include <limits.h> // For ULONG_MAX
 
 // Add this declaration if not already present
 NTSYSAPI
@@ -32,8 +33,8 @@ static NTSTATUS RamDisk_Write(void* ctx, ULONGLONG offset, const void* buffer, U
 static NTSTATUS RamDisk_Flush(void* ctx) { UNREFERENCED_PARAMETER(ctx); return STATUS_SUCCESS; }
 static NTSTATUS RamDisk_Close(void* ctx) {
     RAMDISK_CTX* ram = (RAMDISK_CTX*)ctx;
-    if (ram->buffer) ExFreePoolWithTag(ram->buffer, 'RDBK');
-    ExFreePoolWithTag(ram, 'RDBK');
+    if (ram->buffer) ExFreePool(ram->buffer); // Use tagless free for compatibility
+    ExFreePool(ram);
     return STATUS_SUCCESS;
 }
 static const DISK_BACKEND_OPS RamDiskOps = {
@@ -41,10 +42,10 @@ static const DISK_BACKEND_OPS RamDiskOps = {
 };
 
 NTSTATUS RamDiskBackend_Create(DISK_BACKEND* backend, ULONG64 size) {
-    RAMDISK_CTX* ctx = ALLOCATE_NON_PAGED_POOL(sizeof(RAMDISK_CTX));
+    RAMDISK_CTX* ctx = (RAMDISK_CTX*)ALLOCATE_NON_PAGED_POOL(sizeof(RAMDISK_CTX));
     if (!ctx) return STATUS_INSUFFICIENT_RESOURCES;
-    ctx->buffer = ALLOCATE_NON_PAGED_POOL((SIZE_T)size);
-    if (!ctx->buffer) {  ExFreePool(ctx); return STATUS_INSUFFICIENT_RESOURCES; }
+    ctx->buffer = (PUCHAR)ALLOCATE_NON_PAGED_POOL((SIZE_T)size);
+    if (!ctx->buffer) { ExFreePool(ctx); return STATUS_INSUFFICIENT_RESOURCES; }
     ctx->size = size;
     backend->context = ctx;
     backend->ops = &RamDiskOps;
@@ -81,7 +82,7 @@ static NTSTATUS FileDisk_Flush(void* ctx) {
 static NTSTATUS FileDisk_Close(void* ctx) {
     FILEDISK_CTX* fctx = (FILEDISK_CTX*)ctx;
     if (fctx->fileHandle) ZwClose(fctx->fileHandle);
-    ExFreePoolWithTag(fctx, 'FDBK');
+    ExFreePool(fctx); // Use tagless free for compatibility
     return STATUS_SUCCESS;
 }
 static const DISK_BACKEND_OPS FileDiskOps = {
@@ -109,7 +110,7 @@ NTSTATUS FileDiskBackend_Create(DISK_BACKEND* backend, const wchar_t* path, ULON
         ZwSetInformationFile(hFile, &iosb, &eofInfo, sizeof(eofInfo), FileEndOfFileInformation);
     }
 
-    FILEDISK_CTX* ctx = ALLOCATE_NON_PAGED_POOL(sizeof(FILEDISK_CTX));
+    FILEDISK_CTX* ctx = (FILEDISK_CTX*)ALLOCATE_NON_PAGED_POOL(sizeof(FILEDISK_CTX));
     if (!ctx) { ZwClose(hFile); return STATUS_INSUFFICIENT_RESOURCES; }
     ctx->fileHandle = hFile;
     ctx->size = size;
