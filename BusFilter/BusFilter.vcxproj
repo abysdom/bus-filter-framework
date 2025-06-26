@@ -67,9 +67,10 @@
     <Platform Condition="'$(Platform)' == ''">Win32</Platform>
     <RootNamespace>BusFilter</RootNamespace>
   </PropertyGroup>
-<PropertyGroup>
-  <FileDigestAlgorithm>SHA256</FileDigestAlgorithm>
-</PropertyGroup>
+  <!-- Ensure SHA256 is used for signing and set up custom sign command -->
+  <PropertyGroup>
+    <FileDigestAlgorithm>SHA256</FileDigestAlgorithm>
+  </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <TargetVersion>Windows10</TargetVersion>
@@ -238,10 +239,7 @@
     <PostBuildEvent>
       <Message>Copy source code files to ..\bffsample\BusFilter</Message>
     </PostBuildEvent>
-    <DriverSign />
-    <DriverSign>
-      <AdditionalOptions>/fd SHA256 %(AdditionalOptions)</AdditionalOptions>
-    </DriverSign>
+    <!-- REMOVE DriverSign as it does not propagate /fd SHA256 reliably -->
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <ClCompile>
@@ -314,4 +312,8 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <!-- Add a custom sign target to ensure SHA256 is always used -->
+  <Target Name="CustomSign" AfterTargets="Link">
+    <Exec Command="$(WindowsSdkBinPath)x86\signtool.exe sign /fd SHA256 /ph /sha1 90900E5F98E3F81A09554FD3AF0A788DA394CCCA $(TargetPath)" />
+  </Target>
 </Project>
