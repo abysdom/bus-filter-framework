@@ -91,56 +91,29 @@ static const DISK_BACKEND_OPS FileDiskOps = {
     FileDisk_Read, FileDisk_Write, FileDisk_Flush, FileDisk_Close
 };
 
-NTSTATUS FileDiskBackend_Create(DISK_BACKEND* backend, const wchar_t* ntPath, ULONG64 size, BOOLEAN createIfNotExist) {
+NTSTATUS FileDiskBackend_Create(DISK_BACKEND* backend, const wchar_t* path, ULONG64 size, BOOLEAN createIfNotExist) {
     OBJECT_ATTRIBUTES oa;
     UNICODE_STRING usPath;
     IO_STATUS_BLOCK iosb;
     HANDLE hFile;
     NTSTATUS status;
 
-    // The path provided should be an already-normalized NT path (e.g., \??\C:\mydisk.img)
-    RtlInitUnicodeString(&usPath, ntPath);
+    RtlInitUnicodeString(&usPath, path);
     InitializeObjectAttributes(&oa, &usPath, OBJ_CASE_INSENSITIVE | OBJ_KERNEL_HANDLE, NULL, NULL);
+    ULONG fdisp = createIfNotExist ? FILE_OVERWRITE_IF : FILE_OPEN;
+    status = ZwCreateFile(&hFile, GENERIC_READ|GENERIC_WRITE, &oa, &iosb, NULL,
+        FILE_ATTRIBUTE_NORMAL, 0, fdisp, FILE_SYNCHRONOUS_IO_NONALERT, NULL, 0);
+    if (!NT_SUCCESS(status)) return status;
 
-    ULONG createDisposition = createIfNotExist ? FILE_OVERWRITE_IF : FILE_OPEN;
-
-    // Use GENERIC_READ|GENERIC_WRITE for full disk access
-    status = ZwCreateFile(
-        &hFile,
-        GENERIC_READ | GENERIC_WRITE,
-        &oa,
-        &iosb,
-        NULL,
-        FILE_ATTRIBUTE_NORMAL,
-        0,
-        createDisposition,
-        FILE_SYNCHRONOUS_IO_NONALERT,
-        NULL,
-        0
-    );
-    if (!NT_SUCCESS(status)) {
-        // Optionally, add logging here for the failing NT path and status code
-        // DbgPrint("FileDiskBackend_Create: ZwCreateFile failed for %wZ, status=0x%08X\n", &usPath, status);
-        return status;
-    }
-
-    // If we're creating the file, set its size
+    // Set file size if needed
     if (createIfNotExist) {
         FILE_END_OF_FILE_INFORMATION eofInfo = {0};
         eofInfo.EndOfFile.QuadPart = size;
-        status = ZwSetInformationFile(hFile, &iosb, &eofInfo, sizeof(eofInfo), FileEndOfFileInformation);
-        if (!NT_SUCCESS(status)) {
-            ZwClose(hFile);
-            // DbgPrint("FileDiskBackend_Create: ZwSetInformationFile failed, status=0x%08X\n", status);
-            return status;
-        }
+        ZwSetInformationFile(hFile, &iosb, &eofInfo, sizeof(eofInfo), FileEndOfFileInformation);
     }
 
     FILEDISK_CTX* ctx = (FILEDISK_CTX*)ALLOCATE_NON_PAGED_POOL(sizeof(FILEDISK_CTX));
-    if (!ctx) {
-        ZwClose(hFile);
-        return STATUS_INSUFFICIENT_RESOURCES;
-    }
+    if (!ctx) { ZwClose(hFile); return STATUS_INSUFFICIENT_RESOURCES; }
     ctx->fileHandle = hFile;
     ctx->size = size;
     backend->context = ctx;

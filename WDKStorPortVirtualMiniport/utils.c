@@ -26,9 +26,6 @@
 #include <stortrce.h>
 #pragma warning(pop)
 
-#include <ntddk.h>
-#include <ntstrsafe.h>
-
 #include "utils.tmh"
 
 /**************************************************************************************************/ 
@@ -97,30 +94,6 @@ static ULONGLONG MpQueryRegQwordAutoUpgrade(
 
     DbgPrint("MpQueryRegQwordAutoUpgrade: %ws not found, using default %llu.\n", pValueName, defaultValue);
     return defaultValue;
-}
-
-// Helper: Normalize Win32 path to NT path (\??\C:\foo.img)
-// Returns TRUE if conversion succeeded and sets *pNtPath to the new UNICODE_STRING
-static BOOLEAN NormalizeDiskImagePathToNtPath(PUNICODE_STRING Win32Path, PUNICODE_STRING pNtPath)
-{
-    if (!Win32Path || !Win32Path->Buffer || Win32Path->Length == 0) return FALSE;
-    UNICODE_STRING ntStrOut;
-    WCHAR tempBuf[MAX_PATH];
-    SIZE_T wlen = Win32Path->Length / sizeof(WCHAR);
-    if (wlen >= MAX_PATH) return FALSE;
-    RtlZeroMemory(tempBuf, sizeof(tempBuf));
-    RtlCopyMemory(tempBuf, Win32Path->Buffer, Win32Path->Length);
-    tempBuf[wlen] = 0;
-
-    if (!RtlDosPathNameToNtPathName_U(tempBuf, &ntStrOut, NULL, NULL)) {
-        return FALSE;
-    }
-    // Free the original buffer if present
-    if (Win32Path->Buffer) {
-        ExFreePool(Win32Path->Buffer);
-    }
-    *pNtPath = ntStrOut;
-    return TRUE;
 }
 
 VOID
@@ -231,17 +204,6 @@ Return Value:
 
         if (!NT_SUCCESS(status)) {
             goto use_defaults;
-        }
-
-        // === NEW: Normalize DiskImagePath to NT path if file backend is used ===
-        if (pRegInfo->UseFileBackend && pRegInfo->DiskImagePath.Buffer && pRegInfo->DiskImagePath.Length > 0) {
-            UNICODE_STRING ntPath;
-            if (NormalizeDiskImagePathToNtPath(&pRegInfo->DiskImagePath, &ntPath)) {
-                pRegInfo->DiskImagePath = ntPath;
-                DbgPrint("MpQueryRegParameters: Normalized DiskImagePath to NT path: %wZ\n", &pRegInfo->DiskImagePath);
-            } else {
-                DbgPrint("MpQueryRegParameters: Failed to normalize DiskImagePath to NT path! File backend may not work.\n");
-            }
         }
 
         DbgPrint("MpQueryRegParameters: Final PhysicalDiskSize = %llu, VirtualDiskSize = %llu\n",
