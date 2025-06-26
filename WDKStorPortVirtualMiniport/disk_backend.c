@@ -1,4 +1,5 @@
 #include "disk_backend.h"
+#include "common.h"
 #include <ntstrsafe.h>
 #include <limits.h> // For ULONG_MAX
 
