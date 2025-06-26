@@ -261,7 +261,21 @@ ScsiAllocDiskBuf(
         goto Done;
     }
 
-    *pMaxBlocks = (ULONG)(requestedBytes / MP_BLOCK_SIZE);
+    SIZE_T numBlocks = requestedBytes / MP_BLOCK_SIZE;
+
+#if defined(_WIN64)
+    if (numBlocks > 0xFFFFFFFFULL) { // 32-bit LBA limit for SCSI (READ CAPACITY(10))
+        *pMaxBlocks = 0xFFFFFFFF;
+    } else {
+        *pMaxBlocks = (ULONG)numBlocks;
+    }
+#else
+    if (numBlocks > (SIZE_T)0xFFFFFFFF) {
+        *pMaxBlocks = 0xFFFFFFFF;
+    } else {
+        *pMaxBlocks = (ULONG)numBlocks;
+    }
+#endif
 
     // Debug log: success
     DbgPrint("ScsiAllocDiskBuf: Successfully allocated DiskBuf at %p, size = %llu bytes, MaxBlocks = %lu\n",
@@ -333,7 +347,21 @@ ScsiAllocDiskBufPersistent(
             goto Done;
         }
         *ppDiskBuf = ramBuf;
-        *pMaxBlocks = (ULONG)(requestedBytes / MP_BLOCK_SIZE);
+        SIZE_T numBlocks = requestedBytes / MP_BLOCK_SIZE;
+
+        #if defined(_WIN64)
+          if (numBlocks > 0xFFFFFFFFULL) { // 32-bit LBA limit for SCSI (READ CAPACITY(10))
+            *pMaxBlocks = 0xFFFFFFFF;
+          } else {
+            *pMaxBlocks = (ULONG)numBlocks;
+          }
+          #else
+            if (numBlocks > (SIZE_T)0xFFFFFFFF) {
+               *pMaxBlocks = 0xFFFFFFFF;
+          } else {
+               *pMaxBlocks = (ULONG)numBlocks;
+          }
+        #endif
 
         // Allocate backend structure
         DISK_BACKEND* backend = (DISK_BACKEND*)ALLOCATE_NON_PAGED_POOL(sizeof(DISK_BACKEND));
@@ -375,7 +403,21 @@ ScsiAllocDiskBufPersistent(
             DoStorageTraceEtw(DbgLvlErr, MpDemoDebugInfo, "DiskBuf memory allocation failed!\n");
             goto Done;
         }
-        *pMaxBlocks = (ULONG)(requestedBytes / MP_BLOCK_SIZE);
+        SIZE_T numBlocks = requestedBytes / MP_BLOCK_SIZE;
+
+       #if defined(_WIN64)
+         if (numBlocks > 0xFFFFFFFFULL) { // 32-bit LBA limit for SCSI (READ CAPACITY(10))
+         *pMaxBlocks = 0xFFFFFFFF;
+       } else {
+        *pMaxBlocks = (ULONG)numBlocks;
+       }
+       #else
+        if (numBlocks > (SIZE_T)0xFFFFFFFF) {
+        *pMaxBlocks = 0xFFFFFFFF;
+       } else {
+        *pMaxBlocks = (ULONG)numBlocks;
+       }
+       #endif
         FormatFat32Volume((UCHAR*)*ppDiskBuf, (ULONG)requestedBytes, "NEW VOLUME ");
         goto Success;
     }
