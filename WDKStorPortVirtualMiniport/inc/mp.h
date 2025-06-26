@@ -18,7 +18,6 @@ Environment:
 
 --*/
 
-
 #ifndef _MP_H_
 #define _MP_H_
 
@@ -36,6 +35,8 @@ Environment:
 #include <ntddscsi.h>
 #include <scsiwmi.h>
 #include "common.h"
+
+// === ADD THIS: Disk backend abstraction for file-backed or RAM-backed disks ===
 #include "disk_backend.h"
 
 #if       !defined(_MP_H_skip_includes)
@@ -71,13 +72,14 @@ Environment:
 #define DEFAULT_BREAK_ON_ENTRY      0                // No break
 #define DEFAULT_DEBUG_LEVEL         2               
 #define DEFAULT_INITIATOR_ID        7
-#define DEFAULT_VIRTUAL_DISK_SIZE   (8 * 1024 * 1024)  // 8 MB.  JAntogni, 03.12.2005.
+#define DEFAULT_VIRTUAL_DISK_SIZE   (8 * 1024 * 1024)  // 8 MB
 #define DEFAULT_PHYSICAL_DISK_SIZE  DEFAULT_VIRTUAL_DISK_SIZE
 #define DEFAULT_USE_LBA_LIST        0
 #define DEFAULT_NUMBER_OF_BUSES     1
 #define DEFAULT_NbrVirtDisks        1
 #define DEFAULT_NbrLUNsperHBA       1
 #define DEFAULT_bCombineVirtDisks   FALSE
+#define DEFAULT_UseFileBackend      0 // <<-- Added for backend config
 
 #define GET_FLAG(Flags, Bit)        ((Flags) & (Bit))
 #define SET_FLAG(Flags, Bit)        ((Flags) |= (Bit))
@@ -97,8 +99,6 @@ typedef struct _MP_REG_INFO {
     UNICODE_STRING   VendorId;
     UNICODE_STRING   ProductId;
     UNICODE_STRING   ProductRevision;
-    UNICODE_STRING   DiskImagePath;     // Path to disk image for persistent backend
-
     ULONG            BreakOnEntry;       // Break into debugger
     ULONG            DebugLevel;         // Debug log level
     ULONG            InitiatorID;        // Adapter's target ID
@@ -107,6 +107,10 @@ typedef struct _MP_REG_INFO {
     ULONG            NbrVirtDisks;       // Number of virtual disks.
     ULONG            NbrLUNsperHBA;      // Number of LUNs per HBA.
     ULONG            bCombineVirtDisks;  // 0 => do not combine virtual disks a la MPIO.
+
+    // === Backend config for disk image support ===
+    ULONG            UseFileBackend;     // 0=RAM, 1=File
+    UNICODE_STRING   DiskImagePath;      // NT path of backing file
 } MP_REG_INFO, * pMP_REG_INFO;
 
 typedef struct _MPDriverInfo {                        // The master miniport object. In effect, an extension of the driver object for the miniport.
@@ -178,14 +182,13 @@ typedef struct _HW_LU_EXTENSION {                     // LUN extension allocated
     pHW_LU_EXTENSION_MPIO pLUMPIOExt;
     PUCHAR                pDiskBuf;
     ULONG                 LUFlags;
-    ULONG                MaxBlocks;
+    ULONG                 MaxBlocks;
     USHORT                BlocksUsed;
     BOOLEAN               bIsMissing;                 // At present, this is set only by a kernel debugger, for testing.
     UCHAR                 DeviceType;
     UCHAR                 TargetId;
     UCHAR                 Lun;
-    struct _DISK_BACKEND* pDiskBackend;              // Pointer to file backend for persistence
-
+    struct _DISK_BACKEND *pDiskBackend;               // pointer to disk backend abstraction
 } HW_LU_EXTENSION, * pHW_LU_EXTENSION;
 
 typedef struct _HW_SRB_EXTENSION {
