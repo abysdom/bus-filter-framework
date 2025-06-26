@@ -51,6 +51,9 @@
     <RootNamespace>bff</RootNamespace>
     <DriverType>KMDF</DriverType>
   </PropertyGroup>
+<PropertyGroup>
+  <FileDigestAlgorithm>SHA256</FileDigestAlgorithm>
+</PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <TargetVersion>Windows10</TargetVersion>
