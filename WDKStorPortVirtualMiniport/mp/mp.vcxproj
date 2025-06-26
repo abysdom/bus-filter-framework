@@ -43,7 +43,6 @@
     <Platform Condition="'$(Platform)' == ''">Win32</Platform>
     <RootNamespace>mp</RootNamespace>
   </PropertyGroup>
-  <!-- Ensure SHA256 is used for signing -->
   <PropertyGroup>
     <FileDigestAlgorithm>SHA256</FileDigestAlgorithm>
   </PropertyGroup>
@@ -423,8 +422,7 @@
     </Inf>
     <PostBuildEvent />
     <PostBuildEvent />
-    <!-- REMOVE DriverSign elements and add a custom sign target for SHA256 signing -->
-  </ItemDefinitionGroup>
+   </ItemDefinitionGroup>
   <ItemGroup>
     <FilesToPackage Include="$(OutDir)$(TargetName).cer" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       <PackageRelativeDirectory>
@@ -467,8 +465,4 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
-  <!-- Custom sign target using SHA256 digest algorithm -->
-  <Target Name="CustomSign" AfterTargets="Link">
-    <Exec Command="&quot;C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x86\signtool.exe&quot; sign /fd SHA256 /ph /sha1 90900E5F98E3F81A09554FD3AF0A788DA394CCCA $(TargetPath)" />
-  </Target>
 </Project>
