@@ -461,6 +461,6 @@
   </ImportGroup>
   <!-- Custom sign target using SHA256 digest algorithm -->
   <Target Name="CustomSign" AfterTargets="Link">
-    <Exec Command="&quot;$(WindowsSdkDir)$(TargerPlatformVersion)x86\signtool.exe&quot; sign /fd SHA256 /ph /sha1 90900E5F98E3F81A09554FD3AF0A788DA394CCCA $(TargetPath)" />
+    <Exec Command="&quot;"C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x86\signtool.exe&quot; sign /fd SHA256 /ph /sha1 90900E5F98E3F81A09554FD3AF0A788DA394CCCA $(TargetPath)" />
   </Target>
 </Project>
