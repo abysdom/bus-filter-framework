@@ -19,6 +19,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\disk_backend.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="..\fat32_format.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -35,6 +38,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\wmi.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\disk_backend.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -131,8 +131,9 @@ Return Value:
     RtlInitUnicodeString(&defRegInfo.ProductId, PRODUCT_ID);
     RtlInitUnicodeString(&defRegInfo.ProductRevision, PRODUCT_REV);
 
-    // The initialization of lclRtlQueryRegTbl is put into a subordinate block so that the initialized Buffer members of Unicode strings
-    // in defRegInfo will be used.
+    // === Disk backend config defaults ===
+    defRegInfo.UseFileBackend = DEFAULT_UseFileBackend;
+    RtlInitUnicodeString(&defRegInfo.DiskImagePath, L"");
 
     {
         NTSTATUS status;
@@ -153,31 +154,31 @@ Return Value:
             goto use_defaults;
         }
 
-        // Read/upgrade QWORD or DWORD as needed
+        // Read/upgrade QWORD or DWORD as needed (PhysicalDiskSize, VirtualDiskSize)
         pRegInfo->PhysicalDiskSize = MpQueryRegQwordAutoUpgrade(hKey, L"PhysicalDiskSize", defRegInfo.PhysicalDiskSize);
         pRegInfo->VirtualDiskSize  = MpQueryRegQwordAutoUpgrade(hKey, L"VirtualDiskSize",  defRegInfo.VirtualDiskSize);
 
-        // Now use RtlQueryRegistryValues for the rest (DWORD/string)
+        // Query the rest using RtlQueryRegistryValues
         #pragma warning(push)
         #pragma warning(disable : 4204)
         #pragma warning(disable : 4221)
 
         RTL_QUERY_REGISTRY_TABLE lclRtlQueryRegTbl[] = {
-            // The Parameters entry causes the registry to be searched under that subkey for the subsequent set of entries.
             {NULL, RTL_QUERY_REGISTRY_SUBKEY | RTL_QUERY_REGISTRY_NOEXPAND, L"Parameters",       NULL,                         (ULONG_PTR)NULL, NULL,                              (ULONG_PTR)NULL},
 
             {NULL, RTL_QUERY_REGISTRY_DIRECT | RTL_QUERY_REGISTRY_NOEXPAND, L"BreakOnEntry",     &pRegInfo->BreakOnEntry,      REG_DWORD,       &defRegInfo.BreakOnEntry,          sizeof(ULONG)},
             {NULL, RTL_QUERY_REGISTRY_DIRECT | RTL_QUERY_REGISTRY_NOEXPAND, L"DebugLevel",       &pRegInfo->DebugLevel,        REG_DWORD,       &defRegInfo.DebugLevel,            sizeof(ULONG)},
             {NULL, RTL_QUERY_REGISTRY_DIRECT | RTL_QUERY_REGISTRY_NOEXPAND, L"InitiatorID",      &pRegInfo->InitiatorID,       REG_DWORD,       &defRegInfo.InitiatorID,           sizeof(ULONG)},
-            // QWORDs are handled above
+            // QWORDs handled above
             {NULL, RTL_QUERY_REGISTRY_DIRECT | RTL_QUERY_REGISTRY_NOEXPAND, L"VendorId",         &pRegInfo->VendorId,          REG_SZ,          defRegInfo.VendorId.Buffer,        0},
             {NULL, RTL_QUERY_REGISTRY_DIRECT | RTL_QUERY_REGISTRY_NOEXPAND, L"ProductId",        &pRegInfo->ProductId,         REG_SZ,          defRegInfo.ProductId.Buffer,       0},
             {NULL, RTL_QUERY_REGISTRY_DIRECT | RTL_QUERY_REGISTRY_NOEXPAND, L"ProductRevision",  &pRegInfo->ProductRevision,   REG_SZ,          defRegInfo.ProductRevision.Buffer, 0},
             {NULL, RTL_QUERY_REGISTRY_DIRECT | RTL_QUERY_REGISTRY_NOEXPAND, L"NbrVirtDisks",     &pRegInfo->NbrVirtDisks,      REG_DWORD,       &defRegInfo.NbrVirtDisks,          sizeof(ULONG)},
             {NULL, RTL_QUERY_REGISTRY_DIRECT | RTL_QUERY_REGISTRY_NOEXPAND, L"NbrLUNsperHBA",    &pRegInfo->NbrLUNsperHBA,     REG_DWORD,       &defRegInfo.NbrLUNsperHBA,         sizeof(ULONG)},
             {NULL, RTL_QUERY_REGISTRY_DIRECT | RTL_QUERY_REGISTRY_NOEXPAND, L"CombineVirtDisks", &pRegInfo->bCombineVirtDisks, REG_DWORD,       &defRegInfo.bCombineVirtDisks,     sizeof(ULONG)},
-
-            // The null entry denotes the end of the array.                                                                    
+            // --- Disk backend config entries ---
+            {NULL, RTL_QUERY_REGISTRY_DIRECT | RTL_QUERY_REGISTRY_NOEXPAND, L"UseFileBackend",   &pRegInfo->UseFileBackend,   REG_DWORD,       &defRegInfo.UseFileBackend,       sizeof(ULONG)},
+            {NULL, RTL_QUERY_REGISTRY_DIRECT | RTL_QUERY_REGISTRY_NOEXPAND, L"DiskImagePath",    &pRegInfo->DiskImagePath,     REG_SZ,          defRegInfo.DiskImagePath.Buffer,   0},
             {NULL, 0,                                                       NULL,                NULL,                         (ULONG_PTR)NULL, NULL,                              (ULONG_PTR)NULL},
         };
 
@@ -194,6 +195,8 @@ Return Value:
         DbgPrint("MpQueryRegParameters: Registry read status = 0x%08X\n", status);
         DbgPrint("MpQueryRegParameters: PhysicalDiskSize = %llu, VirtualDiskSize = %llu\n",
             pRegInfo->PhysicalDiskSize, pRegInfo->VirtualDiskSize);
+        DbgPrint("MpQueryRegParameters: UseFileBackend = %lu, DiskImagePath = %wZ\n",
+            pRegInfo->UseFileBackend, &pRegInfo->DiskImagePath);
         DbgPrint("MpQueryRegParameters: NbrVirtDisks = %lu, NbrLUNsperHBA = %lu\n",
             pRegInfo->NbrVirtDisks, pRegInfo->NbrLUNsperHBA);
 
@@ -203,25 +206,28 @@ Return Value:
             goto use_defaults;
         }
 
-        // Log final values for all registry parameters for debugging
         DbgPrint("MpQueryRegParameters: Final PhysicalDiskSize = %llu, VirtualDiskSize = %llu\n",
             pRegInfo->PhysicalDiskSize, pRegInfo->VirtualDiskSize);
+        DbgPrint("MpQueryRegParameters: Final UseFileBackend = %lu, DiskImagePath = %wZ\n",
+            pRegInfo->UseFileBackend, &pRegInfo->DiskImagePath);
         DbgPrint("MpQueryRegParameters: Final NbrVirtDisks = %lu, NbrLUNsperHBA = %lu\n",
             pRegInfo->NbrVirtDisks, pRegInfo->NbrLUNsperHBA);
         return;
 
 use_defaults:
-    pRegInfo->BreakOnEntry      = defRegInfo.BreakOnEntry;
-    pRegInfo->DebugLevel        = defRegInfo.DebugLevel;
-    pRegInfo->InitiatorID       = defRegInfo.InitiatorID;
-    pRegInfo->PhysicalDiskSize  = defRegInfo.PhysicalDiskSize;
-    pRegInfo->VirtualDiskSize   = defRegInfo.VirtualDiskSize;
-    RtlCopyUnicodeString(&pRegInfo->VendorId,  &defRegInfo.VendorId);
-    RtlCopyUnicodeString(&pRegInfo->ProductId, &defRegInfo.ProductId);
-    RtlCopyUnicodeString(&pRegInfo->ProductRevision, &defRegInfo.ProductRevision);
-    pRegInfo->NbrVirtDisks      = defRegInfo.NbrVirtDisks;
-    pRegInfo->NbrLUNsperHBA     = defRegInfo.NbrLUNsperHBA;
-    pRegInfo->bCombineVirtDisks = defRegInfo.bCombineVirtDisks;
-    DbgPrint("MpQueryRegParameters: Registry read failed, using defaults.\n");
+        pRegInfo->BreakOnEntry      = defRegInfo.BreakOnEntry;
+        pRegInfo->DebugLevel        = defRegInfo.DebugLevel;
+        pRegInfo->InitiatorID       = defRegInfo.InitiatorID;
+        pRegInfo->PhysicalDiskSize  = defRegInfo.PhysicalDiskSize;
+        pRegInfo->VirtualDiskSize   = defRegInfo.VirtualDiskSize;
+        RtlCopyUnicodeString(&pRegInfo->VendorId,  &defRegInfo.VendorId);
+        RtlCopyUnicodeString(&pRegInfo->ProductId, &defRegInfo.ProductId);
+        RtlCopyUnicodeString(&pRegInfo->ProductRevision, &defRegInfo.ProductRevision);
+        pRegInfo->NbrVirtDisks      = defRegInfo.NbrVirtDisks;
+        pRegInfo->NbrLUNsperHBA     = defRegInfo.NbrLUNsperHBA;
+        pRegInfo->bCombineVirtDisks = defRegInfo.bCombineVirtDisks;
+        pRegInfo->UseFileBackend   = defRegInfo.UseFileBackend;
+        RtlCopyUnicodeString(&pRegInfo->DiskImagePath, &defRegInfo.DiskImagePath);
+        DbgPrint("MpQueryRegParameters: Registry read failed, using defaults.\n");
     }
 }                                                     // End MpQueryRegParameters().
