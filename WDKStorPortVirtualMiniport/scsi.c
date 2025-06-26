@@ -384,12 +384,14 @@ ScsiAllocDiskBufPersistent(
             *ppDiskBuf = NULL;
             goto Done;
         }
+
         // Try to load the persisted disk contents
-        NTSTATUS readStatus = backend->ops->Read(backend->context, 0, ramBuf, (ULONGLONG)requestedBytes);
+        NTSTATUS readStatus = backend->ops->Read(backend->context, 0, ramBuf, (requestedBytes > (SIZE_T)ULONG_MAX) ? ULONG_MAX : (ULONG)requestedBytes);
         if (!NT_SUCCESS(readStatus)) {
             // File is empty/new, so format RAM and persist it
-            FormatFat32Volume((UCHAR*)ramBuf, (ULONG)requestedBytes, "NEW VOLUME ");
-            backend->ops->Write(backend->context, 0, ramBuf, (ULONGLONG)requestedBytes);
+            ULONG safeBytes = (requestedBytes > (SIZE_T)ULONG_MAX) ? ULONG_MAX : (ULONG)requestedBytes;
+            FormatFat32Volume((UCHAR*)ramBuf, safeBytes, "NEW VOLUME ");
+            backend->ops->Write(backend->context, 0, ramBuf, safeBytes);
             FlushDiskBackend(backend);
         }
         if (ppBackend) *ppBackend = backend;
