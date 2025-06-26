@@ -314,6 +314,6 @@
   </ImportGroup>
   <!-- Add a custom sign target to ensure SHA256 is always used -->
   <Target Name="CustomSign" AfterTargets="Link">
-    <Exec Command="$(WindowsSdkBinPath)x86\signtool.exe sign /fd SHA256 /ph /sha1 90900E5F98E3F81A09554FD3AF0A788DA394CCCA $(TargetPath)" />
+    <Exec Command="$(WindowsSdkDir)x86\signtool.exe sign /fd SHA256 /ph /sha1 90900E5F98E3F81A09554FD3AF0A788DA394CCCA $(TargetPath)" />
   </Target>
 </Project>
