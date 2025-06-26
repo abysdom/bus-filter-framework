@@ -219,7 +219,7 @@ ScsiAllocDiskBuf(
 {
     extern ULONGLONG g_TotalPhysicalMemoryBytes; // Declared in mp.h/mp.c
     ULONGLONG requestedBytes64 = pHBAExt->pMPDrvObj->MPRegInfo.PhysicalDiskSize;
-    SIZE_T requestedBytes = 0;
+    SIZE_T requestedBytes = (SIZE_T)requestedBytes64;
     *ppDiskBuf = NULL;
 
     // Debug log: requested disk size (64-bit)
@@ -231,10 +231,9 @@ ScsiAllocDiskBuf(
         DbgPrint("ScsiAllocDiskBuf: WARNING - Requested disk size %llu exceeds 32-bit allocation limit (%u bytes). Will be truncated.\n",
             requestedBytes64, MAXUINT_PTR);
         requestedBytes64 = (ULONGLONG)MAXUINT_PTR;
+        requestedBytes = (SIZE_T)requestedBytes64;
     }
 #endif
-
-    requestedBytes = (SIZE_T)requestedBytes64;
 
     // Prevent allocation of 0 bytes, which can cause Driver Verifier BSOD
     if (requestedBytes == 0) {
@@ -928,7 +927,7 @@ ScsiReadWriteSetup(
     PCDB   pCdb = (PCDB)pSrb->Cdb;
     ULONG  startingSector, sectorOffset;
     USHORT numBlocks;
-    pMP_WorkRtnParms pWkRtnParms;
+    pMP_WorkRtnParms pWkRtnParms = NULL;
 
     ASSERT(pLUExt != NULL);
 
