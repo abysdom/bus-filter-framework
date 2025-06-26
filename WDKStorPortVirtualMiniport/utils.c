@@ -132,7 +132,7 @@ Return Value:
     RtlInitUnicodeString(&defRegInfo.ProductRevision, PRODUCT_REV);
 
     // === Disk backend config defaults ===
-    defRegInfo.bUseFileBackend = DEFAULT_UseFileBackend;
+    defRegInfo.UseFileBackend = DEFAULT_UseFileBackend;
     RtlInitUnicodeString(&defRegInfo.DiskImagePath, L"");
 
     {
@@ -177,7 +177,7 @@ Return Value:
             {NULL, RTL_QUERY_REGISTRY_DIRECT | RTL_QUERY_REGISTRY_NOEXPAND, L"NbrLUNsperHBA",    &pRegInfo->NbrLUNsperHBA,     REG_DWORD,       &defRegInfo.NbrLUNsperHBA,         sizeof(ULONG)},
             {NULL, RTL_QUERY_REGISTRY_DIRECT | RTL_QUERY_REGISTRY_NOEXPAND, L"CombineVirtDisks", &pRegInfo->bCombineVirtDisks, REG_DWORD,       &defRegInfo.bCombineVirtDisks,     sizeof(ULONG)},
             // --- Disk backend config entries ---
-            {NULL, RTL_QUERY_REGISTRY_DIRECT | RTL_QUERY_REGISTRY_NOEXPAND, L"UseFileBackend",   &pRegInfo->bUseFileBackend,   REG_DWORD,       &defRegInfo.bUseFileBackend,       sizeof(ULONG)},
+            {NULL, RTL_QUERY_REGISTRY_DIRECT | RTL_QUERY_REGISTRY_NOEXPAND, L"UseFileBackend",   &pRegInfo->UseFileBackend,   REG_DWORD,       &defRegInfo.UseFileBackend,       sizeof(ULONG)},
             {NULL, RTL_QUERY_REGISTRY_DIRECT | RTL_QUERY_REGISTRY_NOEXPAND, L"DiskImagePath",    &pRegInfo->DiskImagePath,     REG_SZ,          defRegInfo.DiskImagePath.Buffer,   0},
             {NULL, 0,                                                       NULL,                NULL,                         (ULONG_PTR)NULL, NULL,                              (ULONG_PTR)NULL},
         };
@@ -196,7 +196,7 @@ Return Value:
         DbgPrint("MpQueryRegParameters: PhysicalDiskSize = %llu, VirtualDiskSize = %llu\n",
             pRegInfo->PhysicalDiskSize, pRegInfo->VirtualDiskSize);
         DbgPrint("MpQueryRegParameters: UseFileBackend = %lu, DiskImagePath = %wZ\n",
-            pRegInfo->bUseFileBackend, &pRegInfo->DiskImagePath);
+            pRegInfo->UseFileBackend, &pRegInfo->DiskImagePath);
         DbgPrint("MpQueryRegParameters: NbrVirtDisks = %lu, NbrLUNsperHBA = %lu\n",
             pRegInfo->NbrVirtDisks, pRegInfo->NbrLUNsperHBA);
 
@@ -209,7 +209,7 @@ Return Value:
         DbgPrint("MpQueryRegParameters: Final PhysicalDiskSize = %llu, VirtualDiskSize = %llu\n",
             pRegInfo->PhysicalDiskSize, pRegInfo->VirtualDiskSize);
         DbgPrint("MpQueryRegParameters: Final UseFileBackend = %lu, DiskImagePath = %wZ\n",
-            pRegInfo->bUseFileBackend, &pRegInfo->DiskImagePath);
+            pRegInfo->UseFileBackend, &pRegInfo->DiskImagePath);
         DbgPrint("MpQueryRegParameters: Final NbrVirtDisks = %lu, NbrLUNsperHBA = %lu\n",
             pRegInfo->NbrVirtDisks, pRegInfo->NbrLUNsperHBA);
         return;
@@ -226,7 +226,7 @@ use_defaults:
         pRegInfo->NbrVirtDisks      = defRegInfo.NbrVirtDisks;
         pRegInfo->NbrLUNsperHBA     = defRegInfo.NbrLUNsperHBA;
         pRegInfo->bCombineVirtDisks = defRegInfo.bCombineVirtDisks;
-        pRegInfo->bUseFileBackend   = defRegInfo.bUseFileBackend;
+        pRegInfo->UseFileBackend   = defRegInfo.UseFileBackend;
         RtlCopyUnicodeString(&pRegInfo->DiskImagePath, &defRegInfo.DiskImagePath);
         DbgPrint("MpQueryRegParameters: Registry read failed, using defaults.\n");
     }
