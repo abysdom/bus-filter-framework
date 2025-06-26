@@ -55,6 +55,10 @@ MPDriverInfo  lclDriverInfo;
 
 pMPDriverInfo pMPDrvInfoGlobal = NULL;
 
+// ================== RAM CACHING SUPPORT ==================
+ULONGLONG g_TotalPhysicalMemoryBytes = 0;
+// =========================================================
+
 /**************************************************************************************************/ 
 /*                                                                                                */ 
 /*                                                                                                */ 
@@ -121,6 +125,11 @@ DriverEntry(
         // Physical & Virtual size must match for using full disk
         pMPDrvInfo->MPRegInfo.VirtualDiskSize = pMPDrvInfo->MPRegInfo.PhysicalDiskSize;
     }
+
+    // ================== RAM CACHING SUPPORT ==================
+    // Query and cache total physical RAM at PASSIVE_LEVEL
+    CacheTotalPhysicalMemory();
+    // =========================================================
 
     // Set up information for StorPortInitialize().
 

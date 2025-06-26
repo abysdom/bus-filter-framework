@@ -99,8 +99,8 @@ typedef struct _MP_REG_INFO {
     ULONG            BreakOnEntry;       // Break into debugger
     ULONG            DebugLevel;         // Debug log level
     ULONG            InitiatorID;        // Adapter's target ID
-    ULONG            VirtualDiskSize;    // Disk size to be reported
-    ULONG            PhysicalDiskSize;   // Disk size to be allocated
+    ULONGLONG        VirtualDiskSize;    // Disk size to be reported (64-bit)
+    ULONGLONG        PhysicalDiskSize;   // Disk size to be allocated (64-bit)
     ULONG            NbrVirtDisks;       // Number of virtual disks.
     ULONG            NbrLUNsperHBA;      // Number of LUNs per HBA.
     ULONG            bCombineVirtDisks;  // 0 => do not combine virtual disks a la MPIO.
@@ -213,6 +213,26 @@ typedef struct _RegWorkBuffer {
   pHW_HBA_EXT          pAdapterExt;
   UCHAR                Work[256];
 } RegWorkBuffer, * pRegWorkBuffer;
+
+
+/* =====================  ADDED FOR RAM CACHING SUPPORT  ===================== */
+
+// Cache for total physical RAM (initialized at DriverEntry)
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+extern ULONGLONG g_TotalPhysicalMemoryBytes;
+
+// Function to query and cache total physical RAM at PASSIVE_LEVEL
+NTSTATUS CacheTotalPhysicalMemory(VOID);
+
+#ifdef __cplusplus
+}
+#endif
+
+/* =====================  END RAM CACHING SUPPORT  ===================== */
+
 
 __declspec(dllexport)                                 // Ensure DriverEntry entry point visible to WinDbg even without a matching .pdb.            
 ULONG                                                                                                                                              
@@ -446,4 +466,3 @@ MpCompServReq(
 
 #endif    //   #if !defined(_MP_User_Mode_Only)
 #endif    // _MP_H_
-
