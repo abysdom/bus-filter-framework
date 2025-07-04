@@ -44,7 +44,7 @@ jobs:
       matrix:
         include:
         - language: c-cpp
-          build-mode: autobuild
+          build-mode: manual 
         # CodeQL supports the following values keywords for 'language': 'c-cpp', 'csharp', 'go', 'java-kotlin', 'javascript-typescript', 'python', 'ruby', 'swift'
         # Use `c-cpp` to analyze code written in C, C++ or both
         # Use 'java-kotlin' to analyze code written in Java, Kotlin or both
@@ -56,6 +56,8 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+      with:
+        submodules: recursive
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
@@ -80,7 +82,7 @@ jobs:
     - if: matrix.build-mode == 'manual'
       env:
         # Path to the solution file relative to the root of the project.
-        SOLUTION_FILE_PATH: .\WDKStorPortVirtualMiniport\mp\mp.sln
+        SOLUTION_FILE_PATH: .\mp\mp.sln
 
         # Configuration type to build.
         # You can convert this to a build matrix if you need coverage of multiple configuration types.

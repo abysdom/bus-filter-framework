@@ -61,12 +61,14 @@
     <DriverTargetPlatform>Desktop</DriverTargetPlatform>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <TargetVersion>Windows7</TargetVersion>
+    <TargetVersion>Windows10</TargetVersion>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
     <ConfigurationType>Driver</ConfigurationType>
     <DriverType>KMDF</DriverType>
     <DriverTargetPlatform>Desktop</DriverTargetPlatform>
+    <KMDF_VERSION_MAJOR>1</KMDF_VERSION_MAJOR>
+    <KMDF_VERSION_MINOR>9</KMDF_VERSION_MINOR>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <TargetVersion>Windows10</TargetVersion>
@@ -75,6 +77,8 @@
     <ConfigurationType>Driver</ConfigurationType>
     <DriverType>KMDF</DriverType>
     <DriverTargetPlatform>Desktop</DriverTargetPlatform>
+    <KMDF_VERSION_MAJOR>1</KMDF_VERSION_MAJOR>
+    <KMDF_VERSION_MINOR>9</KMDF_VERSION_MINOR>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'" Label="Configuration">
     <TargetVersion>Windows10</TargetVersion>
@@ -128,13 +132,13 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
-    <IncludePath>$(ProjectDir);$(IncludePath);..\inc</IncludePath>
-    <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
+    <IncludePath>$(ProjectDir);$(IncludePath);..\WDKStorPortVirtualMiniport\inc</IncludePath>
+    <PostBuildEventUseInBuild>true</PostBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
-    <IncludePath>$(ProjectDir);$(IncludePath);..\inc</IncludePath>
-    <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
+    <IncludePath>$(ProjectDir);$(IncludePath);..\WDKStorPortVirtualMiniport\inc</IncludePath>
+    <PostBuildEventUseInBuild>true</PostBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
@@ -363,9 +367,9 @@
       <PreprocessorDefinitions>_WIN64;_AMD64_;AMD64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <WppEnabled>true</WppEnabled>
       <WppGenerateUsingTemplateFile>{km-w2k.tpl}*.tmh</WppGenerateUsingTemplateFile>
-      <WppScanConfigurationData>..\inc\trace.h</WppScanConfigurationData>
-      <WppAdditionalConfigurationFile>..\inc\trcmp.ini</WppAdditionalConfigurationFile>
-      <WppOutputDirectory>..\inc</WppOutputDirectory>
+      <WppScanConfigurationData>..\WDKStorPortVirtualMiniport\inc\trace.h</WppScanConfigurationData>
+      <WppAdditionalConfigurationFile>..\WDKStorPortVirtualMiniport\inc\trcmp.ini</WppAdditionalConfigurationFile>
+      <WppOutputDirectory>..\WDKStorPortVirtualMiniport\inc</WppOutputDirectory>
     </ClCompile>
     <Link>
       <AdditionalDependencies>storport.lib;scsiwmi.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -377,10 +381,10 @@
       <SpecifyDriverVerDirectiveDate>true</SpecifyDriverVerDirectiveDate>
     </Inf>
     <PostBuildEvent>
-      <Command>copy ..\LICENSE-2.0.txt $(OutDir)</Command>
+      <Command>copy ..\LICENSE $(OutDir)$(ProjectName)</Command>
     </PostBuildEvent>
     <PostBuildEvent>
-      <Message>Copy LICENSE-2.0.txt...</Message>
+      <Message>Copy LICENSE...</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -396,9 +400,9 @@
       <PreprocessorDefinitions>_WIN64;_AMD64_;AMD64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <WppEnabled>true</WppEnabled>
       <WppGenerateUsingTemplateFile>{km-w2k.tpl}*.tmh</WppGenerateUsingTemplateFile>
-      <WppScanConfigurationData>..\inc\trace.h</WppScanConfigurationData>
-      <WppAdditionalConfigurationFile>..\inc\trcmp.ini</WppAdditionalConfigurationFile>
-      <WppOutputDirectory>..\inc</WppOutputDirectory>
+      <WppScanConfigurationData>..\WDKStorPortVirtualMiniport\inc\trace.h</WppScanConfigurationData>
+      <WppAdditionalConfigurationFile>..\WDKStorPortVirtualMiniport\inc\trcmp.ini</WppAdditionalConfigurationFile>
+      <WppOutputDirectory>..\WDKStorPortVirtualMiniport\inc</WppOutputDirectory>
     </ClCompile>
     <Link>
       <AdditionalDependencies>storport.lib;scsiwmi.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -410,10 +414,10 @@
       <SpecifyDriverVerDirectiveDate>true</SpecifyDriverVerDirectiveDate>
     </Inf>
     <PostBuildEvent>
-      <Command>copy ..\LICENSE-2.0.txt $(OutDir)</Command>
+      <Command>copy ..\LICENSE $(OutDir)$(ProjectName)</Command>
     </PostBuildEvent>
     <PostBuildEvent>
-      <Message>Copy LICENSE-2.0.txt...</Message>
+      <Message>Copy LICENSE...</Message>
     </PostBuildEvent>
     <DriverSign />
     <DriverSign>
@@ -435,27 +439,27 @@
     </FilesToPackage>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\fat32_format.c" />
-    <ClCompile Include="..\mp.c" />
-    <ClCompile Include="..\scsi.c" />
-    <ClCompile Include="..\utils.c" />
-    <ClCompile Include="..\WkRtn.c" />
-    <ClCompile Include="..\wmi.c" />
+    <Mofcomp Include="..\WDKStorPortVirtualMiniport\mp.mof" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\inc\common.h" />
-    <ClInclude Include="..\inc\fat32_format.h" />
-    <ClInclude Include="..\inc\mp.h" />
-    <ClInclude Include="..\inc\trace.h" />
+    <ClInclude Include="..\WDKStorPortVirtualMiniport\inc\common.h" />
+    <ClInclude Include="..\WDKStorPortVirtualMiniport\inc\fat32_format.h" />
+    <ClInclude Include="..\WDKStorPortVirtualMiniport\inc\mp.h" />
+    <ClInclude Include="..\WDKStorPortVirtualMiniport\inc\trace.h" />
   </ItemGroup>
   <ItemGroup>
-    <Mofcomp Include="..\mp.mof" />
+    <None Include="..\WDKStorPortVirtualMiniport\inc\trcmp.ini" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="..\mp.rc" />
+    <ResourceCompile Include="..\WDKStorPortVirtualMiniport\mp.rc" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\inc\trcmp.ini" />
+    <ClCompile Include="..\WDKStorPortVirtualMiniport\fat32_format.c" />
+    <ClCompile Include="..\WDKStorPortVirtualMiniport\mp.c" />
+    <ClCompile Include="..\WDKStorPortVirtualMiniport\scsi.c" />
+    <ClCompile Include="..\WDKStorPortVirtualMiniport\utils.c" />
+    <ClCompile Include="..\WDKStorPortVirtualMiniport\WkRtn.c" />
+    <ClCompile Include="..\WDKStorPortVirtualMiniport\wmi.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

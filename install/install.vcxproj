@@ -35,7 +35,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\BusFilter\BusFilter.vcxproj">
+    <ProjectReference Include="..\BusFilter\BusFilter.vcxproj">
       <Project>{e65d39a3-0da9-4a25-ba70-2a5092c2ec5e}</Project>
     </ProjectReference>
     <ProjectReference Include="..\mp\mp.vcxproj">
@@ -74,7 +74,7 @@
     <DriverTargetPlatform>Desktop</DriverTargetPlatform>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <TargetVersion>Windows7</TargetVersion>
+    <TargetVersion>Windows10</TargetVersion>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
     <ConfigurationType>Utility</ConfigurationType>

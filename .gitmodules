@@ -1,0 +1,3 @@
+[submodule "WDKStorPortVirtualMiniport"]
+	path = WDKStorPortVirtualMiniport
+	url = git@github.com:abysdom/WDKStorPortVirtualMiniport.git

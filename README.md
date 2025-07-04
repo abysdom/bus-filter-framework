@@ -1,7 +1,7 @@
 # Bus Filter Framework
 A framework for Windows KMDF-based upper filter drivers to behave as bus filters. You don't need to write WDM drivers any more!
 # Sample Driver
-Check the code in the BusFilter directory as well as ReadMe.htm in the WDKStorPortVirtualMiniport directory. To build the sample driver, open WDKStorPortVirtualMiniport\mp\mp.sln with Visual Studio Community Edition.
+Check the code in the BusFilter directory as well as ReadMe.htm in the WDKStorPortVirtualMiniport directory. To build the sample driver, open mp\mp.sln with Visual Studio Community Edition.
 # Documentation
 Please navigate to [here](https://bus-filter-framework.blogspot.tw/p/documentation.html).
 # FAQ
