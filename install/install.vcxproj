@@ -257,27 +257,35 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <PostBuildEvent>
-      <Command>
-      </Command>
+      <Command>copy $(OutDir)LegalPropertyPage.dll $(OutDir)$(ProjectName)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <PostBuildEvent>
-      <Message>
-      </Message>
+      <Message>Copy the property page DLL...</Message>
+    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>if NOT EXIST $(OutDir)$(ProjectName) md $(OutDir)$(ProjectName)</Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Message>Make the package folder...</Message>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <PostBuildEvent>
+      <Command>copy $(OutDir)LegalPropertyPage.dll $(OutDir)$(ProjectName)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <PostBuildEvent>
-      <Command>
-      </Command>
+      <Message>Copy the property page DLL...</Message>
     </PostBuildEvent>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <PostBuildEvent>
-      <Message>
-      </Message>
-    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>if NOT EXIST $(OutDir)$(ProjectName) md $(OutDir)$(ProjectName)</Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Message>Make the package folder...</Message>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <PostBuildEvent>
@@ -305,31 +313,39 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <PostBuildEvent>
-      <Command>
-      </Command>
+      <Command>copy $(OutDir)LegalPropertyPage.dll $(OutDir)$(ProjectName)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <PostBuildEvent>
-      <Message>
-      </Message>
+      <Message>Copy the property page DLL...</Message>
+    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>if NOT EXIST $(OutDir)$(ProjectName) md $(OutDir)$(ProjectName)</Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Message>Make the package folder...</Message>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <PostBuildEvent>
+      <Command>copy $(OutDir)LegalPropertyPage.dll $(OutDir)$(ProjectName)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <PostBuildEvent>
-      <Command>
-      </Command>
-    </PostBuildEvent>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <PostBuildEvent>
-      <Message>
-      </Message>
+      <Message>Copy the property page DLL...</Message>
     </PostBuildEvent>
     <DriverSign />
     <DriverSign>
       <AdditionalOptions>/fd SHA256 %(AdditionalOptions)</AdditionalOptions>
     </DriverSign>
+    <PreBuildEvent>
+      <Command>if NOT EXIST $(OutDir)$(ProjectName) md $(OutDir)$(ProjectName)</Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Message>Make the package folder...</Message>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

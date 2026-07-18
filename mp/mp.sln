@@ -4,20 +4,28 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.12.35514.174
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mp", "mp.vcxproj", "{325A9717-AF6F-41B9-98A7-AECA1923E108}"
-	ProjectSection(ProjectDependencies) = postProject
-		{A1E905CB-21AF-4167-87D9-90927A7A67C6} = {A1E905CB-21AF-4167-87D9-90927A7A67C6}
-		{E65D39A3-0DA9-4A25-BA70-2A5092C2EC5E} = {E65D39A3-0DA9-4A25-BA70-2A5092C2EC5E}
-	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "install", "..\install\install.vcxproj", "{F1030D64-1140-4EC8-8D65-C7821B7DD8A1}"
 	ProjectSection(ProjectDependencies) = postProject
+		{842175A0-8B2E-4164-B7F8-086D4CAE12BD} = {842175A0-8B2E-4164-B7F8-086D4CAE12BD}
 		{A1E905CB-21AF-4167-87D9-90927A7A67C6} = {A1E905CB-21AF-4167-87D9-90927A7A67C6}
 		{E65D39A3-0DA9-4A25-BA70-2A5092C2EC5E} = {E65D39A3-0DA9-4A25-BA70-2A5092C2EC5E}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bff", "..\bff\bff.vcxproj", "{A1E905CB-21AF-4167-87D9-90927A7A67C6}"
+	ProjectSection(ProjectDependencies) = postProject
+		{325A9717-AF6F-41B9-98A7-AECA1923E108} = {325A9717-AF6F-41B9-98A7-AECA1923E108}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BusFilter", "..\BusFilter\BusFilter.vcxproj", "{E65D39A3-0DA9-4A25-BA70-2A5092C2EC5E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{325A9717-AF6F-41B9-98A7-AECA1923E108} = {325A9717-AF6F-41B9-98A7-AECA1923E108}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LegalPropertyPage", "..\LegalPropertyPage\LegalPropertyPage.vcxproj", "{842175A0-8B2E-4164-B7F8-086D4CAE12BD}"
+	ProjectSection(ProjectDependencies) = postProject
+		{325A9717-AF6F-41B9-98A7-AECA1923E108} = {325A9717-AF6F-41B9-98A7-AECA1923E108}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -47,6 +55,10 @@ Global
 		{E65D39A3-0DA9-4A25-BA70-2A5092C2EC5E}.Release|x86.ActiveCfg = Release|Win32
 		{E65D39A3-0DA9-4A25-BA70-2A5092C2EC5E}.Release|x86.Build.0 = Release|Win32
 		{E65D39A3-0DA9-4A25-BA70-2A5092C2EC5E}.Release|x86.Deploy.0 = Release|Win32
+		{842175A0-8B2E-4164-B7F8-086D4CAE12BD}.Release|x64.ActiveCfg = Release|x64
+		{842175A0-8B2E-4164-B7F8-086D4CAE12BD}.Release|x64.Build.0 = Release|x64
+		{842175A0-8B2E-4164-B7F8-086D4CAE12BD}.Release|x86.ActiveCfg = Release|Win32
+		{842175A0-8B2E-4164-B7F8-086D4CAE12BD}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

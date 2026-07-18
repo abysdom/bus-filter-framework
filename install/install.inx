@@ -15,6 +15,7 @@ PnpLockdown=1
 
 [DestinationDirs]
 DefaultDestDir = 12
+Device_Property_Page_File=11
 MP_Device_CoInstaller_CopyFiles = 11
 
 [Manufacturer]
@@ -26,6 +27,14 @@ MP_Device_CoInstaller_CopyFiles = 11
 [MP_Device]
 CopyFiles=@mp.sys
 CopyFiles=@BusFilter.sys
+CopyFiles=Device_Property_Page_File
+AddReg=Device_Property_Page
+
+[Device_Property_Page_File]
+LegalPropertyPage.dll
+
+[Device_Property_Page]
+HKR,,EnumPropPages32,0, "LegalPropertyPage.dll,LegalPropertyPageProvider"
 
 [MP_Device.HW]
 AddReg = MP_Device_AddReg
@@ -65,6 +74,7 @@ HKR,,TypesSupported,0x00010001,7
 [SourceDisksFiles.$ARCH$]
 mp.sys = 1,
 BusFilter.sys = 1,
+LegalPropertyPage.dll=1,
 WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1,  ; make sure the number matches with SourceDisksNames
 
 ;

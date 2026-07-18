@@ -249,10 +249,12 @@
       <SpecifyDriverVerDirectiveDate>true</SpecifyDriverVerDirectiveDate>
     </Inf>
     <PostBuildEvent>
-      <Command>copy ..\LICENSE-2.0.txt $(OutDir)</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
     <PostBuildEvent>
-      <Message>Copy LICENSE-2.0.txt...</Message>
+      <Message>
+      </Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -282,10 +284,12 @@
       <SpecifyDriverVerDirectiveDate>true</SpecifyDriverVerDirectiveDate>
     </Inf>
     <PostBuildEvent>
-      <Command>copy ..\LICENSE-2.0.txt $(OutDir)</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
     <PostBuildEvent>
-      <Message>Copy LICENSE-2.0.txt...</Message>
+      <Message>
+      </Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
@@ -315,10 +319,12 @@
       <SpecifyDriverVerDirectiveDate>true</SpecifyDriverVerDirectiveDate>
     </Inf>
     <PostBuildEvent>
-      <Command>copy ..\LICENSE-2.0.txt $(OutDir)</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
     <PostBuildEvent>
-      <Message>Copy LICENSE-2.0.txt...</Message>
+      <Message>
+      </Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
@@ -348,10 +354,12 @@
       <SpecifyDriverVerDirectiveDate>true</SpecifyDriverVerDirectiveDate>
     </Inf>
     <PostBuildEvent>
-      <Command>copy ..\LICENSE-2.0.txt $(OutDir)</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
     <PostBuildEvent>
-      <Message>Copy LICENSE-2.0.txt...</Message>
+      <Message>
+      </Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -381,10 +389,12 @@
       <SpecifyDriverVerDirectiveDate>true</SpecifyDriverVerDirectiveDate>
     </Inf>
     <PostBuildEvent>
-      <Command>copy ..\LICENSE $(OutDir)$(ProjectName)</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
     <PostBuildEvent>
-      <Message>Copy LICENSE...</Message>
+      <Message>
+      </Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -414,10 +424,12 @@
       <SpecifyDriverVerDirectiveDate>true</SpecifyDriverVerDirectiveDate>
     </Inf>
     <PostBuildEvent>
-      <Command>copy ..\LICENSE $(OutDir)$(ProjectName)</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
     <PostBuildEvent>
-      <Message>Copy LICENSE...</Message>
+      <Message>
+      </Message>
     </PostBuildEvent>
     <DriverSign />
     <DriverSign>
