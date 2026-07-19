@@ -10,6 +10,13 @@ Check the code in the BusFilter directory as well as ReadMe.htm in the WDKStorPo
 ## Alternative to Uninstallation
 1. pnputil /remove-device /deviceid root\mp
 2. pnputil /delete-driver oemXX.inf
+## Screenshots
+1. Driver Details\
+![Driver Details](screenshots/drvdtail.jpg)
+2. GPL v3 Notice\
+![GPL v3 Notice](screenshots/proppage.jpg)
+3. Compatible IDs\
+![Compatible IDs](screenshots/cmptblid.jpg)
 # Documentation
 Please navigate to [here](https://bus-filter-framework.blogspot.tw/p/documentation.html).
 # FAQ
