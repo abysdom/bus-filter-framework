@@ -19,6 +19,17 @@ on:
   schedule:
     - cron: '38 7 * * 5'
 
+env:
+  # Path to the solution file relative to the root of the project.
+  SOLUTION_FILE_PATH: .\mp\mp.sln
+
+  # Configuration type to build.
+  # You can convert this to a build matrix if you need coverage of multiple configuration types.
+  # https://docs.github.com/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+  BUILD_CONFIGURATION: Release
+  BUILD_PLATFORM: x64
+  TARGET_VERSION: Windows10
+
 jobs:
   analyze:
     name: Analyze (${{ matrix.language }})
@@ -27,7 +38,7 @@ jobs:
     #   - https://gh.io/supported-runners-and-hardware-resources
     #   - https://gh.io/using-larger-runners (GitHub.com only)
     # Consider using larger runners or machines with greater resources for possible analysis time improvements.
-    runs-on: 'windows-latest'
+    runs-on: 'windows-2022'
     permissions:
       # required for all workflows
       security-events: write
@@ -61,7 +72,7 @@ jobs:
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@v3
+      uses: github/codeql-action/init@v4
       with:
         languages: ${{ matrix.language }}
         build-mode: ${{ matrix.build-mode }}
@@ -73,6 +84,13 @@ jobs:
         # queries: security-extended,security-and-quality
         queries: security-and-quality
 
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v1.0.2
+
+    - name: Restore NuGet packages
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: nuget restore ${{env.SOLUTION_FILE_PATH}}
+
     # If the analyze step fails for one of the languages you are analyzing with
     # "We were unable to automatically build your code", modify the matrix above
     # to set the build mode to "manual" for that language. Then modify this step
@@ -80,16 +98,6 @@ jobs:
     # ℹ️ Command-line programs to run using the OS shell.
     # 📚 See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsrun
     - if: matrix.build-mode == 'manual'
-      env:
-        # Path to the solution file relative to the root of the project.
-        SOLUTION_FILE_PATH: .\mp\mp.sln
-
-        # Configuration type to build.
-        # You can convert this to a build matrix if you need coverage of multiple configuration types.
-        # https://docs.github.com/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
-        BUILD_CONFIGURATION: Release
-        BUILD_PLATFORM: x64
-        TARGET_VERSION: Windows10
       shell: cmd
       working-directory: .
       run: |
@@ -97,6 +105,6 @@ jobs:
         msbuild /t:clean /t:build /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=${{env.BUILD_PLATFORM}} /p:TargetVersion=${{env.TARGET_VERSION}} ${{env.SOLUTION_FILE_PATH}}
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v3
+      uses: github/codeql-action/analyze@v4
       with:
         category: "/language:${{matrix.language}}"
