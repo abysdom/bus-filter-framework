@@ -1,4 +1,7 @@
 # Bus Filter Framework
+<p align="center">
+  <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjA3T7ljwRoDbPJ3ld0ybkv1dw3qs9Dk8xZrVtxnzN1BuRb7LzIVEmpzrL62lFOCSQFdmrj31fxv7QezNP4YzGoSI0tckC8giHW0DrSn1WcuAsh1hJyA_05JBcYK5GUXeg/s113/imageedit_1_4876990325.png" />
+</p>
 
 Bus Filter Framework (BFF) is an open-source framework that enables Windows Kernel-Mode Driver Framework (KMDF) upper filter drivers to behave as Bus Filter Drivers without requiring developers to implement a full Windows Driver Model (WDM) bus driver.
 
