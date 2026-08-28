@@ -32,10 +32,10 @@
 typedef struct _DEVICE_EXTENSION
 {
     GUID Signature;
+
     //
     // Target Device Object
     //
-
     PDEVICE_OBJECT TargetDeviceObject;
 
     //
@@ -46,6 +46,7 @@ typedef struct _DEVICE_EXTENSION
     LIST_ENTRY List;
     WDFDEVICE Parent; // The upper filter of the parent bus
     WDFOBJECT Child;
+    IO_REMOVE_LOCK RemoveLock;
     BOOLEAN Existing;
 } DEVICE_EXTENSION, *PDEVICE_EXTENSION;
 

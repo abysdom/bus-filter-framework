@@ -34,7 +34,7 @@ DEFINE_GUID(GUID_BUS_FILTER_FRAMEWORK, 0x9b72ba39, 0x1052, 0x4d96, 0x9e, 0xe8, 0
 static PDRIVER_DISPATCH WdfMajorFunction[IRP_MJ_MAXIMUM_FUNCTION + 1];
 static BFF_INITIALIZATION_DATA BffInitializationData;
 
-static FORCEINLINE VOID BffRemoveDevice(IN PDEVICE_OBJECT DeviceObject)
+static FORCEINLINE VOID BffRemoveDevice(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp)
 /*++
 
 Routine Description:
@@ -45,7 +45,7 @@ Routine Description:
 Arguments:
 
     DeviceObject - a pointer to the device object
-
+    Irp          - the remove IRP
 
 Return Value:
     None
@@ -61,7 +61,10 @@ Return Value:
     // parentContext could be NULL if BffAllocateContext had not been called yet.
     //
     if (!parentContext)
+    {
+        IoReleaseRemoveLock(&deviceExtension->RemoveLock, Irp);
         return;
+    }
 
     //
     // Quoted from https://msdn.microsoft.com/en-us/library/windows/hardware/ff561048(v=vs.85).aspx
@@ -89,8 +92,16 @@ Return Value:
     // until the PnP manager sends an IRP_MN_REMOVE_DEVICE request.
     //
     if (deviceExtension->Existing)
+    {
+        IoReleaseRemoveLock(&deviceExtension->RemoveLock, Irp);
         return;
+    }
 
+    // Allow queued I/O operations to complete
+    IoReleaseRemoveLockAndWait(&deviceExtension->RemoveLock, Irp);
+
+    // At this point, all outstanding acquisitions of RemoveLock have been released;
+    // DeviceObject is ready to be removed.
     KeAcquireInStackQueuedSpinLock(&parentContext->Lock, &handle);
     RemoveEntryList(&deviceExtension->List);
     KeReleaseInStackQueuedSpinLock(&handle);
@@ -126,6 +137,7 @@ Return Value:
     PIO_STACK_LOCATION stack = IoGetCurrentIrpStackLocation(Irp);
     UCHAR major = stack->MajorFunction;
     UCHAR minor = stack->MinorFunction;
+    NTSTATUS status;
 
     if (!IsEqualGUID(&deviceExtension->Signature, &GUID_BUS_FILTER_FRAMEWORK))
     {
@@ -140,19 +152,44 @@ Return Value:
     //
     if (major == IRP_MJ_PNP && minor <= IRP_MN_DEVICE_ENUMERATED)
     {
-        if (minor == IRP_MN_REMOVE_DEVICE)
-            BffRemoveDevice(DeviceObject);
-        else if (BffInitializationData.PnPMinorFunction[minor])
-            return BffInitializationData.PnPMinorFunction[minor](deviceExtension->Child, Irp);
-        // fall through if the PnP minor function doesn't exist.
+        status = IoAcquireRemoveLock(&deviceExtension->RemoveLock, Irp);
+        if (!NT_SUCCESS(status))
+        {
+            // Failure to acquire a remove lock indicates that DeviceObject is being deleted.
+            Irp->IoStatus.Status = STATUS_DELETE_PENDING;
+            IoCompleteRequest(Irp, IO_NO_INCREMENT);
+            return STATUS_DELETE_PENDING;
+        }
+
+        if (minor != IRP_MN_REMOVE_DEVICE)
+        {
+            if (BffInitializationData.PnPMinorFunction[minor])
+            {
+                status = BffInitializationData.PnPMinorFunction[minor](deviceExtension->Child, Irp);
+                IoReleaseRemoveLock(&deviceExtension->RemoveLock, Irp);
+                return status;
+            }
+            else
+            {
+                IoReleaseRemoveLock(&deviceExtension->RemoveLock, Irp);
+            }
+            // fall through if the PnP minor function doesn't exist.
+        }
     }
 
     //
     // Forward to the parent bus driver
     //
     IoSkipCurrentIrpStackLocation(Irp);
-    return IoCallDriver(deviceExtension->TargetDeviceObject, Irp);
+    status = IoCallDriver(deviceExtension->TargetDeviceObject, Irp);
 
+    if (major == IRP_MJ_PNP && minor == IRP_MN_REMOVE_DEVICE)
+    {
+        // RemoveLock will be released within BffRemoveDevice.
+        BffRemoveDevice(DeviceObject, Irp);
+    }
+
+    return status;
 } // end BffDispatchAny()
 
 static VOID BffLogError(IN PDEVICE_OBJECT DeviceObject, IN ULONG UniqueId, IN NTSTATUS ErrorCode, IN NTSTATUS Status)
@@ -271,6 +308,7 @@ static FORCEINLINE NTSTATUS BffAddDevice(IN WDFDEVICE Device, IN PDEVICE_OBJECT 
     RtlCopyMemory(&childExtension->Signature, &GUID_BUS_FILTER_FRAMEWORK, sizeof(GUID));
     childExtension->Parent = Device;
     childExtension->Child = child;
+    IoInitializeRemoveLock(&childExtension->RemoveLock, 'tFFB', 0, 0);
 
     //
     // Attaches the device object to the highest device object in the chain and
