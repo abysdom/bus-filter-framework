@@ -219,3 +219,15 @@ PDEVICE_OBJECT BffDeviceWdmGetAttachedDevice(WDFOBJECT BffDevice);
  *  @return             The PDO for success; NULL otherwise.
  */
 PDEVICE_OBJECT BffDeviceWdmGetPhysicalDevice(WDFOBJECT BffDevice);
+
+/** Acquire the RemoveLock of the specified BFF device.
+ *  @param BffDevice    The WDF object as a bus filter device object.
+ *  @param Irp          The PnP IRP.
+ */
+VOID BffDeviceWdmAcquireRemoveLock(WDFOBJECT BffDevice, PIRP Irp);
+
+/** Release the RemoveLock of the specified BFF device.
+ *  @param BffDevice    The WDF object as a bus filter device object.
+ *  @param Irp          The PnP IRP.
+ */
+VOID BffDeviceWdmReleaseRemoveLock(WDFOBJECT BffDevice, PIRP Irp);

@@ -610,3 +610,29 @@ BffDeviceWdmGetPhysicalDevice(WDFOBJECT BffDevice)
     }
     return NULL;
 }
+
+/** Acquire the RemoveLock of the specified BFF device.
+ *  @param BffDevice    The WDF object as a bus filter device object.
+ *  @param Irp          The PnP IRP.
+ */
+VOID
+BffDeviceWdmAcquireRemoveLock(WDFOBJECT BffDevice, PIRP Irp)
+{
+    PDEVICE_OBJECT deviceObject = BffDeviceWdmGetDeviceObject(BffDevice);
+    ASSERT(deviceObject);
+    PDEVICE_EXTENSION deviceExtension = deviceObject->DeviceExtension;
+    IoAcquireRemoveLock(&deviceExtension->RemoveLock, Irp);
+}
+
+/** Release the RemoveLock of the specified BFF device.
+ *  @param BffDevice    The WDF object as a bus filter device object.
+ *  @param Irp          The PnP IRP.
+ */
+VOID
+BffDeviceWdmReleaseRemoveLock(WDFOBJECT BffDevice, PIRP Irp)
+{
+    PDEVICE_OBJECT deviceObject = BffDeviceWdmGetDeviceObject(BffDevice);
+    ASSERT(deviceObject);
+    PDEVICE_EXTENSION deviceExtension = deviceObject->DeviceExtension;
+    IoReleaseRemoveLock(&deviceExtension->RemoveLock, Irp);
+}
