@@ -239,8 +239,6 @@ static FORCEINLINE NTSTATUS BffAddDevice(IN WDFDEVICE Device, IN PDEVICE_OBJECT 
     WDFOBJECT child;
     PBFF_DEVICE_CONTEXT childContext;
 
-    PAGED_CODE();
-
     //
     // Do not proceed if BFF has not been initialized yet.
     //
