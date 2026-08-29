@@ -447,9 +447,7 @@ VOID BffSetInitializationData(PBFF_INITIALIZATION_DATA InitData, DEVICE_TYPE Typ
 }
 
 /** Initialize Bus Filter Framework with the initialization data. This routine
- *  must be invoked in DriverEntry after a call to WdfDriverCreate. Furthermore,
- *  a BFF-based driver must be installed with a valid license key to unlock
- *  functionality of BFF.
+ *  must be invoked in DriverEntry after a call to WdfDriverCreate.
  *  @param DriverObject The same as DriverEntry's first parameter.
  *  @param RegistryPath The same as DriverEntry's second parameter.
  *  @param InitData     The initialization data previously prepared by a call to
