@@ -400,6 +400,8 @@ static NTSTATUS BffCompleteQueryBusRelations(IN PDEVICE_OBJECT DeviceObject, IN 
                 {
                     KdPrint(("%s: failed to add a child:%x\n", __FUNCTION__, status));
                     BffLogError(DeviceObject, IRP_MN_QUERY_DEVICE_RELATIONS, IO_ERR_INTERNAL_ERROR, status);
+                    // Let the higher-level drivers know this error.
+                    Irp->IoStatus.Status = status;
                     break;
                 }
             }
