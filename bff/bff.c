@@ -38,6 +38,7 @@ static VOID BffRemoveDevice(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp);
 
 #ifdef ALLOC_PRAGMA
 #pragma alloc_text(PAGE, BffRemoveDevice)
+#pragma alloc_text(PAGE, BffAllocateContext)
 #endif
 
 static VOID BffRemoveDevice(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp)
@@ -522,6 +523,9 @@ BffAllocateContext(WDFDEVICE Device)
     NTSTATUS status;
     PBFF_PARENT_CONTEXT parentContext;
     WDF_OBJECT_ATTRIBUTES attr;
+
+    PAGED_CODE();
+
     WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&attr, BFF_PARENT_CONTEXT);
     status = WdfObjectAllocateContext(Device, &attr, &parentContext);
     if (NT_SUCCESS(status))
