@@ -45,9 +45,12 @@ Environment:
 #include "driver.tmh"
 #include "..\bff\bff.h"
 
+static VOID BusFilterRemoveDevice(WDFDEVICE Device, WDFOBJECT BffDevice);
+
 #ifdef ALLOC_PRAGMA
 #pragma alloc_text(INIT, DriverEntry)
 #pragma alloc_text(PAGE, BusFilterStartDevice)
+#pragma alloc_text(PAGE, BusFilterRemoveDevice)
 #pragma alloc_text(PAGE, BusFilterEvtDeviceAdd)
 #pragma alloc_text(PAGE, BusFilterEvtDriverContextCleanup)
 #endif
@@ -136,6 +139,9 @@ static NTSTATUS BusFilterAddDevice(WDFDEVICE Device, WDFOBJECT BffDevice)
 static VOID BusFilterRemoveDevice(WDFDEVICE Device, WDFOBJECT BffDevice)
 {
     PBUS_FILTER_CONTEXT busFilterContext = BusFilterGetContext(BffDevice);
+
+    PAGED_CODE();
+
     if (busFilterContext->IsRegistered)
     {
         IoSetDeviceInterfaceState(&busFilterContext->SymbolicLink, FALSE);
