@@ -34,7 +34,13 @@ DEFINE_GUID(GUID_BUS_FILTER_FRAMEWORK, 0x9b72ba39, 0x1052, 0x4d96, 0x9e, 0xe8, 0
 static PDRIVER_DISPATCH WdfMajorFunction[IRP_MJ_MAXIMUM_FUNCTION + 1];
 static BFF_INITIALIZATION_DATA BffInitializationData;
 
-static FORCEINLINE VOID BffRemoveDevice(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp)
+static VOID BffRemoveDevice(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp);
+
+#ifdef ALLOC_PRAGMA
+#pragma alloc_text(PAGE, BffRemoveDevice)
+#endif
+
+static VOID BffRemoveDevice(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp)
 /*++
 
 Routine Description:
