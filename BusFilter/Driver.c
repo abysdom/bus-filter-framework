@@ -47,6 +47,7 @@ Environment:
 
 #ifdef ALLOC_PRAGMA
 #pragma alloc_text(INIT, DriverEntry)
+#pragma alloc_text(PAGE, BusFilterStartDevice)
 #pragma alloc_text(PAGE, BusFilterEvtDeviceAdd)
 #pragma alloc_text(PAGE, BusFilterEvtDriverContextCleanup)
 #endif
