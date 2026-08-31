@@ -18,8 +18,6 @@ env:
   # Configuration type to build.
   # You can convert this to a build matrix if you need coverage of multiple configuration types.
   # https://docs.github.com/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
-  BUILD_CONFIGURATION: Release
-  BUILD_PLATFORM: x64
   TARGET_VERSION: Windows10
 
 permissions:
@@ -27,6 +25,10 @@ permissions:
 
 jobs:
   build:
+    strategy:
+      matrix:
+        configuration: [Debug, Release]
+        platform: [x64]
     runs-on: windows-2022
 
     steps:
@@ -48,4 +50,7 @@ jobs:
       # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
       run: |
         call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars32.bat"
-        msbuild /t:clean /t:build /m /p:Configuration=${{env.BUILD_CONFIGURATION}} /p:Platform=${{env.BUILD_PLATFORM}} /p:TargetVersion=${{env.TARGET_VERSION}} ${{env.SOLUTION_FILE_PATH}}
+        msbuild /t:clean /t:build /m /p:Configuration=${{env.Configuration}} /p:Platform=${{env.Platform}} /p:TargetVersion=${{env.TARGET_VERSION}} ${{env.SOLUTION_FILE_PATH}}
+      env:
+        Configuration: ${{ matrix.configuration }}
+        Platform: ${{ matrix.platform }}

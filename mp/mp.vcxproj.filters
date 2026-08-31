@@ -41,6 +41,7 @@
     <None Include="..\WDKStorPortVirtualMiniport\inc\trcmp.ini">
       <Filter>Header Files</Filter>
     </None>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\WDKStorPortVirtualMiniport\mp.rc">
