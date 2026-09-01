@@ -131,8 +131,8 @@ when the Irp is not processed by this driver.
 
 Arguments:
 
-    DeviceObject
-    Irp
+    DeviceObject - The WDM device object that Irp is targeting
+    Irp - The I/O request packet
 
 Return Value:
 
@@ -233,6 +233,22 @@ Return Value:
 }
 
 static FORCEINLINE NTSTATUS BffAddDevice(IN WDFDEVICE Device, IN PDEVICE_OBJECT PhysicalDeviceObject)
+/*++
+
+Routine Description:
+
+    Create and attach a bus filter DO to a PDO for an upper filter device
+
+Arguments:
+
+    Device - The WDF device object representing an upper filter device object
+    PhysicalDeviceObject - The PDO to which a bus filter DO is going to attach
+
+Return Value:
+
+    NTSTATUS
+
+--*/
 {
     NTSTATUS status;
     PDEVICE_OBJECT DeviceObject = WdfDeviceWdmGetDeviceObject(Device);
@@ -368,6 +384,23 @@ deleteobj:
 }
 
 static NTSTATUS BffCompleteQueryBusRelations(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp, IN WDFDEVICE Device)
+/*++
+
+Routine Description:
+
+    Complete a Query-Bus-Relations IRP
+
+Arguments:
+
+    DeviceObject - The WDM upper filter device object that Irp is targeting
+    Irp - The I/O request packet that queries bus relations
+    Device - The WDF device object representing DeviceObject
+
+Return Value:
+
+    NTSTATUS
+
+--*/
 {
     if (Irp->PendingReturned)
         IoMarkIrpPending(Irp);
