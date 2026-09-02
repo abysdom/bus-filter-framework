@@ -158,17 +158,20 @@ VOID BffSetInitializationData(PBFF_INITIALIZATION_DATA InitData, DEVICE_TYPE Typ
  *  @param RegistryPath The same as DriverEntry's second parameter.
  *  @param InitData     The initialization data previously prepared by a call to
  *                      BffSetInitializationData.
+ *  @param driver       The WDF driver object
  *  @return             One of the following values:
  *                      (a) 0 or any positive value for success;
  *                      (b) STATUS_NOT_SUPPORTED if the driver has not called
- *                          WdfDriverCreate;
+ *                          WdfDriverCreate, or if this routine is called for a
+ *                          second time;
  *                      (c) STATUS_INVALID_PARAMETER if an invalid parameter is
  *                          speciifed;
  *                      (d) STATUS_INVALID_SIGNATURE if no valid license key in
  *                          registry; or
  *                      (e) Any other negative value for failure.
  */
-NTSTATUS BffInitialize(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath, PBFF_INITIALIZATION_DATA InitData);
+NTSTATUS BffInitialize(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath, PBFF_INITIALIZATION_DATA InitData,
+                       WDFDRIVER driver);
 
 /** Allocate context space for an upper filter device object on behalf of Bus
  *  Filter Framework. This routine is typically called in the EvtDriverDeviceAdd

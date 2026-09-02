@@ -226,6 +226,7 @@ Return Value:
 
 --*/
 {
+    WDFDRIVER driver;
     WDF_DRIVER_CONFIG config;
     NTSTATUS status;
     WDF_OBJECT_ATTRIBUTES attributes;
@@ -251,7 +252,7 @@ Return Value:
 
     WDF_DRIVER_CONFIG_INIT(&config, BusFilterEvtDeviceAdd);
 
-    status = WdfDriverCreate(DriverObject, RegistryPath, &attributes, &config, WDF_NO_HANDLE);
+    status = WdfDriverCreate(DriverObject, RegistryPath, &attributes, &config, &driver);
 
     if (!NT_SUCCESS(status))
     {
@@ -260,7 +261,7 @@ Return Value:
         return status;
     }
 
-    status = BffInitialize(DriverObject, RegistryPath, &initData);
+    status = BffInitialize(DriverObject, RegistryPath, &initData, driver);
     if (!NT_SUCCESS(status))
     {
         KdPrint(("%s: failed to initialize BFF:%x\n", __FUNCTION__, status));

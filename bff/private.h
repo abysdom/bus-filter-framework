@@ -24,6 +24,19 @@
 #pragma once
 #include <wdm.h>
 #include <wdf.h>
+#include "bff.h"
+
+//
+// Bus Filter Framework Context
+//
+
+typedef struct _BFF_PRIVATE_CONTEXT
+{
+    PDRIVER_DISPATCH WdfMajorFunction[IRP_MJ_MAXIMUM_FUNCTION + 1];
+    BFF_INITIALIZATION_DATA BffInitializationData;
+} BFF_PRIVATE_CONTEXT, *PBFF_PRIVATE_CONTEXT;
+
+WDF_DECLARE_CONTEXT_TYPE(BFF_PRIVATE_CONTEXT)
 
 //
 // Bus Filter Device Extension

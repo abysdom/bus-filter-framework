@@ -31,8 +31,7 @@ Global variables
 **/
 // {9B72BA39-1052-4D96-9EE8-500629E4EAF1}
 DEFINE_GUID(GUID_BUS_FILTER_FRAMEWORK, 0x9b72ba39, 0x1052, 0x4d96, 0x9e, 0xe8, 0x50, 0x6, 0x29, 0xe4, 0xea, 0xf1);
-static PDRIVER_DISPATCH WdfMajorFunction[IRP_MJ_MAXIMUM_FUNCTION + 1];
-static BFF_INITIALIZATION_DATA BffInitializationData;
+static PBFF_PRIVATE_CONTEXT BffPrivateContext;
 
 static VOID BffRemoveDevice(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp);
 
@@ -113,8 +112,9 @@ Return Value:
     RemoveEntryList(&deviceExtension->List);
     KeReleaseInStackQueuedSpinLock(&handle);
 
-    if (BffInitializationData.DeviceConfig.DeviceRemove)
-        BffInitializationData.DeviceConfig.DeviceRemove(deviceExtension->Parent, deviceExtension->Child);
+    if (BffPrivateContext->BffInitializationData.DeviceConfig.DeviceRemove)
+        BffPrivateContext->BffInitializationData.DeviceConfig.DeviceRemove(deviceExtension->Parent,
+                                                                           deviceExtension->Child);
 
     WdfObjectDelete(deviceExtension->Child);
     IoDetachDevice(deviceExtension->TargetDeviceObject);
@@ -151,7 +151,7 @@ Return Value:
         //
         // This must be the upper filter device object managed by WDF.
         //
-        return WdfMajorFunction[major](DeviceObject, Irp);
+        return BffPrivateContext->WdfMajorFunction[major](DeviceObject, Irp);
     }
 
     //
@@ -170,9 +170,9 @@ Return Value:
 
         if (minor != IRP_MN_REMOVE_DEVICE)
         {
-            if (BffInitializationData.PnPMinorFunction[minor])
+            if (BffPrivateContext->BffInitializationData.PnPMinorFunction[minor])
             {
-                status = BffInitializationData.PnPMinorFunction[minor](deviceExtension->Child, Irp);
+                status = BffPrivateContext->BffInitializationData.PnPMinorFunction[minor](deviceExtension->Child, Irp);
                 IoReleaseRemoveLock(&deviceExtension->RemoveLock, Irp);
                 return status;
             }
@@ -263,12 +263,6 @@ Return Value:
     PBFF_DEVICE_CONTEXT childContext;
 
     //
-    // Do not proceed if BFF has not been initialized yet.
-    //
-    if (BffInitializationData.Size != sizeof(BFF_INITIALIZATION_DATA))
-        return STATUS_NOT_SUPPORTED;
-
-    //
     // parentContext could be NULL if BffAllocateContext had not been called yet.
     //
     if (!parentContext)
@@ -308,9 +302,10 @@ Return Value:
         return status;
     }
 
-    status = IoCreateDevice(
-        DeviceObject->DriverObject, DEVICE_EXTENSION_SIZE, NULL, BffInitializationData.DeviceConfig.DeviceType,
-        FILE_DEVICE_SECURE_OPEN | BffInitializationData.DeviceConfig.DeviceCharacteristics, FALSE, &filterDeviceObject);
+    ULONG deviceType = BffPrivateContext->BffInitializationData.DeviceConfig.DeviceType;
+    ULONG deviceCharacteristics = BffPrivateContext->BffInitializationData.DeviceConfig.DeviceCharacteristics;
+    status = IoCreateDevice(DeviceObject->DriverObject, DEVICE_EXTENSION_SIZE, NULL, deviceType,
+                            FILE_DEVICE_SECURE_OPEN | deviceCharacteristics, FALSE, &filterDeviceObject);
 
     if (!NT_SUCCESS(status))
     {
@@ -351,9 +346,9 @@ Return Value:
     filterDeviceObject->Flags |= childExtension->TargetDeviceObject->Flags &
                                  (DO_BUFFERED_IO | DO_DIRECT_IO | DO_POWER_INRUSH | DO_POWER_PAGABLE);
 
-    if (BffInitializationData.DeviceConfig.DeviceAdd)
+    if (BffPrivateContext->BffInitializationData.DeviceConfig.DeviceAdd)
     {
-        status = BffInitializationData.DeviceConfig.DeviceAdd(Device, child);
+        status = BffPrivateContext->BffInitializationData.DeviceConfig.DeviceAdd(Device, child);
         if (!NT_SUCCESS(status))
         {
             KdPrint(("%s: Client's DeviceAdd failed: %x\n", __FUNCTION__, status));
@@ -404,6 +399,17 @@ Return Value:
 {
     if (Irp->PendingReturned)
         IoMarkIrpPending(Irp);
+
+    //
+    // Set error status if BFF has not been initialized yet.
+    //
+    if (!BffPrivateContext)
+    {
+        KdPrint(("%s: BFF has not been initialized yet:%x\n", __FUNCTION__, STATUS_NOT_SUPPORTED));
+        BffLogError(DeviceObject, IRP_MN_QUERY_DEVICE_RELATIONS, IO_ERR_INTERNAL_ERROR, STATUS_NOT_SUPPORTED);
+        // Let the higher-level drivers know this error.
+        Irp->IoStatus.Status = STATUS_NOT_SUPPORTED;
+    }
 
     if (NT_SUCCESS(Irp->IoStatus.Status))
     {
@@ -492,10 +498,12 @@ VOID BffSetInitializationData(PBFF_INITIALIZATION_DATA InitData, DEVICE_TYPE Typ
  *  @param RegistryPath The same as DriverEntry's second parameter.
  *  @param InitData     The initialization data previously prepared by a call to
  *                      BffSetInitializationData.
+ *  @param driver       The WDF driver object
  *  @return             One of the following values:
  *                      (a) 0 or any positive value for success;
  *                      (b) STATUS_NOT_SUPPORTED if the driver has not called
- *                          WdfDriverCreate;
+ *                          WdfDriverCreate, or if this routine is called for a
+ *                          second time;
  *                      (c) STATUS_INVALID_PARAMETER if an invalid parameter is
  *                          speciifed;
  *                      (d) STATUS_INVALID_SIGNATURE if no valid license key in
@@ -503,7 +511,8 @@ VOID BffSetInitializationData(PBFF_INITIALIZATION_DATA InitData, DEVICE_TYPE Typ
  *                      (e) Any other negative value for failure.
  */
 NTSTATUS
-BffInitialize(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath, PBFF_INITIALIZATION_DATA InitData)
+BffInitialize(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath, PBFF_INITIALIZATION_DATA InitData,
+              WDFDRIVER driver)
 {
     NTSTATUS status;
 
@@ -512,32 +521,46 @@ BffInitialize(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath, PBFF_IN
     //
     // Do not proceed if WdfDriverCreate has not been called yet.
     //
-    if (!WdfGetDriver())
+    if (!driver)
+        return STATUS_NOT_SUPPORTED;
+
+    //
+    // Do not proceed if the BFF private context is existing.
+    //
+    if (BffPrivateContext)
         return STATUS_NOT_SUPPORTED;
 
     status = STATUS_INVALID_PARAMETER;
     if (DriverObject && InitData && InitData->Size == sizeof(BFF_INITIALIZATION_DATA))
     {
-        ULONG ulIndex;
-        PDRIVER_DISPATCH *dispatch;
         //
-        // Create dispatch points
+        // Create the BFF private context
         //
-        for (ulIndex = 0, dispatch = DriverObject->MajorFunction; ulIndex <= IRP_MJ_MAXIMUM_FUNCTION;
-             ulIndex++, dispatch++)
+        WDF_OBJECT_ATTRIBUTES attr;
+        WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&attr, BFF_PRIVATE_CONTEXT);
+        status = WdfObjectAllocateContext(driver, &attr, &BffPrivateContext);
+        if (NT_SUCCESS(status))
         {
-            WdfMajorFunction[ulIndex] = *dispatch;
-            *dispatch = BffDispatchAny;
-        }
+            ULONG ulIndex;
+            PDRIVER_DISPATCH *dispatch;
+            //
+            // Create dispatch points
+            //
+            for (ulIndex = 0, dispatch = DriverObject->MajorFunction; ulIndex <= IRP_MJ_MAXIMUM_FUNCTION;
+                 ulIndex++, dispatch++)
+            {
+                BffPrivateContext->WdfMajorFunction[ulIndex] = *dispatch;
+                *dispatch = BffDispatchAny;
+            }
 
-        RtlCopyMemory(&BffInitializationData, InitData, sizeof(BFF_INITIALIZATION_DATA));
-        //
-        // Clear illegal settings
-        //
-        BffInitializationData.DeviceConfig.DeviceCharacteristics &=
-            ~(FILE_AUTOGENERATED_DEVICE_NAME | FILE_CHARACTERISTIC_TS_DEVICE | FILE_CHARACTERISTIC_WEBDAV_DEVICE |
-              FILE_DEVICE_IS_MOUNTED | FILE_VIRTUAL_VOLUME);
-        status = STATUS_SUCCESS;
+            RtlCopyMemory(&BffPrivateContext->BffInitializationData, InitData, sizeof(BFF_INITIALIZATION_DATA));
+            //
+            // Clear illegal settings
+            //
+            BffPrivateContext->BffInitializationData.DeviceConfig.DeviceCharacteristics &=
+                ~(FILE_AUTOGENERATED_DEVICE_NAME | FILE_CHARACTERISTIC_TS_DEVICE | FILE_CHARACTERISTIC_WEBDAV_DEVICE |
+                  FILE_DEVICE_IS_MOUNTED | FILE_VIRTUAL_VOLUME);
+        }
     }
 
     return status;
