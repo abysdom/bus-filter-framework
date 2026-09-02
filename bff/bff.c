@@ -36,6 +36,8 @@ static PBFF_PRIVATE_CONTEXT BffPrivateContext;
 static VOID BffRemoveDevice(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp);
 
 #ifdef ALLOC_PRAGMA
+#pragma alloc_text(INIT, BffSetInitializationData)
+#pragma alloc_text(INIT, BffInitialize)
 #pragma alloc_text(PAGE, BffRemoveDevice)
 #pragma alloc_text(PAGE, BffAllocateContext)
 #endif
