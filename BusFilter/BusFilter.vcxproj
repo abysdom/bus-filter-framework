@@ -197,10 +197,12 @@
       <DisableSpecificWarnings>4100;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <PostBuildEvent>
-      <Command>copy *.c ..\bffsample\BusFilter &amp; copy *.h ..\bffsample\BusFilter</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
     <PostBuildEvent>
-      <Message>Copy source code files to ..\bffsample\BusFilter</Message>
+      <Message>
+      </Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -212,10 +214,12 @@
       <DisableSpecificWarnings>4100;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <PostBuildEvent>
-      <Command>copy *.c ..\bffsample\BusFilter &amp; copy *.h ..\bffsample\BusFilter</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
     <PostBuildEvent>
-      <Message>Copy source code files to ..\bffsample\BusFilter</Message>
+      <Message>
+      </Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -268,10 +272,12 @@
       <DisableSpecificWarnings>4100;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <PostBuildEvent>
-      <Command>copy *.c ..\bffsample\BusFilter &amp; copy *.h ..\bffsample\BusFilter</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
     <PostBuildEvent>
-      <Message>Copy source code files to ..\bffsample\BusFilter</Message>
+      <Message>
+      </Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
@@ -283,10 +289,12 @@
       <DisableSpecificWarnings>4100;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <PostBuildEvent>
-      <Command>copy *.c ..\bffsample\BusFilter &amp; copy *.h ..\bffsample\BusFilter</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
     <PostBuildEvent>
-      <Message>Copy source code files to ..\bffsample\BusFilter</Message>
+      <Message>
+      </Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
@@ -298,10 +306,12 @@
       <DisableSpecificWarnings>4100;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <PostBuildEvent>
-      <Command>copy *.c ..\bffsample\BusFilter &amp; copy *.h ..\bffsample\BusFilter</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
     <PostBuildEvent>
-      <Message>Copy source code files to ..\bffsample\BusFilter</Message>
+      <Message>
+      </Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
@@ -313,10 +323,12 @@
       <DisableSpecificWarnings>4100;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <PostBuildEvent>
-      <Command>copy *.c ..\bffsample\BusFilter &amp; copy *.h ..\bffsample\BusFilter</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
     <PostBuildEvent>
-      <Message>Copy source code files to ..\bffsample\BusFilter</Message>
+      <Message>
+      </Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
