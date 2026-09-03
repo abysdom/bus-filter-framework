@@ -234,7 +234,8 @@ Return Value:
     }
 }
 
-static FORCEINLINE NTSTATUS BffAddDevice(IN WDFDEVICE Device, IN PDEVICE_OBJECT PhysicalDeviceObject)
+static FORCEINLINE NTSTATUS BffAddDevice(IN PBFF_PARENT_CONTEXT parentContext, IN WDFDEVICE Device,
+                                         IN PDEVICE_OBJECT PhysicalDeviceObject)
 /*++
 
 Routine Description:
@@ -255,7 +256,6 @@ Return Value:
     NTSTATUS status;
     PDEVICE_OBJECT DeviceObject = WdfDeviceWdmGetDeviceObject(Device);
     PDEVICE_OBJECT filterDeviceObject;
-    PBFF_PARENT_CONTEXT parentContext = BffGetParentContext(Device);
     PDEVICE_EXTENSION childExtension;
     KLOCK_QUEUE_HANDLE handle;
     PLIST_ENTRY entry;
@@ -263,12 +263,6 @@ Return Value:
     WDF_OBJECT_ATTRIBUTES attr;
     WDFOBJECT child;
     PBFF_DEVICE_CONTEXT childContext;
-
-    //
-    // parentContext could be NULL if BffAllocateContext had not been called yet.
-    //
-    if (!parentContext)
-        return STATUS_NOT_SUPPORTED;
 
     //
     // Skip if PhysicalDeviceObject is an existing child.
@@ -413,13 +407,23 @@ Return Value:
         Irp->IoStatus.Status = STATUS_NOT_SUPPORTED;
     }
 
+    //
+    // parentContext could be NULL if BffAllocateContext has not been called yet.
+    //
+    PBFF_PARENT_CONTEXT parentContext = BffGetParentContext(Device);
+    if (!parentContext)
+    {
+        KdPrint(("%s: BffAllocateContext has not been called yet:%x\n", __FUNCTION__, STATUS_NOT_SUPPORTED));
+        BffLogError(DeviceObject, IRP_MN_QUERY_DEVICE_RELATIONS, IO_ERR_INTERNAL_ERROR, STATUS_NOT_SUPPORTED);
+        // Let the higher-level drivers know this error.
+        Irp->IoStatus.Status = STATUS_NOT_SUPPORTED;
+    }
+
     if (NT_SUCCESS(Irp->IoStatus.Status))
     {
-        PBFF_PARENT_CONTEXT parentContext = BffGetParentContext(Device);
         PDEVICE_RELATIONS dr = (PDEVICE_RELATIONS)Irp->IoStatus.Information;
-        ULONG i;
 
-        if (parentContext)
+        if (dr)
         {
             PDEVICE_EXTENSION childExtension;
             KLOCK_QUEUE_HANDLE handle;
@@ -437,13 +441,10 @@ Return Value:
                 childExtension->Existing = FALSE;
             }
             KeReleaseInStackQueuedSpinLock(&handle);
-        }
 
-        if (dr)
-        {
-            for (i = 0; i < dr->Count; i++)
+            for (ULONG i = 0; i < dr->Count; i++)
             {
-                NTSTATUS status = BffAddDevice(Device, dr->Objects[i]);
+                NTSTATUS status = BffAddDevice(parentContext, Device, dr->Objects[i]);
                 if (!NT_SUCCESS(status))
                 {
                     KdPrint(("%s: failed to add a child:%x\n", __FUNCTION__, status));
