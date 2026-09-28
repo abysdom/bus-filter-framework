@@ -169,6 +169,23 @@ Projects inspired by Bus Filter Framework:
 
 - [DmfBusFilterExtension](https://git.nefarius.at/nefarius/DmfBusFilterExtension) by nefarius
 
+## BFF vs. DmfBusFilterExtension
+
+BFF provides a lightweight bus-filter framework built directly on WDF and does not require DMF. It introduces BFFDEVICE as its bus-filter device abstraction and provides the lifecycle and callback infrastructure required by bus-filter drivers.
+
+If a project already uses DMF and wants a DMF-based bus-filter implementation, DmfBusFilterExtension is an alternative approach.
+
+|                                | **BFF**                          | **DmfBusFilterExtension**      |
+| ------------------------------ | -------------------------------- | ------------------------------ |
+| Framework foundation           | WDF                              | WDF + DMF                      |
+| Bus-filter abstraction         | ✓                                | ✓                              |
+| Bus-filter child-device object | `BFFDEVICE`                      | `DMFBUSCHILDDEVICE`            |
+| Child-device object type       | `WDFOBJECT`                      | `WDFOBJECT`                    |
+| DMF module ecosystem           | —                                | ✓                              |
+| DMF dependency                 | No                               | Yes                            |
+| Primary purpose                | Lightweight bus-filter framework | DMF-based bus-filter extension |
+
+
 ---
 
 # Contributing
