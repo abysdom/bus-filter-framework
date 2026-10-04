@@ -48,7 +48,9 @@ Environment:
 #endif
 
 NTSTATUS
-BusFilterQueueInitialize(_In_ WDFDEVICE Device)
+BusFilterQueueInitialize(
+    _In_ WDFDEVICE Device
+    )
 /*++
 
 Routine Description:
@@ -98,8 +100,14 @@ Return Value:
     return status;
 }
 
-VOID BusFilterEvtIoDeviceControl(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In_ size_t OutputBufferLength,
-                                 _In_ size_t InputBufferLength, _In_ ULONG IoControlCode)
+VOID
+BusFilterEvtIoDeviceControl(
+    _In_ WDFQUEUE   Queue,
+    _In_ WDFREQUEST Request,
+    _In_ size_t     OutputBufferLength,
+    _In_ size_t     InputBufferLength,
+    _In_ ULONG      IoControlCode
+    )
 /*++
 
 Routine Description:
@@ -134,7 +142,12 @@ Return Value:
     return;
 }
 
-VOID BusFilterEvtIoStop(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In_ ULONG ActionFlags)
+VOID
+BusFilterEvtIoStop(
+    _In_ WDFQUEUE   Queue,
+    _In_ WDFREQUEST Request,
+    _In_ ULONG      ActionFlags
+    )
 /*++
 
 Routine Description:

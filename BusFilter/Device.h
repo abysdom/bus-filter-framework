@@ -75,6 +75,8 @@ WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(DEVICE_CONTEXT, DeviceGetContext)
 // Function to initialize the device and its callbacks
 //
 NTSTATUS
-BusFilterCreateDevice(_Inout_ PWDFDEVICE_INIT DeviceInit);
+BusFilterCreateDevice(
+    _Inout_ PWDFDEVICE_INIT DeviceInit
+    );
 
 EXTERN_C_END

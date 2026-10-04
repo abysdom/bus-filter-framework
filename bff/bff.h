@@ -149,8 +149,14 @@ typedef struct _BFF_INITIALIZATION_DATA
  *  @param DeviceRemove     The callback function for removal of a bus
  *                          filter device object.
  */
-VOID BffSetInitializationData(PBFF_INITIALIZATION_DATA InitData, DEVICE_TYPE Type, ULONG Characteristics,
-                              PBFF_DEVICE_ADD DeviceAdd, PBFF_DEVICE_REMOVE DeviceRemove);
+VOID
+BffSetInitializationData(
+    _Out_ PBFF_INITIALIZATION_DATA  InitData,
+    _In_  DEVICE_TYPE               Type,
+    _In_  ULONG                     Characteristics,
+    _In_  PBFF_DEVICE_ADD           DeviceAdd,
+    _In_  PBFF_DEVICE_REMOVE        DeviceRemove
+    );
 
 /** Initialize Bus Filter Framework with the initialization data. This routine
  *  must be invoked in DriverEntry after a call to WdfDriverCreate.
@@ -170,8 +176,13 @@ VOID BffSetInitializationData(PBFF_INITIALIZATION_DATA InitData, DEVICE_TYPE Typ
  *                          registry; or
  *                      (e) Any other negative value for failure.
  */
-NTSTATUS BffInitialize(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath, PBFF_INITIALIZATION_DATA InitData,
-                       WDFDRIVER driver);
+NTSTATUS
+BffInitialize(
+    _In_ PDRIVER_OBJECT             DriverObject,
+    _In_ PUNICODE_STRING            RegistryPath,
+    _In_ PBFF_INITIALIZATION_DATA   InitData,
+    _In_ WDFDRIVER                  driver
+    );
 
 /** Allocate context space for an upper filter device object on behalf of Bus
  *  Filter Framework. This routine is typically called in the EvtDriverDeviceAdd
@@ -180,7 +191,10 @@ NTSTATUS BffInitialize(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath
  *                  device object.
  *  @return         The value that WdfObjectAllocateContext returns.
  */
-NTSTATUS BffAllocateContext(WDFDEVICE Device);
+NTSTATUS
+BffAllocateContext(
+    _In_ WDFDEVICE Device
+    );
 
 /** The callback function for an upper filter driver to preprocess
  *  IRP_MN_QUERY_DEVICE_RELATIONS/BusRelations before KMDF. This routine can be
@@ -194,7 +208,11 @@ NTSTATUS BffAllocateContext(WDFDEVICE Device);
  *  @param Irp      The IRP_MN_QUERY_DEVICE_RELATIONS I/O request packet.
  *  @return         The value that WdfDeviceWdmDispatchPreprocessedIrp returns.
  */
-NTSTATUS BffPreprocessQueryBusRelations(WDFDEVICE Device, PIRP Irp);
+NTSTATUS
+BffPreprocessQueryBusRelations(
+    _In_ WDFDEVICE  Device,
+    _In_ PIRP       Irp
+    );
 
 /*******************************************************************************
  * APIs for bus filter device objects.
@@ -205,7 +223,10 @@ NTSTATUS BffPreprocessQueryBusRelations(WDFDEVICE Device, PIRP Irp);
  *  @return             The WDM bus filter device object for success; NULL
  *                      otherwise.
  */
-PDEVICE_OBJECT BffDeviceWdmGetDeviceObject(WDFOBJECT BffDevice);
+PDEVICE_OBJECT
+BffDeviceWdmGetDeviceObject(
+    _In_ WDFOBJECT BffDevice
+    );
 
 /** Retrieve the next lower WDM device object in the device stack of the
  *  specified WDF object.
@@ -213,22 +234,36 @@ PDEVICE_OBJECT BffDeviceWdmGetDeviceObject(WDFOBJECT BffDevice);
  *  @return             The next lower WDM device object for success; NULL
  *                      otherwise.
  */
-PDEVICE_OBJECT BffDeviceWdmGetAttachedDevice(WDFOBJECT BffDevice);
+PDEVICE_OBJECT
+BffDeviceWdmGetAttachedDevice(
+    _In_ WDFOBJECT BffDevice
+    );
 
 /** Retrieve the PDO from the device stack of the specified WDF object.
  *  @param BffDevice    The WDF object as a bus filter device object.
  *  @return             The PDO for success; NULL otherwise.
  */
-PDEVICE_OBJECT BffDeviceWdmGetPhysicalDevice(WDFOBJECT BffDevice);
+PDEVICE_OBJECT
+BffDeviceWdmGetPhysicalDevice(
+    _In_ WDFOBJECT BffDevice
+    );
 
 /** Acquire the RemoveLock of the specified BFF device.
  *  @param BffDevice    The WDF object as a bus filter device object.
  *  @param Irp          The PnP IRP.
  */
-VOID BffDeviceWdmAcquireRemoveLock(WDFOBJECT BffDevice, PIRP Irp);
+VOID
+BffDeviceWdmAcquireRemoveLock(
+    _In_ WDFOBJECT  BffDevice,
+    _In_ PIRP       Irp
+    );
 
 /** Release the RemoveLock of the specified BFF device.
  *  @param BffDevice    The WDF object as a bus filter device object.
  *  @param Irp          The PnP IRP.
  */
-VOID BffDeviceWdmReleaseRemoveLock(WDFOBJECT BffDevice, PIRP Irp);
+VOID
+BffDeviceWdmReleaseRemoveLock(
+    _In_ WDFOBJECT  BffDevice,
+    _In_ PIRP       Irp
+    );

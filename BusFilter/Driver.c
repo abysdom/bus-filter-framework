@@ -45,7 +45,12 @@ Environment:
 #include "driver.tmh"
 #include "..\bff\bff.h"
 
-static VOID BusFilterRemoveDevice(WDFDEVICE Device, WDFOBJECT BffDevice);
+static
+VOID
+BusFilterRemoveDevice(
+    _In_ WDFDEVICE Device,
+    _In_ WDFOBJECT BffDevice
+    );
 
 #ifdef ALLOC_PRAGMA
 #pragma alloc_text(INIT, DriverEntry)
@@ -66,7 +71,10 @@ static VOID BusFilterRemoveDevice(WDFDEVICE Device, WDFOBJECT BffDevice);
 #endif
 
 NTSTATUS
-BusFilterDeviceEnumerated(WDFOBJECT BffDevice, PIRP Irp)
+BusFilterDeviceEnumerated(
+    _In_ WDFOBJECT  BffDevice,
+    _In_ PIRP       Irp
+    )
 {
     PBUS_FILTER_CONTEXT busFilterContext = BusFilterGetContext(BffDevice);
     KIRQL irql = KeGetCurrentIrql();
@@ -91,7 +99,10 @@ BusFilterDeviceEnumerated(WDFOBJECT BffDevice, PIRP Irp)
 }
 
 NTSTATUS
-BusFilterStartDevice(IN WDFOBJECT BffDevice, IN PIRP Irp)
+BusFilterStartDevice(
+    _In_ WDFOBJECT  BffDevice,
+    _In_ PIRP       Irp
+    )
 {
     PBUS_FILTER_CONTEXT busFilterContext = BusFilterGetContext(BffDevice);
     NTSTATUS status;
@@ -112,7 +123,12 @@ BusFilterStartDevice(IN WDFOBJECT BffDevice, IN PIRP Irp)
     return status;
 }
 
-static NTSTATUS BusFilterAddDevice(WDFDEVICE Device, WDFOBJECT BffDevice)
+static
+NTSTATUS
+BusFilterAddDevice(
+    _In_ WDFDEVICE Device,
+    _In_ WDFOBJECT BffDevice
+    )
 {
     NTSTATUS status;
     WDF_OBJECT_ATTRIBUTES attr;
@@ -136,7 +152,12 @@ static NTSTATUS BusFilterAddDevice(WDFDEVICE Device, WDFOBJECT BffDevice)
     return status;
 }
 
-static VOID BusFilterRemoveDevice(WDFDEVICE Device, WDFOBJECT BffDevice)
+static
+VOID
+BusFilterRemoveDevice(
+    _In_ WDFDEVICE Device,
+    _In_ WDFOBJECT BffDevice
+    )
 {
     PBUS_FILTER_CONTEXT busFilterContext = BusFilterGetContext(BffDevice);
 
@@ -149,7 +170,12 @@ static VOID BusFilterRemoveDevice(WDFDEVICE Device, WDFOBJECT BffDevice)
     }
 }
 
-static NTSTATUS BusFilterQueryID(WDFOBJECT BffDevice, PIRP Irp)
+static
+NTSTATUS
+BusFilterQueryID(
+    _In_ WDFOBJECT  BffDevice,
+    _In_ PIRP       Irp
+    )
 {
     NTSTATUS status;
     PIO_STACK_LOCATION stack = IoGetCurrentIrpStackLocation(Irp);
@@ -199,7 +225,10 @@ static NTSTATUS BusFilterQueryID(WDFOBJECT BffDevice, PIRP Irp)
 }
 
 NTSTATUS
-DriverEntry(_In_ PDRIVER_OBJECT DriverObject, _In_ PUNICODE_STRING RegistryPath)
+DriverEntry(
+    _In_ PDRIVER_OBJECT     DriverObject,
+    _In_ PUNICODE_STRING    RegistryPath
+    )
 /*++
 
 Routine Description:
@@ -275,7 +304,10 @@ Return Value:
 }
 
 NTSTATUS
-BusFilterEvtDeviceAdd(_In_ WDFDRIVER Driver, _Inout_ PWDFDEVICE_INIT DeviceInit)
+BusFilterEvtDeviceAdd(
+    _In_    WDFDRIVER       Driver,
+    _Inout_ PWDFDEVICE_INIT DeviceInit
+    )
 /*++
 Routine Description:
 
@@ -310,7 +342,10 @@ Return Value:
     return status;
 }
 
-VOID BusFilterEvtDriverContextCleanup(_In_ WDFOBJECT DriverObject)
+VOID
+BusFilterEvtDriverContextCleanup(
+    _In_ WDFOBJECT DriverObject
+    )
 /*++
 Routine Description:
 

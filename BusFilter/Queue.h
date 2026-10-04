@@ -57,7 +57,9 @@ typedef struct _QUEUE_CONTEXT
 WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(QUEUE_CONTEXT, QueueGetContext)
 
 NTSTATUS
-BusFilterQueueInitialize(_In_ WDFDEVICE hDevice);
+BusFilterQueueInitialize(
+    _In_ WDFDEVICE hDevice
+    );
 
 //
 // Events from the IoQueue object

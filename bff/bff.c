@@ -33,7 +33,12 @@ Global variables
 DEFINE_GUID(GUID_BUS_FILTER_FRAMEWORK, 0x9b72ba39, 0x1052, 0x4d96, 0x9e, 0xe8, 0x50, 0x6, 0x29, 0xe4, 0xea, 0xf1);
 static PBFF_PRIVATE_CONTEXT BffPrivateContext;
 
-static VOID BffRemoveDevice(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp);
+static
+VOID
+BffRemoveDevice(
+    _In_ PDEVICE_OBJECT DeviceObject,
+    _In_ PIRP           Irp
+    );
 
 #ifdef ALLOC_PRAGMA
 #pragma alloc_text(INIT, BffSetInitializationData)
@@ -42,7 +47,12 @@ static VOID BffRemoveDevice(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp);
 #pragma alloc_text(PAGE, BffAllocateContext)
 #endif
 
-static VOID BffRemoveDevice(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp)
+static
+VOID
+BffRemoveDevice(
+    _In_ PDEVICE_OBJECT DeviceObject,
+    _In_ PIRP           Irp
+    )
 /*++
 
 Routine Description:
@@ -123,7 +133,12 @@ Return Value:
     IoDeleteDevice(DeviceObject);
 }
 
-static NTSTATUS BffDispatchAny(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp)
+static
+NTSTATUS
+BffDispatchAny(
+    _In_ PDEVICE_OBJECT DeviceObject,
+    _In_ PIRP           Irp
+    )
 /*++
 
 Routine Description:
@@ -201,7 +216,14 @@ Return Value:
     return status;
 } // end BffDispatchAny()
 
-static VOID BffLogError(IN PDEVICE_OBJECT DeviceObject, IN ULONG UniqueId, IN NTSTATUS ErrorCode, IN NTSTATUS Status)
+static
+VOID
+BffLogError(
+    _In_ PDEVICE_OBJECT DeviceObject,
+    _In_ ULONG          UniqueId,
+    _In_ NTSTATUS       ErrorCode,
+    _In_ NTSTATUS       Status
+    )
 /*++
 
 Routine Description:
@@ -234,8 +256,14 @@ Return Value:
     }
 }
 
-static FORCEINLINE NTSTATUS BffAddDevice(IN PBFF_PARENT_CONTEXT parentContext, IN WDFDEVICE Device,
-                                         IN PDEVICE_OBJECT PhysicalDeviceObject)
+static
+FORCEINLINE
+NTSTATUS
+BffAddDevice(
+    _In_ PBFF_PARENT_CONTEXT    parentContext,
+    _In_ WDFDEVICE              Device,
+    _In_ PDEVICE_OBJECT         PhysicalDeviceObject
+    )
 /*++
 
 Routine Description:
@@ -374,7 +402,13 @@ deleteobj:
     return status;
 }
 
-static NTSTATUS BffCompleteQueryBusRelations(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp, IN WDFDEVICE Device)
+static
+NTSTATUS
+BffCompleteQueryBusRelations(
+    _In_ PDEVICE_OBJECT DeviceObject,
+    _In_ PIRP           Irp,
+    _In_ WDFDEVICE      Device
+    )
 /*++
 
 Routine Description:
@@ -484,8 +518,14 @@ Return Value:
  *  @param DeviceRemove     The callback function for removal of a bus
  *                          filter device object.
  */
-VOID BffSetInitializationData(PBFF_INITIALIZATION_DATA InitData, DEVICE_TYPE Type, ULONG Characteristics,
-                              PBFF_DEVICE_ADD DeviceAdd, PBFF_DEVICE_REMOVE DeviceRemove)
+VOID
+BffSetInitializationData(
+    _Out_ PBFF_INITIALIZATION_DATA  InitData,
+    _In_  DEVICE_TYPE               Type,
+    _In_  ULONG                     Characteristics,
+    _In_  PBFF_DEVICE_ADD           DeviceAdd,
+    _In_  PBFF_DEVICE_REMOVE        DeviceRemove
+    )
 {
     RtlZeroMemory(InitData, sizeof(BFF_INITIALIZATION_DATA));
     InitData->Size = sizeof(BFF_INITIALIZATION_DATA);
@@ -514,8 +554,12 @@ VOID BffSetInitializationData(PBFF_INITIALIZATION_DATA InitData, DEVICE_TYPE Typ
  *                      (e) Any other negative value for failure.
  */
 NTSTATUS
-BffInitialize(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath, PBFF_INITIALIZATION_DATA InitData,
-              WDFDRIVER driver)
+BffInitialize(
+    _In_ PDRIVER_OBJECT             DriverObject,
+    _In_ PUNICODE_STRING            RegistryPath,
+    _In_ PBFF_INITIALIZATION_DATA   InitData,
+    _In_ WDFDRIVER                  driver
+    )
 {
     NTSTATUS status;
 
@@ -577,7 +621,9 @@ BffInitialize(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath, PBFF_IN
  *  @return         The value that WdfObjectAllocateContext returns.
  */
 NTSTATUS
-BffAllocateContext(WDFDEVICE Device)
+BffAllocateContext(
+    _In_ WDFDEVICE Device
+    )
 {
     NTSTATUS status;
     PBFF_PARENT_CONTEXT parentContext;
@@ -609,7 +655,10 @@ BffAllocateContext(WDFDEVICE Device)
  *  @return         The value that WdfDeviceWdmDispatchPreprocessedIrp returns.
  */
 NTSTATUS
-BffPreprocessQueryBusRelations(WDFDEVICE Device, PIRP Irp)
+BffPreprocessQueryBusRelations(
+    _In_ WDFDEVICE  Device,
+    _In_ PIRP       Irp
+    )
 {
     PIO_STACK_LOCATION stack = IoGetCurrentIrpStackLocation(Irp);
     if (stack->MajorFunction != IRP_MJ_PNP || stack->MinorFunction != IRP_MN_QUERY_DEVICE_RELATIONS ||
@@ -634,7 +683,9 @@ BffPreprocessQueryBusRelations(WDFDEVICE Device, PIRP Irp)
  *                      otherwise.
  */
 PDEVICE_OBJECT
-BffDeviceWdmGetDeviceObject(WDFOBJECT BffDevice)
+BffDeviceWdmGetDeviceObject(
+    _In_ WDFOBJECT BffDevice
+    )
 {
     PBFF_DEVICE_CONTEXT childContext = BffGetDeviceContext(BffDevice);
     if (childContext)
@@ -649,7 +700,9 @@ BffDeviceWdmGetDeviceObject(WDFOBJECT BffDevice)
  *                      otherwise.
  */
 PDEVICE_OBJECT
-BffDeviceWdmGetAttachedDevice(WDFOBJECT BffDevice)
+BffDeviceWdmGetAttachedDevice(
+    _In_ WDFOBJECT BffDevice
+    )
 {
     PBFF_DEVICE_CONTEXT childContext = BffGetDeviceContext(BffDevice);
     if (childContext)
@@ -666,7 +719,9 @@ BffDeviceWdmGetAttachedDevice(WDFOBJECT BffDevice)
  *  @return             The PDO for success; NULL otherwise.
  */
 PDEVICE_OBJECT
-BffDeviceWdmGetPhysicalDevice(WDFOBJECT BffDevice)
+BffDeviceWdmGetPhysicalDevice(
+    _In_ WDFOBJECT BffDevice
+    )
 {
     PBFF_DEVICE_CONTEXT childContext = BffGetDeviceContext(BffDevice);
     if (childContext)
@@ -683,7 +738,10 @@ BffDeviceWdmGetPhysicalDevice(WDFOBJECT BffDevice)
  *  @param Irp          The PnP IRP.
  */
 VOID
-BffDeviceWdmAcquireRemoveLock(WDFOBJECT BffDevice, PIRP Irp)
+BffDeviceWdmAcquireRemoveLock(
+    _In_ WDFOBJECT  BffDevice,
+    _In_ PIRP       Irp
+    )
 {
     PDEVICE_OBJECT deviceObject = BffDeviceWdmGetDeviceObject(BffDevice);
     ASSERT(deviceObject);
@@ -696,7 +754,10 @@ BffDeviceWdmAcquireRemoveLock(WDFOBJECT BffDevice, PIRP Irp)
  *  @param Irp          The PnP IRP.
  */
 VOID
-BffDeviceWdmReleaseRemoveLock(WDFOBJECT BffDevice, PIRP Irp)
+BffDeviceWdmReleaseRemoveLock(
+    _In_ WDFOBJECT  BffDevice,
+    _In_ PIRP       Irp
+    )
 {
     PDEVICE_OBJECT deviceObject = BffDeviceWdmGetDeviceObject(BffDevice);
     ASSERT(deviceObject);

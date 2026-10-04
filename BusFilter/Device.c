@@ -49,7 +49,9 @@ Environment:
 #endif
 
 NTSTATUS
-BusFilterCreateDevice(_Inout_ PWDFDEVICE_INIT DeviceInit)
+BusFilterCreateDevice(
+    _Inout_ PWDFDEVICE_INIT DeviceInit
+    )
 /*++
 
 Routine Description:

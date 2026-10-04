@@ -5,31 +5,43 @@ charset = utf-8
 end_of_line = crlf
 insert_final_newline = true
 trim_trailing_whitespace = true
+
+[*.{c,cc,cpp,cxx,h,hpp,inl}]
 indent_style = space
 indent_size = 4
 tab_width = 4
 
-[*.{c,cpp,h,hpp,inl}]
+[*.{asm,inc}]
 indent_style = space
 indent_size = 4
+tab_width = 4
 
-# WDK INF
-[*.inf]
-indent_style = space
-indent_size = 4
-
-# MSBuild
-[*.{vcxproj,props,targets}]
-indent_size = 2
-
-# Solution
-[*.sln]
+[*.{inf,inx}]
+charset = utf-8-bom
 end_of_line = crlf
+indent_style = space
+indent_size = 4
+tab_width = 4
 
-# Markdown
-[*.md]
+[*.{vcxproj,filters,props,targets}]
+indent_style = space
+indent_size = 4
+tab_width = 4
+
+[*.{sln}]
+indent_style = space
+indent_size = 4
+tab_width = 4
+
+[*.{ps1,psm1}]
+indent_style = space
+indent_size = 4
+tab_width = 4
+
+[*.{md,txt}]
+end_of_line = crlf
+insert_final_newline = true
 trim_trailing_whitespace = false
 
-# Batch
-[*.{bat,cmd}]
+[Makefile]
 indent_style = tab
