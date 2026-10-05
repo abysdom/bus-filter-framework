@@ -45,6 +45,11 @@ Environment:
 #include "driver.tmh"
 #include "..\bff\bff.h"
 
+// MAX_DEVICE_ID_LEN is actually defined within cfgmgr32.h, but it is not exported to WDK. So we define it here.
+#ifndef MAX_DEVICE_ID_LEN
+#define MAX_DEVICE_ID_LEN 200
+#endif
+
 static
 VOID
 BusFilterRemoveDevice(
@@ -191,7 +196,7 @@ BusFilterQueryID(
         Irp->IoStatus.Status = STATUS_NO_SUCH_DEVICE;
     else if (NT_SUCCESS(Irp->IoStatus.Status) && Irp->IoStatus.Information)
     {
-        WCHAR *newCompatibleIDs = ALLOCATE_PAGED_POOL_WITH_TAG(200 * sizeof(WCHAR), 'tFFB');
+        WCHAR *newCompatibleIDs = ALLOCATE_PAGED_POOL_WITH_TAG(MAX_DEVICE_ID_LEN * sizeof(WCHAR), 'tFFB');
         if (newCompatibleIDs)
         {
             WCHAR *newIDs = newCompatibleIDs;
@@ -203,7 +208,7 @@ BusFilterQueryID(
             // oldIDs is a multi-sz list, hence two NULL characters
             // terminated.
             //
-            while (oldIDs && *oldIDs && length + wcslen(oldIDs) + 2 <= 200)
+            while (oldIDs && *oldIDs && length + wcslen(oldIDs) + 2 <= MAX_DEVICE_ID_LEN)
             {
                 wcscpy(newIDs, oldIDs);
                 length += wcslen(oldIDs) + 1;
