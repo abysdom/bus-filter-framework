@@ -51,6 +51,13 @@ Environment:
 #endif
 
 static
+NTSTATUS
+BusFilterQueryID(
+    _In_ WDFOBJECT  BffDevice,
+    _In_ PIRP       Irp
+    );
+
+static
 VOID
 BusFilterRemoveDevice(
     _In_ WDFDEVICE Device,
@@ -60,6 +67,7 @@ BusFilterRemoveDevice(
 #ifdef ALLOC_PRAGMA
 #pragma alloc_text(INIT, DriverEntry)
 #pragma alloc_text(PAGE, BusFilterStartDevice)
+#pragma alloc_text(PAGE, BusFilterQueryID)
 #pragma alloc_text(PAGE, BusFilterRemoveDevice)
 #pragma alloc_text(PAGE, BusFilterEvtDeviceAdd)
 #pragma alloc_text(PAGE, BusFilterEvtDriverContextCleanup)
@@ -186,6 +194,7 @@ BusFilterQueryID(
     PIO_STACK_LOCATION stack = IoGetCurrentIrpStackLocation(Irp);
     ASSERT(stack->MajorFunction == IRP_MJ_PNP);
     ASSERT(stack->MinorFunction == IRP_MN_QUERY_ID);
+    PAGED_CODE();
     if (stack->Parameters.QueryId.IdType != BusQueryCompatibleIDs)
     {
         IoSkipCurrentIrpStackLocation(Irp);
