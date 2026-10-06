@@ -461,14 +461,12 @@ Return Value:
         IoMarkIrpPending(Irp);
 
     //
-    // Set error status if BFF has not been initialized yet.
+    // BffPrivateContext could be NULL if BffInitialize has not been called yet.
     //
     if (!BffPrivateContext)
     {
         KdPrint(("%s: BFF has not been initialized yet:%x\n", __FUNCTION__, STATUS_NOT_SUPPORTED));
         BffLogError(DeviceObject, IRP_MN_QUERY_DEVICE_RELATIONS, IO_ERR_INTERNAL_ERROR, STATUS_NOT_SUPPORTED);
-        // Let the higher-level drivers know this error.
-        Irp->IoStatus.Status = STATUS_NOT_SUPPORTED;
     }
 
     //
@@ -479,15 +477,18 @@ Return Value:
     {
         KdPrint(("%s: BffAllocateContext has not been called yet:%x\n", __FUNCTION__, STATUS_NOT_SUPPORTED));
         BffLogError(DeviceObject, IRP_MN_QUERY_DEVICE_RELATIONS, IO_ERR_INTERNAL_ERROR, STATUS_NOT_SUPPORTED);
-        // Let the higher-level drivers know this error.
-        Irp->IoStatus.Status = STATUS_NOT_SUPPORTED;
     }
 
     if (NT_SUCCESS(Irp->IoStatus.Status))
     {
         PDEVICE_RELATIONS dr = (PDEVICE_RELATIONS)Irp->IoStatus.Information;
 
-        if (dr)
+        if (!dr)
+        {
+            KdPrint(("%s: failed to retreive device relations:%x\n", __FUNCTION__, Irp->IoStatus.Status));
+            BffLogError(DeviceObject, IRP_MN_QUERY_DEVICE_RELATIONS, IO_ERR_INTERNAL_ERROR, Irp->IoStatus.Status);
+        }
+        else if (BffPrivateContext && parentContext)
         {
             PDEVICE_EXTENSION childExtension;
             KLOCK_QUEUE_HANDLE handle;
@@ -513,14 +514,9 @@ Return Value:
                 {
                     KdPrint(("%s: failed to add a child:%x\n", __FUNCTION__, status));
                     BffLogError(DeviceObject, IRP_MN_QUERY_DEVICE_RELATIONS, IO_ERR_INTERNAL_ERROR, status);
-                    break;
+                    // continue to recover previously existinng child devices
                 }
             }
-        }
-        else
-        {
-            KdPrint(("%s: failed to retreive device relations:%x\n", __FUNCTION__, Irp->IoStatus.Status));
-            BffLogError(DeviceObject, IRP_MN_QUERY_DEVICE_RELATIONS, IO_ERR_INTERNAL_ERROR, Irp->IoStatus.Status);
         }
     }
 
