@@ -776,7 +776,8 @@ BffDeviceWdmAcquireRemoveLock(
     PDEVICE_OBJECT deviceObject = BffDeviceWdmGetDeviceObject(BffDevice);
     ASSERT(deviceObject);
     PDEVICE_EXTENSION childExtension = deviceObject->DeviceExtension;
-    IoAcquireRemoveLock(&childExtension->RemoveLock, Irp);
+    if (IsEqualGUID(&childExtension->Signature, &GUID_BUS_FILTER_FRAMEWORK))
+        IoAcquireRemoveLock(&childExtension->RemoveLock, Irp);
 }
 
 /** Release the RemoveLock of the specified BFF device.
@@ -792,5 +793,6 @@ BffDeviceWdmReleaseRemoveLock(
     PDEVICE_OBJECT deviceObject = BffDeviceWdmGetDeviceObject(BffDevice);
     ASSERT(deviceObject);
     PDEVICE_EXTENSION childExtension = deviceObject->DeviceExtension;
-    IoReleaseRemoveLock(&childExtension->RemoveLock, Irp);
+    if (IsEqualGUID(&childExtension->Signature, &GUID_BUS_FILTER_FRAMEWORK))
+        IoReleaseRemoveLock(&childExtension->RemoveLock, Irp);
 }
