@@ -164,7 +164,7 @@ BffSetInitializationData(
  *  @param RegistryPath The same as DriverEntry's second parameter.
  *  @param InitData     The initialization data previously prepared by a call to
  *                      BffSetInitializationData.
- *  @param driver       The WDF driver object
+ *  @param Driver       The WDF driver object
  *  @return             One of the following values:
  *                      (a) 0 or any positive value for success;
  *                      (b) STATUS_NOT_SUPPORTED if the driver has not called
@@ -181,7 +181,7 @@ BffInitialize(
     _In_ PDRIVER_OBJECT             DriverObject,
     _In_ PUNICODE_STRING            RegistryPath,
     _In_ PBFF_INITIALIZATION_DATA   InitData,
-    _In_ WDFDRIVER                  driver
+    _In_ WDFDRIVER                  Driver
     );
 
 /** Allocate context space for an upper filter device object on behalf of Bus
