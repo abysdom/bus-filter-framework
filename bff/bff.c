@@ -40,6 +40,8 @@ BffRemoveDevice(
     _In_ PIRP           Irp
     );
 
+static IO_COMPLETION_ROUTINE BffCompleteQueryBusRelations;
+
 #ifdef ALLOC_PRAGMA
 #pragma alloc_text(INIT, BffSetInitializationData)
 #pragma alloc_text(INIT, BffInitialize)
