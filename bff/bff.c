@@ -45,6 +45,7 @@ BffRemoveDevice(
 #pragma alloc_text(INIT, BffInitialize)
 #pragma alloc_text(PAGE, BffRemoveDevice)
 #pragma alloc_text(PAGE, BffAllocateContext)
+#pragma alloc_text(PAGE, BffPreprocessQueryBusRelations)
 #endif
 
 static
@@ -685,6 +686,9 @@ BffPreprocessQueryBusRelations(
     )
 {
     PIO_STACK_LOCATION stack = IoGetCurrentIrpStackLocation(Irp);
+
+    PAGED_CODE();
+
     if (stack->MajorFunction != IRP_MJ_PNP || stack->MinorFunction != IRP_MN_QUERY_DEVICE_RELATIONS ||
         stack->Parameters.QueryDeviceRelations.Type != BusRelations)
         IoSkipCurrentIrpStackLocation(Irp);
