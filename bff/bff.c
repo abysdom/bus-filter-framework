@@ -253,6 +253,25 @@ Return Value:
 
 static
 FORCEINLINE
+BOOLEAN
+BffFindExistingPDO(
+    _In_ PDEVICE_RELATIONS  DeviceRelations,
+    _In_ PDEVICE_OBJECT     PhysicalDeviceObject
+    )
+{
+    for (ULONG i = 0; i < DeviceRelations->Count; ++i)
+    {
+        if (DeviceRelations->Objects[i] == PhysicalDeviceObject)
+        {
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
+static
+FORCEINLINE
 NTSTATUS
 BffFindExistingChild(
     _In_ PBFF_PARENT_CONTEXT    ParentContext,
@@ -273,7 +292,6 @@ BffFindExistingChild(
         childExtension = CONTAINING_RECORD(entry, DEVICE_EXTENSION, List);
         if (childExtension->PhysicalDeviceObject == PhysicalDeviceObject)
         {
-            childExtension->Existing = TRUE;
             status = STATUS_SUCCESS;
             break;
         }
@@ -325,12 +343,6 @@ Return Value:
 
 --*/
 {
-    NTSTATUS status = BffFindExistingChild(ParentContext, PhysicalDeviceObject);
-    if (NT_SUCCESS(status))
-    {
-        return STATUS_SUCCESS;
-    }
-
     //
     // Create a filter device object for this device.
     //
@@ -342,8 +354,8 @@ Return Value:
     PDEVICE_OBJECT filterDeviceObject;
     ULONG deviceType = BffPrivateContext->BffInitializationData.DeviceConfig.DeviceType;
     ULONG deviceCharacteristics = BffPrivateContext->BffInitializationData.DeviceConfig.DeviceCharacteristics;
-    status = IoCreateDevice(driverObject, DEVICE_EXTENSION_SIZE, NULL, deviceType,
-                            FILE_DEVICE_SECURE_OPEN | deviceCharacteristics, FALSE, &filterDeviceObject);
+    NTSTATUS status = IoCreateDevice(driverObject, DEVICE_EXTENSION_SIZE, NULL, deviceType,
+                                     FILE_DEVICE_SECURE_OPEN | deviceCharacteristics, FALSE, &filterDeviceObject);
     if (!NT_SUCCESS(status))
     {
         KdPrint(("%s: Cannot create filterDeviceObject: %x\n", __FUNCTION__, status));
@@ -498,26 +510,33 @@ Return Value:
             PLIST_ENTRY entry;
 
             //
-            // Assume that all child devices do not exist; if any
-            // child device is found duplicated in BffAddDevice, it
-            // will be reverted to 'existing' then.
+            // Check if any existing child device has been removed from the bus. If so, mark it as non-existing.
             //
             KeAcquireInStackQueuedSpinLock(&parentContext->Lock, &handle);
             for (entry = parentContext->List.Flink; entry != &parentContext->List; entry = entry->Flink)
             {
                 childExtension = CONTAINING_RECORD(entry, DEVICE_EXTENSION, List);
-                childExtension->Existing = FALSE;
+                childExtension->Existing = BffFindExistingPDO(dr, childExtension->PhysicalDeviceObject);
             }
             KeReleaseInStackQueuedSpinLock(&handle);
 
+            //
+            // Add new child devices to the list of children.
+            //
             for (ULONG i = 0; i < dr->Count; i++)
             {
-                NTSTATUS status = BffAddDevice(parentContext, Device, dr->Objects[i]);
+                NTSTATUS status = BffFindExistingChild(parentContext, dr->Objects[i]);
+                if (NT_SUCCESS(status))
+                {
+                    continue; // This child device has already been added to the list of children.
+                }
+
+                status = BffAddDevice(parentContext, Device, dr->Objects[i]);
                 if (!NT_SUCCESS(status))
                 {
                     KdPrint(("%s: failed to add a child:%x\n", __FUNCTION__, status));
                     BffLogError(DeviceObject, IRP_MN_QUERY_DEVICE_RELATIONS, IO_ERR_INTERNAL_ERROR, status);
-                    // continue to recover previously existinng child devices
+                    // continue to add other new child devices
                 }
             }
         }
