@@ -381,7 +381,7 @@ Return Value:
     //
 
     WDF_OBJECT_ATTRIBUTES attr;
-    WDFOBJECT child;
+    BFFDEVICE child;
     WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&attr, BFF_DEVICE_CONTEXT);
     attr.ParentObject = Device;
     status = WdfObjectCreate(&attr, &child);
@@ -733,7 +733,7 @@ BffPreprocessQueryBusRelations(
  */
 PDEVICE_OBJECT
 BffDeviceWdmGetDeviceObject(
-    _In_ WDFOBJECT BffDevice
+    _In_ BFFDEVICE BffDevice
     )
 {
     PBFF_DEVICE_CONTEXT childContext = BffGetDeviceContext(BffDevice);
@@ -750,7 +750,7 @@ BffDeviceWdmGetDeviceObject(
  */
 PDEVICE_OBJECT
 BffDeviceWdmGetAttachedDevice(
-    _In_ WDFOBJECT BffDevice
+    _In_ BFFDEVICE BffDevice
     )
 {
     PBFF_DEVICE_CONTEXT childContext = BffGetDeviceContext(BffDevice);
@@ -769,7 +769,7 @@ BffDeviceWdmGetAttachedDevice(
  */
 PDEVICE_OBJECT
 BffDeviceWdmGetPhysicalDevice(
-    _In_ WDFOBJECT BffDevice
+    _In_ BFFDEVICE BffDevice
     )
 {
     PBFF_DEVICE_CONTEXT childContext = BffGetDeviceContext(BffDevice);
@@ -788,7 +788,7 @@ BffDeviceWdmGetPhysicalDevice(
  */
 VOID
 BffDeviceWdmAcquireRemoveLock(
-    _In_ WDFOBJECT  BffDevice,
+    _In_ BFFDEVICE  BffDevice,
     _In_ PIRP       Irp
     )
 {
@@ -805,7 +805,7 @@ BffDeviceWdmAcquireRemoveLock(
  */
 VOID
 BffDeviceWdmReleaseRemoveLock(
-    _In_ WDFOBJECT  BffDevice,
+    _In_ BFFDEVICE  BffDevice,
     _In_ PIRP       Irp
     )
 {

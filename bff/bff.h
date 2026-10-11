@@ -25,6 +25,8 @@
 #include <wdm.h>
 #include <wdf.h>
 
+typedef WDFOBJECT BFFDEVICE;
+
 /** Callback function for creation of a bus filter device object. Before this
  *  call, a WDF object, BffDevice, and its underlying WDM device object had
  *  been created, and the latter in particular was then attached to the next
@@ -35,7 +37,7 @@
  *  @return             0 or any positive value for success; otherwise for
  *                      failure.
  */
-typedef NTSTATUS BFF_DEVICE_ADD(WDFDEVICE Device, WDFOBJECT BffDevice);
+typedef NTSTATUS BFF_DEVICE_ADD(WDFDEVICE Device, BFFDEVICE BffDevice);
 typedef BFF_DEVICE_ADD *PBFF_DEVICE_ADD;
 
 /** Callback function for removal of a bus filter device object. After this
@@ -45,7 +47,7 @@ typedef BFF_DEVICE_ADD *PBFF_DEVICE_ADD;
  *                      device object.
  *  @param BffDevice    The WDF object as a bus filter device object.
  */
-typedef VOID BFF_DEVICE_REMOVE(WDFDEVICE Device, WDFOBJECT BffDevice);
+typedef VOID BFF_DEVICE_REMOVE(WDFDEVICE Device, BFFDEVICE BffDevice);
 typedef BFF_DEVICE_REMOVE *PBFF_DEVICE_REMOVE;
 
 /** Data structure for configuration of a bus filter device object.
@@ -77,7 +79,7 @@ typedef struct _BFF_DEVICE_CONFIG
  *  or, optionally register an IoCompletion routine, and pass that IRP to the
  *  next lower driver before returning to BFF.
  *  Example#1:
- *  NTSTATUS callback1(WDFOBJECT BffDevice, PIRP Irp)
+ *  NTSTATUS callback1(BFFDEVICE BffDevice, PIRP Irp)
  *  {
  *      ...
  *      IoCompleteRequest(Irp, IO_NO_INCREMENT);
@@ -85,7 +87,7 @@ typedef struct _BFF_DEVICE_CONFIG
  *  }
  *
  *  Example#2:
- *  NTSTATUS callback2(WDFOBJECT BffDevice, PIRP Irp)
+ *  NTSTATUS callback2(BFFDEVICE BffDevice, PIRP Irp)
  *  {
  *      ...
  *      IoSkipCurrentIrpStackLocation(Irp);
@@ -95,7 +97,7 @@ typedef struct _BFF_DEVICE_CONFIG
  *  }
  *
  *  Example#3:
- *  NTSTATUS callback3(WDFOBJECT BffDevice, PIRP Irp)
+ *  NTSTATUS callback3(BFFDEVICE BffDevice, PIRP Irp)
  *  {
  *      ...
  *      IoCopyCurrentIrpStackLocationToNext(Irp);
@@ -109,7 +111,7 @@ typedef struct _BFF_DEVICE_CONFIG
  *  @return             0 or any positive value for success; otherwise for
  *                      failure.
  */
-typedef NTSTATUS BFF_DISPATCH_PNP(WDFOBJECT BffDevice, PIRP Irp);
+typedef NTSTATUS BFF_DISPATCH_PNP(BFFDEVICE BffDevice, PIRP Irp);
 typedef BFF_DISPATCH_PNP *PBFF_DISPATCH_PNP;
 
 /** Data structure for initialization of Bus Filter Framework. Typically, you
@@ -225,7 +227,7 @@ BffPreprocessQueryBusRelations(
  */
 PDEVICE_OBJECT
 BffDeviceWdmGetDeviceObject(
-    _In_ WDFOBJECT BffDevice
+    _In_ BFFDEVICE BffDevice
     );
 
 /** Retrieve the next lower WDM device object in the device stack of the
@@ -236,7 +238,7 @@ BffDeviceWdmGetDeviceObject(
  */
 PDEVICE_OBJECT
 BffDeviceWdmGetAttachedDevice(
-    _In_ WDFOBJECT BffDevice
+    _In_ BFFDEVICE BffDevice
     );
 
 /** Retrieve the PDO from the device stack of the specified WDF object.
@@ -245,7 +247,7 @@ BffDeviceWdmGetAttachedDevice(
  */
 PDEVICE_OBJECT
 BffDeviceWdmGetPhysicalDevice(
-    _In_ WDFOBJECT BffDevice
+    _In_ BFFDEVICE BffDevice
     );
 
 /** Acquire the RemoveLock of the specified BFF device.
@@ -254,7 +256,7 @@ BffDeviceWdmGetPhysicalDevice(
  */
 VOID
 BffDeviceWdmAcquireRemoveLock(
-    _In_ WDFOBJECT  BffDevice,
+    _In_ BFFDEVICE  BffDevice,
     _In_ PIRP       Irp
     );
 
@@ -264,6 +266,6 @@ BffDeviceWdmAcquireRemoveLock(
  */
 VOID
 BffDeviceWdmReleaseRemoveLock(
-    _In_ WDFOBJECT  BffDevice,
+    _In_ BFFDEVICE  BffDevice,
     _In_ PIRP       Irp
     );

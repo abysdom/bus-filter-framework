@@ -53,7 +53,7 @@ Environment:
 static
 NTSTATUS
 BusFilterQueryID(
-    _In_ WDFOBJECT  BffDevice,
+    _In_ BFFDEVICE  BffDevice,
     _In_ PIRP       Irp
     );
 
@@ -61,7 +61,7 @@ static
 VOID
 BusFilterRemoveDevice(
     _In_ WDFDEVICE Device,
-    _In_ WDFOBJECT BffDevice
+    _In_ BFFDEVICE BffDevice
     );
 
 #ifdef ALLOC_PRAGMA
@@ -85,7 +85,7 @@ BusFilterRemoveDevice(
 
 NTSTATUS
 BusFilterDeviceEnumerated(
-    _In_ WDFOBJECT  BffDevice,
+    _In_ BFFDEVICE  BffDevice,
     _In_ PIRP       Irp
     )
 {
@@ -113,7 +113,7 @@ BusFilterDeviceEnumerated(
 
 NTSTATUS
 BusFilterStartDevice(
-    _In_ WDFOBJECT  BffDevice,
+    _In_ BFFDEVICE  BffDevice,
     _In_ PIRP       Irp
     )
 {
@@ -140,7 +140,7 @@ static
 NTSTATUS
 BusFilterAddDevice(
     _In_ WDFDEVICE Device,
-    _In_ WDFOBJECT BffDevice
+    _In_ BFFDEVICE BffDevice
     )
 {
     NTSTATUS status;
@@ -169,7 +169,7 @@ static
 VOID
 BusFilterRemoveDevice(
     _In_ WDFDEVICE Device,
-    _In_ WDFOBJECT BffDevice
+    _In_ BFFDEVICE BffDevice
     )
 {
     PBUS_FILTER_CONTEXT busFilterContext = BusFilterGetContext(BffDevice);
@@ -186,7 +186,7 @@ BusFilterRemoveDevice(
 static
 NTSTATUS
 BusFilterQueryID(
-    _In_ WDFOBJECT  BffDevice,
+    _In_ BFFDEVICE  BffDevice,
     _In_ PIRP       Irp
     )
 {
