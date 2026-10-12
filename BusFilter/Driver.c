@@ -50,19 +50,12 @@ Environment:
 #define MAX_DEVICE_ID_LEN 200
 #endif
 
-static
-NTSTATUS
-BusFilterQueryID(
-    _In_ BFFDEVICE  BffDevice,
-    _In_ PIRP       Irp
-    );
+static BFF_DISPATCH_PNP BusFilterStartDevice;
+static BFF_DISPATCH_PNP BusFilterDeviceEnumerated;
+static BFF_DISPATCH_PNP BusFilterQueryID;
 
-static
-VOID
-BusFilterRemoveDevice(
-    _In_ WDFDEVICE Device,
-    _In_ BFFDEVICE BffDevice
-    );
+static BFF_DEVICE_ADD BusFilterAddDevice;
+static BFF_DEVICE_REMOVE BusFilterRemoveDevice;
 
 #ifdef ALLOC_PRAGMA
 #pragma alloc_text(INIT, DriverEntry)
@@ -83,6 +76,8 @@ BusFilterRemoveDevice(
 #define ALLOCATE_PAGED_POOL_WITH_TAG(size, tag) ExAllocatePoolWithTag(PagedPool, size, tag)
 #endif
 
+_Use_decl_annotations_
+static
 NTSTATUS
 BusFilterDeviceEnumerated(
     _In_ BFFDEVICE  BffDevice,
@@ -111,6 +106,8 @@ BusFilterDeviceEnumerated(
     return IoCallDriver(BffDeviceWdmGetAttachedDevice(BffDevice), Irp);
 }
 
+_Use_decl_annotations_
+static
 NTSTATUS
 BusFilterStartDevice(
     _In_ BFFDEVICE  BffDevice,
@@ -136,6 +133,7 @@ BusFilterStartDevice(
     return status;
 }
 
+_Use_decl_annotations_
 static
 NTSTATUS
 BusFilterAddDevice(
@@ -165,6 +163,7 @@ BusFilterAddDevice(
     return status;
 }
 
+_Use_decl_annotations_
 static
 VOID
 BusFilterRemoveDevice(
@@ -183,6 +182,7 @@ BusFilterRemoveDevice(
     }
 }
 
+_Use_decl_annotations_
 static
 NTSTATUS
 BusFilterQueryID(
@@ -238,6 +238,7 @@ BusFilterQueryID(
     return status;
 }
 
+_Use_decl_annotations_
 NTSTATUS
 DriverEntry(
     _In_ PDRIVER_OBJECT     DriverObject,
@@ -317,6 +318,7 @@ Return Value:
     return status;
 }
 
+_Use_decl_annotations_
 NTSTATUS
 BusFilterEvtDeviceAdd(
     _In_    WDFDRIVER       Driver,
@@ -356,6 +358,7 @@ Return Value:
     return status;
 }
 
+_Use_decl_annotations_
 VOID
 BusFilterEvtDriverContextCleanup(
     _In_ WDFOBJECT DriverObject

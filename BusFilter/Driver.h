@@ -55,10 +55,6 @@ EXTERN_C_START
 //
 
 DRIVER_INITIALIZE DriverEntry;
-NTSTATUS BusFilterStartDevice(
-    _In_ WDFOBJECT BffDevice,
-    _In_ PIRP Irp
-    );
 EVT_WDF_DRIVER_DEVICE_ADD BusFilterEvtDeviceAdd;
 EVT_WDF_OBJECT_CONTEXT_CLEANUP BusFilterEvtDriverContextCleanup;
 

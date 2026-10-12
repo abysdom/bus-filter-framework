@@ -37,7 +37,15 @@ typedef WDFOBJECT BFFDEVICE;
  *  @return             0 or any positive value for success; otherwise for
  *                      failure.
  */
-typedef NTSTATUS BFF_DEVICE_ADD(WDFDEVICE Device, BFFDEVICE BffDevice);
+_Function_class_(BFF_DEVICE_ADD)
+_IRQL_requires_max_(DISPATCH_LEVEL)
+_IRQL_requires_same_
+typedef
+NTSTATUS
+BFF_DEVICE_ADD(
+    _In_ WDFDEVICE Device,
+    _In_ BFFDEVICE BffDevice
+    );
 typedef BFF_DEVICE_ADD *PBFF_DEVICE_ADD;
 
 /** Callback function for removal of a bus filter device object. After this
@@ -47,7 +55,15 @@ typedef BFF_DEVICE_ADD *PBFF_DEVICE_ADD;
  *                      device object.
  *  @param BffDevice    The WDF object as a bus filter device object.
  */
-typedef VOID BFF_DEVICE_REMOVE(WDFDEVICE Device, BFFDEVICE BffDevice);
+_Function_class_(BFF_DEVICE_REMOVE)
+_IRQL_requires_max_(PASSIVE_LEVEL)
+_IRQL_requires_same_
+typedef
+VOID
+BFF_DEVICE_REMOVE(
+    _In_ WDFDEVICE Device, 
+    _In_ BFFDEVICE BffDevice
+    );
 typedef BFF_DEVICE_REMOVE *PBFF_DEVICE_REMOVE;
 
 /** Data structure for configuration of a bus filter device object.
@@ -111,7 +127,15 @@ typedef struct _BFF_DEVICE_CONFIG
  *  @return             0 or any positive value for success; otherwise for
  *                      failure.
  */
-typedef NTSTATUS BFF_DISPATCH_PNP(BFFDEVICE BffDevice, PIRP Irp);
+_Function_class_(BFF_DISPATCH_PNP)
+_IRQL_requires_max_(DISPATCH_LEVEL)
+_IRQL_requires_same_
+typedef
+NTSTATUS
+BFF_DISPATCH_PNP(
+    _In_ BFFDEVICE BffDevice, 
+    _In_ PIRP      Irp
+    );
 typedef BFF_DISPATCH_PNP *PBFF_DISPATCH_PNP;
 
 /** Data structure for initialization of Bus Filter Framework. Typically, you
@@ -151,6 +175,8 @@ typedef struct _BFF_INITIALIZATION_DATA
  *  @param DeviceRemove     The callback function for removal of a bus
  *                          filter device object.
  */
+_IRQL_requires_max_(PASSIVE_LEVEL)
+_IRQL_requires_same_
 VOID
 BffSetInitializationData(
     _Out_ PBFF_INITIALIZATION_DATA  InitData,
@@ -178,6 +204,8 @@ BffSetInitializationData(
  *                          registry; or
  *                      (e) Any other negative value for failure.
  */
+_IRQL_requires_max_(PASSIVE_LEVEL)
+_IRQL_requires_same_
 NTSTATUS
 BffInitialize(
     _In_ PDRIVER_OBJECT             DriverObject,
@@ -193,6 +221,8 @@ BffInitialize(
  *                  device object.
  *  @return         The value that WdfObjectAllocateContext returns.
  */
+_IRQL_requires_max_(PASSIVE_LEVEL)
+_IRQL_requires_same_
 NTSTATUS
 BffAllocateContext(
     _In_ WDFDEVICE Device
@@ -210,6 +240,8 @@ BffAllocateContext(
  *  @param Irp      The IRP_MN_QUERY_DEVICE_RELATIONS I/O request packet.
  *  @return         The value that WdfDeviceWdmDispatchPreprocessedIrp returns.
  */
+_IRQL_requires_max_(PASSIVE_LEVEL)
+_IRQL_requires_same_
 NTSTATUS
 BffPreprocessQueryBusRelations(
     _In_ WDFDEVICE  Device,
@@ -225,6 +257,8 @@ BffPreprocessQueryBusRelations(
  *  @return             The WDM bus filter device object for success; NULL
  *                      otherwise.
  */
+_IRQL_requires_max_(DISPATCH_LEVEL)
+_IRQL_requires_same_
 PDEVICE_OBJECT
 BffDeviceWdmGetDeviceObject(
     _In_ BFFDEVICE BffDevice
@@ -236,6 +270,8 @@ BffDeviceWdmGetDeviceObject(
  *  @return             The next lower WDM device object for success; NULL
  *                      otherwise.
  */
+_IRQL_requires_max_(DISPATCH_LEVEL)
+_IRQL_requires_same_
 PDEVICE_OBJECT
 BffDeviceWdmGetAttachedDevice(
     _In_ BFFDEVICE BffDevice
@@ -245,6 +281,8 @@ BffDeviceWdmGetAttachedDevice(
  *  @param BffDevice    The WDF object as a bus filter device object.
  *  @return             The PDO for success; NULL otherwise.
  */
+_IRQL_requires_max_(DISPATCH_LEVEL)
+_IRQL_requires_same_
 PDEVICE_OBJECT
 BffDeviceWdmGetPhysicalDevice(
     _In_ BFFDEVICE BffDevice
@@ -254,6 +292,8 @@ BffDeviceWdmGetPhysicalDevice(
  *  @param BffDevice    The WDF object as a bus filter device object.
  *  @param Irp          The PnP IRP.
  */
+_IRQL_requires_max_(DISPATCH_LEVEL)
+_IRQL_requires_same_
 VOID
 BffDeviceWdmAcquireRemoveLock(
     _In_ BFFDEVICE  BffDevice,
@@ -264,6 +304,8 @@ BffDeviceWdmAcquireRemoveLock(
  *  @param BffDevice    The WDF object as a bus filter device object.
  *  @param Irp          The PnP IRP.
  */
+_IRQL_requires_max_(DISPATCH_LEVEL)
+_IRQL_requires_same_
 VOID
 BffDeviceWdmReleaseRemoveLock(
     _In_ BFFDEVICE  BffDevice,

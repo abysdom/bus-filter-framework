@@ -33,6 +33,8 @@ Global variables
 DEFINE_GUID(GUID_BUS_FILTER_FRAMEWORK, 0x9b72ba39, 0x1052, 0x4d96, 0x9e, 0xe8, 0x50, 0x6, 0x29, 0xe4, 0xea, 0xf1);
 static PBFF_PRIVATE_CONTEXT BffPrivateContext;
 
+_IRQL_requires_max_(PASSIVE_LEVEL)
+_IRQL_requires_same_
 static
 VOID
 BffRemoveDevice(
@@ -40,6 +42,7 @@ BffRemoveDevice(
     _In_ PIRP           Irp
     );
 
+static DRIVER_DISPATCH BffDispatchAny;
 static IO_COMPLETION_ROUTINE BffCompleteQueryBusRelations;
 
 #ifdef ALLOC_PRAGMA
@@ -50,6 +53,7 @@ static IO_COMPLETION_ROUTINE BffCompleteQueryBusRelations;
 #pragma alloc_text(PAGE, BffPreprocessQueryBusRelations)
 #endif
 
+_Use_decl_annotations_
 static
 VOID
 BffRemoveDevice(
@@ -128,6 +132,7 @@ Return Value:
     IoDeleteDevice(DeviceObject);
 }
 
+_Use_decl_annotations_
 static
 NTSTATUS
 BffDispatchAny(
@@ -211,6 +216,8 @@ Return Value:
     return status;
 } // end BffDispatchAny()
 
+_IRQL_requires_max_(DISPATCH_LEVEL)
+_IRQL_requires_same_
 static
 VOID
 BffLogError(
@@ -251,6 +258,8 @@ Return Value:
     }
 }
 
+_IRQL_requires_max_(DISPATCH_LEVEL)
+_IRQL_requires_same_
 static
 FORCEINLINE
 BOOLEAN
@@ -270,6 +279,8 @@ BffFindExistingPDO(
     return FALSE;
 }
 
+_IRQL_requires_max_(DISPATCH_LEVEL)
+_IRQL_requires_same_
 static
 FORCEINLINE
 NTSTATUS
@@ -301,6 +312,8 @@ BffFindExistingChild(
     return status;
 }
 
+_IRQL_requires_max_(DISPATCH_LEVEL)
+_IRQL_requires_same_
 static
 FORCEINLINE
 VOID
@@ -317,6 +330,8 @@ BffCommitChild(
     KeReleaseInStackQueuedSpinLock(&handle);
 }
 
+_IRQL_requires_max_(DISPATCH_LEVEL)
+_IRQL_requires_same_
 static
 FORCEINLINE
 NTSTATUS
@@ -447,6 +462,7 @@ deleteDev:
     return status;
 }
 
+_Use_decl_annotations_
 static
 NTSTATUS
 BffCompleteQueryBusRelations(
@@ -564,6 +580,7 @@ Return Value:
  *  @param DeviceRemove     The callback function for removal of a bus
  *                          filter device object.
  */
+_Use_decl_annotations_
 VOID
 BffSetInitializationData(
     _Out_ PBFF_INITIALIZATION_DATA  InitData,
@@ -599,6 +616,7 @@ BffSetInitializationData(
  *                          registry; or
  *                      (e) Any other negative value for failure.
  */
+_Use_decl_annotations_
 NTSTATUS
 BffInitialize(
     _In_ PDRIVER_OBJECT             DriverObject,
@@ -666,6 +684,7 @@ BffInitialize(
  *                  device object.
  *  @return         The value that WdfObjectAllocateContext returns.
  */
+_Use_decl_annotations_
 NTSTATUS
 BffAllocateContext(
     _In_ WDFDEVICE Device
@@ -700,6 +719,7 @@ BffAllocateContext(
  *  @param Irp      The IRP_MN_QUERY_DEVICE_RELATIONS I/O request packet.
  *  @return         The value that WdfDeviceWdmDispatchPreprocessedIrp returns.
  */
+_Use_decl_annotations_
 NTSTATUS
 BffPreprocessQueryBusRelations(
     _In_ WDFDEVICE  Device,
@@ -731,6 +751,7 @@ BffPreprocessQueryBusRelations(
  *  @return             The WDM bus filter device object for success; NULL
  *                      otherwise.
  */
+_Use_decl_annotations_
 PDEVICE_OBJECT
 BffDeviceWdmGetDeviceObject(
     _In_ BFFDEVICE BffDevice
@@ -748,6 +769,7 @@ BffDeviceWdmGetDeviceObject(
  *  @return             The next lower WDM device object for success; NULL
  *                      otherwise.
  */
+_Use_decl_annotations_
 PDEVICE_OBJECT
 BffDeviceWdmGetAttachedDevice(
     _In_ BFFDEVICE BffDevice
@@ -767,6 +789,7 @@ BffDeviceWdmGetAttachedDevice(
  *  @param BffDevice    The WDF object as a bus filter device object.
  *  @return             The PDO for success; NULL otherwise.
  */
+_Use_decl_annotations_
 PDEVICE_OBJECT
 BffDeviceWdmGetPhysicalDevice(
     _In_ BFFDEVICE BffDevice
@@ -786,6 +809,7 @@ BffDeviceWdmGetPhysicalDevice(
  *  @param BffDevice    The WDF object as a bus filter device object.
  *  @param Irp          The PnP IRP.
  */
+_Use_decl_annotations_
 VOID
 BffDeviceWdmAcquireRemoveLock(
     _In_ BFFDEVICE  BffDevice,
@@ -803,6 +827,7 @@ BffDeviceWdmAcquireRemoveLock(
  *  @param BffDevice    The WDF object as a bus filter device object.
  *  @param Irp          The PnP IRP.
  */
+_Use_decl_annotations_
 VOID
 BffDeviceWdmReleaseRemoveLock(
     _In_ BFFDEVICE  BffDevice,
