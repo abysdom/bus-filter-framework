@@ -510,50 +510,52 @@ Return Value:
         BffLogError(DeviceObject, IRP_MN_QUERY_DEVICE_RELATIONS, IO_ERR_INTERNAL_ERROR, STATUS_NOT_SUPPORTED);
     }
 
-    if (NT_SUCCESS(Irp->IoStatus.Status))
+    if (NT_SUCCESS(Irp->IoStatus.Status) && BffPrivateContext && parentContext)
     {
         PDEVICE_RELATIONS dr = (PDEVICE_RELATIONS)Irp->IoStatus.Information;
+        DEVICE_RELATIONS dummyDR;
 
         if (!dr)
         {
             KdPrint(("%s: failed to retreive device relations:%x\n", __FUNCTION__, Irp->IoStatus.Status));
-            BffLogError(DeviceObject, IRP_MN_QUERY_DEVICE_RELATIONS, IO_ERR_INTERNAL_ERROR, Irp->IoStatus.Status);
+            BffLogError(DeviceObject, IRP_MN_QUERY_DEVICE_RELATIONS, IO_ERR_INTERNAL_ERROR, Irp->IoStatus.Status);        
+            //
+            // Workaround for a buggy bus driver that returns NULL device relations. We will treat it as an empty
+            // device relations.
+            //
+            dummyDR.Count = 0;
+            dr = &dummyDR;
         }
-        else if (BffPrivateContext && parentContext)
+
+        //
+        // Check if any existing child device has been removed from the bus. If so, mark it as non-existing.
+        //
+        KLOCK_QUEUE_HANDLE handle;
+        KeAcquireInStackQueuedSpinLock(&parentContext->Lock, &handle);
+        for (PLIST_ENTRY entry = parentContext->List.Flink; entry != &parentContext->List; entry = entry->Flink)
         {
-            PDEVICE_EXTENSION childExtension;
-            KLOCK_QUEUE_HANDLE handle;
-            PLIST_ENTRY entry;
+            PDEVICE_EXTENSION childExtension = CONTAINING_RECORD(entry, DEVICE_EXTENSION, List);
+            childExtension->Existing = BffFindExistingPDO(dr, childExtension->PhysicalDeviceObject);
+        }
+        KeReleaseInStackQueuedSpinLock(&handle);
 
-            //
-            // Check if any existing child device has been removed from the bus. If so, mark it as non-existing.
-            //
-            KeAcquireInStackQueuedSpinLock(&parentContext->Lock, &handle);
-            for (entry = parentContext->List.Flink; entry != &parentContext->List; entry = entry->Flink)
+        //
+        // Add new child devices to the list of children.
+        //
+        for (ULONG i = 0; i < dr->Count; i++)
+        {
+            NTSTATUS status = BffFindExistingChild(parentContext, dr->Objects[i]);
+            if (NT_SUCCESS(status))
             {
-                childExtension = CONTAINING_RECORD(entry, DEVICE_EXTENSION, List);
-                childExtension->Existing = BffFindExistingPDO(dr, childExtension->PhysicalDeviceObject);
+                continue; // This child device has already been added to the list of children.
             }
-            KeReleaseInStackQueuedSpinLock(&handle);
 
-            //
-            // Add new child devices to the list of children.
-            //
-            for (ULONG i = 0; i < dr->Count; i++)
+            status = BffAddDevice(parentContext, Device, dr->Objects[i]);
+            if (!NT_SUCCESS(status))
             {
-                NTSTATUS status = BffFindExistingChild(parentContext, dr->Objects[i]);
-                if (NT_SUCCESS(status))
-                {
-                    continue; // This child device has already been added to the list of children.
-                }
-
-                status = BffAddDevice(parentContext, Device, dr->Objects[i]);
-                if (!NT_SUCCESS(status))
-                {
-                    KdPrint(("%s: failed to add a child:%x\n", __FUNCTION__, status));
-                    BffLogError(DeviceObject, IRP_MN_QUERY_DEVICE_RELATIONS, IO_ERR_INTERNAL_ERROR, status);
-                    // continue to add other new child devices
-                }
+                KdPrint(("%s: failed to add a child:%x\n", __FUNCTION__, status));
+                BffLogError(DeviceObject, IRP_MN_QUERY_DEVICE_RELATIONS, IO_ERR_INTERNAL_ERROR, status);
+                // continue to add other new child devices
             }
         }
     }
