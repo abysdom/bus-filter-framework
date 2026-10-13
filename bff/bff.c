@@ -38,12 +38,12 @@ _IRQL_requires_same_
 static
 VOID
 BffRemoveDevice(
-    _In_ PDEVICE_OBJECT DeviceObject,
-    _In_ PIRP           Irp
+    _In_ PDEVICE_EXTENSION ChildExtension
     );
 
 static DRIVER_DISPATCH BffDispatchAny;
 static IO_COMPLETION_ROUTINE BffCompleteQueryBusRelations;
+static EVT_WDF_OBJECT_CONTEXT_DESTROY BffDeviceContextDestroy;
 
 #ifdef ALLOC_PRAGMA
 #pragma alloc_text(INIT, BffSetInitializationData)
@@ -57,8 +57,7 @@ _Use_decl_annotations_
 static
 VOID
 BffRemoveDevice(
-    _In_ PDEVICE_OBJECT DeviceObject,
-    _In_ PIRP           Irp
+    _In_ PDEVICE_EXTENSION ChildExtension
     )
 /*++
 
@@ -69,19 +68,13 @@ Routine Description:
 
 Arguments:
 
-    DeviceObject - a pointer to the device object
-    Irp          - the remove IRP
+    ChildExtension - The device extension of the bus filter device object to be removed.
 
 Return Value:
     None
 --*/
 {
-    PDEVICE_EXTENSION childExtension = DeviceObject->DeviceExtension;
-    PBFF_PARENT_CONTEXT parentContext = BffGetParentContext(childExtension->Parent);
-    KLOCK_QUEUE_HANDLE handle;
-
     PAGED_CODE();
-    ASSERT(parentContext);
 
     //
     // Quoted from https://msdn.microsoft.com/en-us/library/windows/hardware/ff561048(v=vs.85).aspx
@@ -108,28 +101,33 @@ Return Value:
     // IoInvalidateDeviceRelations, but it must not delete the device's PDO
     // until the PnP manager sends an IRP_MN_REMOVE_DEVICE request.
     //
-    if (childExtension->Existing)
+    if (!ChildExtension->Existing)
     {
-        IoReleaseRemoveLock(&childExtension->RemoveLock, Irp);
-        return;
+        KdPrint(("%s: Driver %X Device %X\n", __FUNCTION__,
+                                              BffDeviceWdmGetDeviceObject(ChildExtension->Child)->DriverObject,
+                                              BffDeviceWdmGetPhysicalDevice(ChildExtension->Child)));
+
+        // Allow queued I/O operations to complete
+        IoAcquireRemoveLock(&ChildExtension->RemoveLock, ChildExtension->Child);
+        //
+        // If we are the very last remove lock holder, we won't wait; otherwise, we will wait until all other remove lock
+        // holders have released the remove lock.
+        //
+        IoReleaseRemoveLockAndWait(&ChildExtension->RemoveLock, ChildExtension->Child);
+
+        //
+        // At this point, all outstanding acquisitions of RemoveLock have been released;
+        // The bus filter device object is ready to be removed.
+        // Let EvtDestroyCallback handle the removal of the child device.
+        //
+        WdfObjectDelete(ChildExtension->Child);
     }
-
-    // Allow queued I/O operations to complete
-    IoReleaseRemoveLockAndWait(&childExtension->RemoveLock, Irp);
-
-    // At this point, all outstanding acquisitions of RemoveLock have been released;
-    // DeviceObject is ready to be removed.
-    KeAcquireInStackQueuedSpinLock(&parentContext->Lock, &handle);
-    RemoveEntryList(&childExtension->List);
-    KeReleaseInStackQueuedSpinLock(&handle);
-
-    if (BffPrivateContext->BffInitializationData.DeviceConfig.DeviceRemove)
-        BffPrivateContext->BffInitializationData.DeviceConfig.DeviceRemove(childExtension->Parent,
-                                                                           childExtension->Child);
-
-    WdfObjectDelete(childExtension->Child);
-    IoDetachDevice(childExtension->TargetDeviceObject);
-    IoDeleteDevice(DeviceObject);
+    else
+    {
+        KdPrint(("%s: Driver %X Device %X is still existing\n", __FUNCTION__,
+                                              BffDeviceWdmGetDeviceObject(ChildExtension->Child)->DriverObject,
+                                              BffDeviceWdmGetPhysicalDevice(ChildExtension->Child)));
+    }
 }
 
 _Use_decl_annotations_
@@ -176,7 +174,7 @@ Return Value:
     //
     if (major == IRP_MJ_PNP && minor <= IRP_MN_DEVICE_ENUMERATED)
     {
-        status = IoAcquireRemoveLock(&childExtension->RemoveLock, Irp);
+        status = IoAcquireRemoveLock(&childExtension->RemoveLock, childExtension->Child);
         if (!NT_SUCCESS(status))
         {
             // Failure to acquire a remove lock indicates that DeviceObject is being deleted.
@@ -190,15 +188,13 @@ Return Value:
             if (BffPrivateContext->BffInitializationData.PnPMinorFunction[minor])
             {
                 status = BffPrivateContext->BffInitializationData.PnPMinorFunction[minor](childExtension->Child, Irp);
-                IoReleaseRemoveLock(&childExtension->RemoveLock, Irp);
+                IoReleaseRemoveLock(&childExtension->RemoveLock, childExtension->Child);
                 return status;
-            }
-            else
-            {
-                IoReleaseRemoveLock(&childExtension->RemoveLock, Irp);
             }
             // fall through if the PnP minor function doesn't exist.
         }
+
+        IoReleaseRemoveLock(&childExtension->RemoveLock, childExtension->Child);
     }
 
     //
@@ -209,8 +205,7 @@ Return Value:
 
     if (major == IRP_MJ_PNP && minor == IRP_MN_REMOVE_DEVICE)
     {
-        // RemoveLock will be released within BffRemoveDevice.
-        BffRemoveDevice(DeviceObject, Irp);
+        BffRemoveDevice(childExtension);
     }
 
     return status;
@@ -330,6 +325,34 @@ BffCommitChild(
     KeReleaseInStackQueuedSpinLock(&handle);
 }
 
+_Use_decl_annotations_
+static
+VOID
+BffDeviceContextDestroy(
+    _In_ BFFDEVICE BffDevice
+    )
+{
+    PBFF_DEVICE_CONTEXT childContext = BffGetDeviceContext(BffDevice);
+    PDEVICE_OBJECT filterDeviceObject = childContext->DeviceObject;
+    PDEVICE_EXTENSION childExtension = filterDeviceObject->DeviceExtension;
+    PBFF_PARENT_CONTEXT parentContext = BffGetParentContext(childExtension->Parent);
+    KLOCK_QUEUE_HANDLE handle;
+
+    KdPrint(("%s: Driver %X Device %X\n", __FUNCTION__,
+                                          filterDeviceObject->DriverObject,
+                                          BffDeviceWdmGetPhysicalDevice(BffDevice)));
+
+    KeAcquireInStackQueuedSpinLock(&parentContext->Lock, &handle);
+    RemoveEntryList(&childExtension->List);
+    KeReleaseInStackQueuedSpinLock(&handle);
+
+    if (BffPrivateContext->BffInitializationData.DeviceConfig.DeviceRemove)
+        BffPrivateContext->BffInitializationData.DeviceConfig.DeviceRemove(childExtension->Parent, BffDevice);
+
+    IoDetachDevice(childExtension->TargetDeviceObject);
+    IoDeleteDevice(filterDeviceObject);
+}
+
 _IRQL_requires_max_(DISPATCH_LEVEL)
 _IRQL_requires_same_
 static
@@ -399,6 +422,7 @@ Return Value:
     BFFDEVICE child;
     WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&attr, BFF_DEVICE_CONTEXT);
     attr.ParentObject = Device;
+    attr.EvtDestroyCallback = BffDeviceContextDestroy;
     status = WdfObjectCreate(&attr, &child);
     if (!NT_SUCCESS(status))
     {

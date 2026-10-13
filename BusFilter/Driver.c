@@ -61,7 +61,6 @@ static BFF_DEVICE_REMOVE BusFilterRemoveDevice;
 #pragma alloc_text(INIT, DriverEntry)
 #pragma alloc_text(PAGE, BusFilterStartDevice)
 #pragma alloc_text(PAGE, BusFilterQueryID)
-#pragma alloc_text(PAGE, BusFilterRemoveDevice)
 #pragma alloc_text(PAGE, BusFilterEvtDeviceAdd)
 #pragma alloc_text(PAGE, BusFilterEvtDriverContextCleanup)
 #endif
@@ -172,9 +171,6 @@ BusFilterRemoveDevice(
     )
 {
     PBUS_FILTER_CONTEXT busFilterContext = BusFilterGetContext(BffDevice);
-
-    PAGED_CODE();
-
     if (busFilterContext->IsRegistered)
     {
         IoSetDeviceInterfaceState(&busFilterContext->SymbolicLink, FALSE);
