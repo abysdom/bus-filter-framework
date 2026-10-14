@@ -21,7 +21,7 @@ BreakBeforeBraces: Allman
 AllowShortBlocksOnASingleLine: Never
 AllowShortFunctionsOnASingleLine: None
 AllowShortIfStatementsOnASingleLine: Never
-AllowShortLoopsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
 
 # ---------------------------------------------------------------------------
 # Pointers / references
