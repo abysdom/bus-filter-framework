@@ -252,7 +252,8 @@ BffPreprocessQueryBusRelations(
  * APIs for bus filter device objects.
  ******************************************************************************/
 /** Retrieve the WDM bus filter device object that is associated with the
- *  specified WDF object.
+ *  specified WDF object. Never call this function in EvtDestroyCallback of
+ *  BffDevice.
  *  @param BffDevice    The WDF object as a bus filter device object.
  *  @return             The WDM bus filter device object for success; NULL
  *                      otherwise.
@@ -265,7 +266,8 @@ BffDeviceWdmGetDeviceObject(
     );
 
 /** Retrieve the next lower WDM device object in the device stack of the
- *  specified WDF object.
+ *  specified WDF object. Never call this function in EvtDestroyCallback of
+ *  BffDevice.
  *  @param BffDevice    The WDF object as a bus filter device object.
  *  @return             The next lower WDM device object for success; NULL
  *                      otherwise.
@@ -277,7 +279,8 @@ BffDeviceWdmGetAttachedDevice(
     _In_ BFFDEVICE BffDevice
     );
 
-/** Retrieve the PDO from the device stack of the specified WDF object.
+/** Retrieve the PDO from the device stack of the specified WDF object. Never
+ *  call this function in EvtDestroyCallback of BffDevice.
  *  @param BffDevice    The WDF object as a bus filter device object.
  *  @return             The PDO for success; NULL otherwise.
  */
@@ -288,7 +291,8 @@ BffDeviceWdmGetPhysicalDevice(
     _In_ BFFDEVICE BffDevice
     );
 
-/** Acquire the RemoveLock of the specified BFF device.
+/** Acquire the RemoveLock of the specified BFF device. Call this function only
+ *  in BFF_DISPATCH_PNP or in the processing of Irp.
  *  @param BffDevice    The WDF object as a bus filter device object.
  *  @param Irp          The PnP IRP.
  */
@@ -300,7 +304,8 @@ BffDeviceWdmAcquireRemoveLock(
     _In_ PIRP       Irp
     );
 
-/** Release the RemoveLock of the specified BFF device.
+/** Release the RemoveLock of the specified BFF device. Call this function only
+ *  in BFF_DISPATCH_PNP or in the processing of Irp.
  *  @param BffDevice    The WDF object as a bus filter device object.
  *  @param Irp          The PnP IRP.
  */
