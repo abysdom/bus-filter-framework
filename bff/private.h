@@ -45,6 +45,18 @@ WDF_DECLARE_CONTEXT_TYPE(BFF_PRIVATE_CONTEXT)
 typedef struct _DEVICE_EXTENSION
 {
     GUID Signature;
+    BFFDEVICE Child;
+} DEVICE_EXTENSION, *PDEVICE_EXTENSION;
+
+#define DEVICE_EXTENSION_SIZE sizeof(DEVICE_EXTENSION)
+
+typedef struct _BFF_DEVICE_CONTEXT
+{
+    //
+    // Back pointer to device object
+    //
+
+    PDEVICE_OBJECT DeviceObject;
 
     //
     // Target Device Object
@@ -58,19 +70,7 @@ typedef struct _DEVICE_EXTENSION
 
     LIST_ENTRY List;
     WDFDEVICE Parent; // The upper filter of the parent bus
-    BFFDEVICE Child;
     IO_REMOVE_LOCK RemoveLock;
-} DEVICE_EXTENSION, *PDEVICE_EXTENSION;
-
-#define DEVICE_EXTENSION_SIZE sizeof(DEVICE_EXTENSION)
-
-typedef struct _BFF_DEVICE_CONTEXT
-{
-    //
-    // Back pointer to device object
-    //
-
-    PDEVICE_OBJECT DeviceObject;
 } BFF_DEVICE_CONTEXT, *PBFF_DEVICE_CONTEXT;
 
 WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(BFF_DEVICE_CONTEXT, BffDeviceContextGet)
