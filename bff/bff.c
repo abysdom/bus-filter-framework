@@ -38,8 +38,9 @@ _IRQL_requires_same_
 static
 VOID
 BffDeviceRemove(
-    _In_ BFFDEVICE BffDevice,
-    _In_ PDEVICE_EXTENSION ChildExtension
+    _In_ BFFDEVICE         BffDevice,
+    _In_ PDEVICE_EXTENSION ChildExtension,
+    _In_ PIRP              Irp
     );
 
 static DRIVER_DISPATCH BffDispatchAny;
@@ -58,8 +59,9 @@ _Use_decl_annotations_
 static
 VOID
 BffDeviceRemove(
-    _In_ BFFDEVICE BffDevice,
-    _In_ PDEVICE_EXTENSION ChildExtension
+    _In_ BFFDEVICE         BffDevice,
+    _In_ PDEVICE_EXTENSION ChildExtension,
+    _In_ PIRP              Irp
     )
 /*++
 
@@ -72,6 +74,7 @@ Arguments:
 
     BffDevice - The bus filter device object to be removed.
     ChildExtension - The device extension of the bus filter device object to be removed.
+    Irp - The PnP IRP that requests the removal of the device.
 
 Return Value:
     None
@@ -110,6 +113,7 @@ Return Value:
                  __FUNCTION__,
                  WdfDriverWdmGetDriverObject(WdfGetDriver()),
                  BffDeviceWdmGetPhysicalDevice(BffDevice)));
+        IoReleaseRemoveLock(&ChildExtension->RemoveLock, Irp);
         return;
     }
     
@@ -119,13 +123,7 @@ Return Value:
              BffDeviceWdmGetPhysicalDevice(BffDevice)));
 
     // Allow queued I/O operations to complete
-    IoAcquireRemoveLock(&ChildExtension->RemoveLock, BffDevice);
-    //
-    // If we are the very last remove lock holder, we won't wait; otherwise,
-    // we will wait until all other remove lock holders have released the
-    // remove lock.
-    //
-    IoReleaseRemoveLockAndWait(&ChildExtension->RemoveLock, BffDevice);
+    IoReleaseRemoveLockAndWait(&ChildExtension->RemoveLock, Irp);
 
     //
     // At this point, all outstanding acquisitions of RemoveLock have been
@@ -177,26 +175,24 @@ Return Value:
     //
     BFFDEVICE bffDevice = childExtension->Child;
     UCHAR minor = stack->MinorFunction;
-    NTSTATUS status;
-    if (major == IRP_MJ_PNP && minor <= IRP_MN_DEVICE_ENUMERATED)
+    NTSTATUS status = IoAcquireRemoveLock(&childExtension->RemoveLock, Irp);
+    if (!NT_SUCCESS(status))
     {
-        status = IoAcquireRemoveLock(&childExtension->RemoveLock, bffDevice);
-        if (!NT_SUCCESS(status))
-        {
-            // Failure to acquire a remove lock indicates that DeviceObject is being deleted.
-            Irp->IoStatus.Status = STATUS_DELETE_PENDING;
-            IoCompleteRequest(Irp, IO_NO_INCREMENT);
-            return STATUS_DELETE_PENDING;
-        }
+        // Failure to acquire a remove lock indicates that DeviceObject is being deleted.
+        Irp->IoStatus.Status = STATUS_DELETE_PENDING;
+        IoCompleteRequest(Irp, IO_NO_INCREMENT);
+        return STATUS_DELETE_PENDING;
+    }
 
-        if (minor != IRP_MN_REMOVE_DEVICE && BffPrivateContext->BffInitializationData.PnPMinorFunction[minor])
+    if (major == IRP_MJ_PNP && minor <= IRP_MN_DEVICE_ENUMERATED && minor != IRP_MN_REMOVE_DEVICE)
+    {
+        PBFF_DISPATCH_PNP dispatchPnp = BffPrivateContext->BffInitializationData.PnPMinorFunction[minor];
+        if (dispatchPnp)
         {
-            status = BffPrivateContext->BffInitializationData.PnPMinorFunction[minor](bffDevice, Irp);
-            IoReleaseRemoveLock(&childExtension->RemoveLock, bffDevice);
+            status = dispatchPnp(bffDevice, Irp);
+            IoReleaseRemoveLock(&childExtension->RemoveLock, Irp);
             return status;
         }
-
-        IoReleaseRemoveLock(&childExtension->RemoveLock, bffDevice);
     }
 
     //
@@ -207,7 +203,16 @@ Return Value:
 
     if (major == IRP_MJ_PNP && minor == IRP_MN_REMOVE_DEVICE)
     {
-        BffDeviceRemove(bffDevice, childExtension);
+        // RemoveLock will be released within BffDeviceRemove.
+        BffDeviceRemove(bffDevice, childExtension, Irp);
+    }
+    else
+    {
+        //
+        // For I/O operations that do not set an IoCompletion routine, a driver should call IoReleaseRemoveLock after
+        // passing the current IRP to the next-lower driver, but before exiting the dispatch routine.
+        //
+        IoReleaseRemoveLock(&childExtension->RemoveLock, Irp);
     }
 
     return status;
