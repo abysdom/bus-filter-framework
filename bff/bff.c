@@ -36,10 +36,11 @@ static PBFF_PRIVATE_CONTEXT BffPrivateContext;
 _IRQL_requires_max_(PASSIVE_LEVEL)
 _IRQL_requires_same_
 static
-VOID
+NTSTATUS
 BffDeviceRemove(
-    _In_ BFFDEVICE BffDevice,
-    _In_ PDEVICE_EXTENSION ChildExtension
+    _In_ BFFDEVICE         BffDevice,
+    _In_ PDEVICE_EXTENSION ChildExtension,
+    _In_ PIRP              Irp
     );
 
 static DRIVER_DISPATCH BffDispatchAny;
@@ -56,10 +57,11 @@ static EVT_WDF_OBJECT_CONTEXT_DESTROY BffDeviceContextDestroy;
 
 _Use_decl_annotations_
 static
-VOID
+NTSTATUS
 BffDeviceRemove(
-    _In_ BFFDEVICE BffDevice,
-    _In_ PDEVICE_EXTENSION ChildExtension
+    _In_ BFFDEVICE         BffDevice,
+    _In_ PDEVICE_EXTENSION ChildExtension,
+    _In_ PIRP              Irp
     )
 /*++
 
@@ -72,60 +74,28 @@ Arguments:
 
     BffDevice - The bus filter device object to be removed.
     ChildExtension - The device extension of the bus filter device object to be removed.
+    Irp - The PnP IRP that requests the removal of the device.
 
 Return Value:
-    None
+    NTSTATUS
 --*/
 {
     PAGED_CODE();
 
-    //
-    // Quoted from https://msdn.microsoft.com/en-us/library/windows/hardware/ff561048(v=vs.85).aspx
-    // If the device is still present when the PnP manager sends the
-    // IRP_MN_REMOVE_DEVICE request, the bus driver retains the PDO. If, at
-    // some later time, the device is physically removed from the bus, the
-    // PnP manager sends another IRP_MN_REMOVE_DEVICE. Upon receipt of the
-    // subsequent remove IRP, the bus driver deletes the PDO for the device.
-    //
-    // A bus driver must be able to handle an IRP_MN_REMOVE_DEVICE for a
-    // device it has already removed and whose PDO is marked for deletion.
-    // In response to such an IRP, the bus driver can succeed the IRP or
-    // return STATUS_NO_SUCH_DEVICE. The PDO for the device has not yet been
-    // deleted in this case, despite the bus driver's previous call to
-    // IoDeleteDevice, because some component still has a reference to the
-    // object. Therefore, the bus driver can access the PDO while handling
-    // the second remove IRP. The bus driver must not call IoDeleteDevice a
-    // second time for the PDO; the I/O system deletes the PDO when its
-    // reference count reaches zero.
-    //
-    // A bus driver does not remove its data structures for a child device
-    // until it receives an IRP_MN_REMOVE_DEVICE request for the device. A
-    // bus driver might detect that a device has been removed and call
-    // IoInvalidateDeviceRelations, but it must not delete the device's PDO
-    // until the PnP manager sends an IRP_MN_REMOVE_DEVICE request.
-    //
-    if (ChildExtension->Existing)
+    if (!IoForwardIrpSynchronously(ChildExtension->TargetDeviceObject, Irp))
     {
-        KdPrint(("%s: Driver %X Device %X is still existing\n",
-                 __FUNCTION__,
-                 WdfDriverWdmGetDriverObject(WdfGetDriver()),
-                 BffDeviceWdmGetPhysicalDevice(BffDevice)));
-        return;
+        Irp->IoStatus.Status = STATUS_NO_SUCH_DEVICE;
     }
-    
-    KdPrint(("%s: Driver %X Device %X\n",
-             __FUNCTION__,
-             WdfDriverWdmGetDriverObject(WdfGetDriver()),
-             BffDeviceWdmGetPhysicalDevice(BffDevice)));
 
+    NTSTATUS status = Irp->IoStatus.Status;
+    IoCompleteRequest(Irp, IO_NO_INCREMENT);
+
+    KdPrint(("%s: Driver %X Device %X\n",
+            __FUNCTION__,
+            WdfDriverWdmGetDriverObject(WdfGetDriver()),
+            BffDeviceWdmGetPhysicalDevice(BffDevice)));
     // Allow queued I/O operations to complete
-    IoAcquireRemoveLock(&ChildExtension->RemoveLock, BffDevice);
-    //
-    // If we are the very last remove lock holder, we won't wait; otherwise,
-    // we will wait until all other remove lock holders have released the
-    // remove lock.
-    //
-    IoReleaseRemoveLockAndWait(&ChildExtension->RemoveLock, BffDevice);
+    IoReleaseRemoveLockAndWait(&ChildExtension->RemoveLock, Irp);
 
     //
     // At this point, all outstanding acquisitions of RemoveLock have been
@@ -133,6 +103,8 @@ Return Value:
     // Let EvtDestroyCallback handle the removal of the child device.
     //
     WdfObjectDelete(BffDevice);
+
+    return status;
 }
 
 _Use_decl_annotations_
@@ -177,26 +149,33 @@ Return Value:
     //
     BFFDEVICE bffDevice = childExtension->Child;
     UCHAR minor = stack->MinorFunction;
-    NTSTATUS status;
+    NTSTATUS status = IoAcquireRemoveLock(&childExtension->RemoveLock, Irp);
+    if (!NT_SUCCESS(status))
+    {
+        // Failure to acquire a remove lock indicates that DeviceObject is being deleted.
+        Irp->IoStatus.Status = STATUS_DELETE_PENDING;
+        IoCompleteRequest(Irp, IO_NO_INCREMENT);
+        return STATUS_DELETE_PENDING;
+    }
+
     if (major == IRP_MJ_PNP && minor <= IRP_MN_DEVICE_ENUMERATED)
     {
-        status = IoAcquireRemoveLock(&childExtension->RemoveLock, bffDevice);
-        if (!NT_SUCCESS(status))
+        if (minor == IRP_MN_REMOVE_DEVICE)
         {
-            // Failure to acquire a remove lock indicates that DeviceObject is being deleted.
-            Irp->IoStatus.Status = STATUS_DELETE_PENDING;
-            IoCompleteRequest(Irp, IO_NO_INCREMENT);
-            return STATUS_DELETE_PENDING;
-        }
-
-        if (minor != IRP_MN_REMOVE_DEVICE && BffPrivateContext->BffInitializationData.PnPMinorFunction[minor])
-        {
-            status = BffPrivateContext->BffInitializationData.PnPMinorFunction[minor](bffDevice, Irp);
-            IoReleaseRemoveLock(&childExtension->RemoveLock, bffDevice);
+            // RemoveLock will be released within BffDeviceRemove.
+            status = BffDeviceRemove(bffDevice, childExtension, Irp);
             return status;
         }
-
-        IoReleaseRemoveLock(&childExtension->RemoveLock, bffDevice);
+        else
+        {
+            PBFF_DISPATCH_PNP dispatchPnp = BffPrivateContext->BffInitializationData.PnPMinorFunction[minor];
+            if (dispatchPnp)
+            {
+                status = dispatchPnp(bffDevice, Irp);
+                IoReleaseRemoveLock(&childExtension->RemoveLock, Irp);
+                return status;
+            }
+        }
     }
 
     //
@@ -205,10 +184,11 @@ Return Value:
     IoSkipCurrentIrpStackLocation(Irp);
     status = IoCallDriver(childExtension->TargetDeviceObject, Irp);
 
-    if (major == IRP_MJ_PNP && minor == IRP_MN_REMOVE_DEVICE)
-    {
-        BffDeviceRemove(bffDevice, childExtension);
-    }
+    //
+    // For I/O operations that do not set an IoCompletion routine, a driver should call IoReleaseRemoveLock after
+    // passing the current IRP to the next-lower driver, but before exiting the dispatch routine.
+    //
+    IoReleaseRemoveLock(&childExtension->RemoveLock, Irp);
 
     return status;
 } // end BffDispatchAny()
@@ -259,27 +239,6 @@ _IRQL_requires_max_(DISPATCH_LEVEL)
 _IRQL_requires_same_
 static
 FORCEINLINE
-BOOLEAN
-BffFindExistingPDO(
-    _In_ PDEVICE_RELATIONS  DeviceRelations,
-    _In_ PDEVICE_OBJECT     PhysicalDeviceObject
-    )
-{
-    for (ULONG i = 0; i < DeviceRelations->Count; ++i)
-    {
-        if (DeviceRelations->Objects[i] == PhysicalDeviceObject)
-        {
-            return TRUE;
-        }
-    }
-
-    return FALSE;
-}
-
-_IRQL_requires_max_(DISPATCH_LEVEL)
-_IRQL_requires_same_
-static
-FORCEINLINE
 NTSTATUS
 BffFindExistingChild(
     _In_ PBFF_PARENT_CONTEXT    ParentContext,
@@ -322,7 +281,6 @@ BffCommitChild(
     KLOCK_QUEUE_HANDLE handle;
 
     KeAcquireInStackQueuedSpinLock(&ParentContext->Lock, &handle);
-    ChildExtension->Existing = TRUE;
     InsertTailList(&ParentContext->List, &ChildExtension->List);
     KeReleaseInStackQueuedSpinLock(&handle);
 }
@@ -552,18 +510,6 @@ Return Value:
             dummyDR.Count = 0;
             dr = &dummyDR;
         }
-
-        //
-        // Check if any existing child device has been removed from the bus. If so, mark it as non-existing.
-        //
-        KLOCK_QUEUE_HANDLE handle;
-        KeAcquireInStackQueuedSpinLock(&parentContext->Lock, &handle);
-        for (PLIST_ENTRY entry = parentContext->List.Flink; entry != &parentContext->List; entry = entry->Flink)
-        {
-            PDEVICE_EXTENSION childExtension = CONTAINING_RECORD(entry, DEVICE_EXTENSION, List);
-            childExtension->Existing = BffFindExistingPDO(dr, childExtension->PhysicalDeviceObject);
-        }
-        KeReleaseInStackQueuedSpinLock(&handle);
 
         //
         // Add new child devices to the list of children.

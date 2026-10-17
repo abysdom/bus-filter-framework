@@ -60,7 +60,6 @@ typedef struct _DEVICE_EXTENSION
     WDFDEVICE Parent; // The upper filter of the parent bus
     BFFDEVICE Child;
     IO_REMOVE_LOCK RemoveLock;
-    BOOLEAN Existing;
 } DEVICE_EXTENSION, *PDEVICE_EXTENSION;
 
 #define DEVICE_EXTENSION_SIZE sizeof(DEVICE_EXTENSION)
