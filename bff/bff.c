@@ -21,6 +21,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
+#include <ntddk.h>
 #include <initguid.h>
 #include "bff.h"
 #include "private.h"
@@ -345,20 +346,6 @@ Return Value:
     }
 
     //
-    // Attaches the device object to the highest device object in the chain and
-    // return the previously highest device object, which is passed to
-    // IoCallDriver when pass IRPs down the device stack
-    //
-
-    PDEVICE_OBJECT targetDeviceObject = IoAttachDeviceToDeviceStack(filterDeviceObject, PhysicalDeviceObject);
-    if (targetDeviceObject == NULL)
-    {
-        KdPrint(("%s: Unable to attach %X to target %X\n", __FUNCTION__, filterDeviceObject, PhysicalDeviceObject));
-        status = STATUS_NO_SUCH_DEVICE;
-        goto deleteDev;
-    }
-
-    //
     // Create a WDF object for the filter device object, so that we can store the filter device object in its context.
     //
 
@@ -370,12 +357,12 @@ Return Value:
     if (!NT_SUCCESS(status))
     {
         KdPrint(("%s: failed to create WDF object for child device: %x\n", __FUNCTION__, status));
-        goto detachDev;
+        goto deleteDev;
     }
 
     PBFF_DEVICE_CONTEXT childContext = BffDeviceGetContext(child);
     childContext->DeviceObject = filterDeviceObject;
-    childContext->TargetDeviceObject = targetDeviceObject;
+    childContext->TargetDeviceObject = NULL;
     childContext->PhysicalDeviceObject = PhysicalDeviceObject;
     childContext->Parent = Device;
     IoInitializeRemoveLock(&childContext->RemoveLock, 'tFFB', 0, 0);
@@ -390,9 +377,31 @@ Return Value:
     childExtension->Child = child;
 
     //
+    // Attaches the device object to the highest device object in the chain and
+    // return the previously highest device object, which is passed to
+    // IoCallDriver when pass IRPs down the device stack
+    //
+
+    //
+    // IoAttachDeviceToDeviceStackSafe updates childContext->TargetDeviceObject
+    // while holding the I/O system database lock, hence avoidance of a race
+    // condition that could otherwise occur if the filterDeviceObject received
+    // an IRP before childContext->TargetDeviceObject was updated.
+    //
+    status = IoAttachDeviceToDeviceStackSafe(filterDeviceObject,
+                                             PhysicalDeviceObject,
+                                             &childContext->TargetDeviceObject);
+    if (!NT_SUCCESS(status))
+    {
+        KdPrint(("%s: Unable to attach %X to target %X\n", __FUNCTION__, filterDeviceObject, PhysicalDeviceObject));
+        goto deleteObj;
+    }
+
+    //
     // Set the device flags of the filter device object to be the same as those of the target device object.
     //
 
+    PDEVICE_OBJECT targetDeviceObject = childContext->TargetDeviceObject;
     filterDeviceObject->Flags |= targetDeviceObject->Flags &
                                  (DO_BUFFERED_IO | DO_DIRECT_IO | DO_POWER_INRUSH | DO_POWER_PAGABLE);
 
@@ -400,13 +409,14 @@ Return Value:
     // Call the client's DeviceAdd callback function if it exists.
     //
 
-    if (BffPrivateContext->BffInitializationData.DeviceConfig.DeviceAdd)
+    PBFF_DEVICE_ADD deviceAdd = BffPrivateContext->BffInitializationData.DeviceConfig.DeviceAdd;
+    if (deviceAdd)
     {
-        status = BffPrivateContext->BffInitializationData.DeviceConfig.DeviceAdd(Device, child);
+        status = deviceAdd(Device, child);
         if (!NT_SUCCESS(status))
         {
             KdPrint(("%s: Client's DeviceAdd failed: %x\n", __FUNCTION__, status));
-            goto deleteObj;
+            goto detachDev;
         }
     }
 
@@ -420,10 +430,10 @@ Return Value:
 
     return STATUS_SUCCESS;
 
-deleteObj:
-    WdfObjectDelete(child);
 detachDev:
     IoDetachDevice(targetDeviceObject);
+deleteObj:
+    WdfObjectDelete(child);
 deleteDev:
     IoDeleteDevice(filterDeviceObject);
     return status;
