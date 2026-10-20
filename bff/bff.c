@@ -45,6 +45,7 @@ BffDeviceRemove(
 
 static DRIVER_DISPATCH BffDispatchAny;
 static IO_COMPLETION_ROUTINE BffCompleteQueryBusRelations;
+static EVT_WDF_WORKITEM BffWorkItemAddDevice;
 
 #ifdef ALLOC_PRAGMA
 #pragma alloc_text(INIT, BffSetInitializationData)
@@ -52,6 +53,7 @@ static IO_COMPLETION_ROUTINE BffCompleteQueryBusRelations;
 #pragma alloc_text(PAGE, BffDeviceRemove)
 #pragma alloc_text(PAGE, BffAllocateContext)
 #pragma alloc_text(PAGE, BffPreprocessQueryBusRelations)
+#pragma alloc_text(PAGE, BffWorkItemAddDevice)
 #endif
 
 _Use_decl_annotations_
@@ -429,6 +431,43 @@ deleteDev:
 
 _Use_decl_annotations_
 static
+VOID
+BffWorkItemAddDevice(
+    _In_ WDFWORKITEM WorkItem
+    )
+{
+    PBFF_WORKITEM_CONTEXT workItemContext = BffWorkItemGetContext(WorkItem);
+    PIRP irp = workItemContext->Irp;
+    WDFDEVICE device = workItemContext->Device;
+    PDEVICE_RELATIONS dr = workItemContext->DeviceRelations;
+    PBFF_PARENT_CONTEXT parentContext = workItemContext->ParentContext;
+
+    PAGED_CODE();
+
+    for (ULONG i = 0; i < dr->Count; i++)
+    {
+        NTSTATUS status = BffFindExistingChild(parentContext, dr->Objects[i]);
+        if (NT_SUCCESS(status))
+        {
+            continue; // This child device has already been added to the list of children.
+        }
+
+        status = BffDeviceAdd(device, parentContext, dr->Objects[i]);
+        if (!NT_SUCCESS(status))
+        {
+            KdPrint(("%s: failed to add a child:%x\n", __FUNCTION__, status));
+            BffLogError(workItemContext->DeviceObject, IRP_MN_QUERY_DEVICE_RELATIONS, IO_ERR_INTERNAL_ERROR, status);
+            // continue to add other new child devices
+        }
+    }
+
+    IoCompleteRequest(irp, IO_NO_INCREMENT);
+    WdfObjectDelete(WorkItem);
+    WdfObjectDereference(device);   // paired with BffPreprocessQueryBusRelations
+}
+
+_Use_decl_annotations_
+static
 NTSTATUS
 BffCompleteQueryBusRelations(
     _In_ PDEVICE_OBJECT DeviceObject,
@@ -453,9 +492,6 @@ Return Value:
 
 --*/
 {
-    if (Irp->PendingReturned)
-        IoMarkIrpPending(Irp);
-
     //
     // BffPrivateContext could be NULL if BffInitialize has not been called yet.
     //
@@ -478,41 +514,36 @@ Return Value:
     if (NT_SUCCESS(Irp->IoStatus.Status) && BffPrivateContext && parentContext)
     {
         PDEVICE_RELATIONS dr = (PDEVICE_RELATIONS)Irp->IoStatus.Information;
-        DEVICE_RELATIONS dummyDR;
 
-        if (!dr)
+        if (dr)
         {
-            KdPrint(("%s: failed to retreive device relations:%x\n", __FUNCTION__, Irp->IoStatus.Status));
-            BffLogError(DeviceObject, IRP_MN_QUERY_DEVICE_RELATIONS, IO_ERR_INTERNAL_ERROR, Irp->IoStatus.Status);        
-            //
-            // Workaround for a buggy bus driver that returns NULL device relations. We will treat it as an empty
-            // device relations.
-            //
-            dummyDR.Count = 0;
-            dr = &dummyDR;
-        }
-
-        //
-        // Add new child devices to the list of children.
-        //
-        for (ULONG i = 0; i < dr->Count; i++)
-        {
-            NTSTATUS status = BffFindExistingChild(parentContext, dr->Objects[i]);
+            WDF_WORKITEM_CONFIG config;
+            WDF_OBJECT_ATTRIBUTES attr;
+            WDFWORKITEM workItem;
+            WDF_WORKITEM_CONFIG_INIT(&config, BffWorkItemAddDevice);
+            WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&attr, BFF_WORKITEM_CONTEXT);
+            attr.ParentObject = Device;
+            NTSTATUS status = WdfWorkItemCreate(&config, &attr, &workItem);
             if (NT_SUCCESS(status))
             {
-                continue; // This child device has already been added to the list of children.
+                PBFF_WORKITEM_CONTEXT workItemContext = BffWorkItemGetContext(workItem);
+                workItemContext->DeviceObject = DeviceObject;
+                workItemContext->Irp = Irp;
+                workItemContext->Device = Device;
+                workItemContext->DeviceRelations = dr;
+                workItemContext->ParentContext = parentContext;
+                WdfWorkItemEnqueue(workItem);
+                return STATUS_MORE_PROCESSING_REQUIRED;
             }
-
-            status = BffDeviceAdd(Device, parentContext, dr->Objects[i]);
-            if (!NT_SUCCESS(status))
+            else
             {
-                KdPrint(("%s: failed to add a child:%x\n", __FUNCTION__, status));
-                BffLogError(DeviceObject, IRP_MN_QUERY_DEVICE_RELATIONS, IO_ERR_INTERNAL_ERROR, status);
-                // continue to add other new child devices
+                KdPrint(("%s: failed to create work item:%x", __FUNCTION__, status));
+                BffLogError(DeviceObject, IRP_MN_QUERY_DEVICE_RELATIONS, IO_ERR_INSUFFICIENT_RESOURCES, status);
             }
         }
     }
 
+    WdfObjectDereference(Device);   // paired with BffPreprocessQueryBusRelations
     return STATUS_CONTINUE_COMPLETION;
 }
 
@@ -687,14 +718,21 @@ BffPreprocessQueryBusRelations(
 
     if (stack->MajorFunction != IRP_MJ_PNP || stack->MinorFunction != IRP_MN_QUERY_DEVICE_RELATIONS ||
         stack->Parameters.QueryDeviceRelations.Type != BusRelations)
-        IoSkipCurrentIrpStackLocation(Irp);
-    else
     {
-        IoCopyCurrentIrpStackLocationToNext(Irp);
-        IoSetCompletionRoutine(Irp, BffCompleteQueryBusRelations, Device, TRUE, TRUE, TRUE);
+        IoSkipCurrentIrpStackLocation(Irp);
+        return WdfDeviceWdmDispatchPreprocessedIrp(Device, Irp);
     }
 
-    return WdfDeviceWdmDispatchPreprocessedIrp(Device, Irp);
+    //
+    // https://learn.microsoft.com/en-us/windows-hardware/drivers/kernel/different-ways-of-handling-irps-cheat-sheet
+    // Refer to Scenario 4 of the web page above for the reason why IoMarkIrpPending is called here.
+    //
+    IoMarkIrpPending(Irp);
+    IoCopyCurrentIrpStackLocationToNext(Irp);
+    IoSetCompletionRoutine(Irp, BffCompleteQueryBusRelations, Device, TRUE, TRUE, TRUE);
+    WdfObjectReference(Device); // for BffCompleteQueryBusRelations
+    WdfDeviceWdmDispatchPreprocessedIrp(Device, Irp);
+    return STATUS_PENDING;
 }
 
 /*******************************************************************************
