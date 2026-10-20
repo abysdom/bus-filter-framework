@@ -73,7 +73,7 @@ typedef struct _BFF_DEVICE_CONTEXT
     IO_REMOVE_LOCK RemoveLock;
 } BFF_DEVICE_CONTEXT, *PBFF_DEVICE_CONTEXT;
 
-WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(BFF_DEVICE_CONTEXT, BffDeviceContextGet)
+WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(BFF_DEVICE_CONTEXT, BffDeviceGetContext)
 
 //
 // The device context performs the same job as
