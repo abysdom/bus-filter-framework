@@ -26,6 +26,8 @@
 #include <wdf.h>
 #include "bff.h"
 
+#define BFF_ERR_NO_WAITLOCK_CREATED 0xFFFFFFFFUL
+
 //
 // Bus Filter Framework Context
 //
@@ -81,8 +83,8 @@ WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(BFF_DEVICE_CONTEXT, BffDeviceGetContext)
 //
 typedef struct _BFF_PARENT_CONTEXT
 {
-    LIST_ENTRY List; // Child list
-    KSPIN_LOCK Lock; // Lock for child list
+    LIST_ENTRY List;  // Child list
+    WDFWAITLOCK Lock; // Lock for child list
 } BFF_PARENT_CONTEXT, *PBFF_PARENT_CONTEXT;
 
 //

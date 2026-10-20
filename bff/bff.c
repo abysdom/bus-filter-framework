@@ -82,6 +82,8 @@ Return Value:
     NTSTATUS
 --*/
 {
+    WDFDEVICE device = ChildContext->Parent;
+
     PAGED_CODE();
 
     if (!IoForwardIrpSynchronously(ChildContext->TargetDeviceObject, Irp))
@@ -104,18 +106,19 @@ Return Value:
     // released; the bus filter device object is ready to be removed.
     //
     PBFF_PARENT_CONTEXT parentContext = BffGetParentContext(ChildContext->Parent);
-    KLOCK_QUEUE_HANDLE handle;
-    KeAcquireInStackQueuedSpinLock(&parentContext->Lock, &handle);
+    WdfWaitLockAcquire(parentContext->Lock, NULL);
     RemoveEntryList(&ChildContext->List);
-    KeReleaseInStackQueuedSpinLock(&handle);
 
     PBFF_DEVICE_REMOVE deviceRemove = BffPrivateContext->BffInitializationData.DeviceConfig.DeviceRemove;
     if (deviceRemove)
         deviceRemove(ChildContext->Parent, BffDevice);
 
     IoDetachDevice(ChildContext->TargetDeviceObject);
+    WdfWaitLockRelease(parentContext->Lock);
+
     IoDeleteDevice(ChildContext->DeviceObject);
     WdfObjectDelete(BffDevice);
+    WdfObjectDereference(device);   // paired with BffDeviceAdd
 
     return status;
 }
@@ -249,7 +252,7 @@ Return Value:
     }
 }
 
-_IRQL_requires_max_(DISPATCH_LEVEL)
+_IRQL_requires_max_(PASSIVE_LEVEL)
 _IRQL_requires_same_
 static
 FORCEINLINE
@@ -261,13 +264,12 @@ BffFindExistingChild(
 {
     NTSTATUS status = STATUS_NO_SUCH_DEVICE;
     PBFF_DEVICE_CONTEXT childContext;
-    KLOCK_QUEUE_HANDLE handle;
     PLIST_ENTRY entry;
 
     //
     // Check if the child device has already been added to the list of children.
     //
-    KeAcquireInStackQueuedSpinLock(&ParentContext->Lock, &handle);
+    WdfWaitLockAcquire(ParentContext->Lock, NULL);
     for (entry = ParentContext->List.Flink; entry != &ParentContext->List; entry = entry->Flink)
     {
         childContext = CONTAINING_RECORD(entry, BFF_DEVICE_CONTEXT, List);
@@ -277,12 +279,12 @@ BffFindExistingChild(
             break;
         }
     }
-    KeReleaseInStackQueuedSpinLock(&handle);
+    WdfWaitLockRelease(ParentContext->Lock);
 
     return status;
 }
 
-_IRQL_requires_max_(DISPATCH_LEVEL)
+_IRQL_requires_max_(PASSIVE_LEVEL)
 _IRQL_requires_same_
 static
 FORCEINLINE
@@ -292,14 +294,12 @@ BffCommitChild(
     _In_ PBFF_DEVICE_CONTEXT ChildContext
     )
 {
-    KLOCK_QUEUE_HANDLE handle;
-
-    KeAcquireInStackQueuedSpinLock(&ParentContext->Lock, &handle);
+    WdfWaitLockAcquire(ParentContext->Lock, NULL);
     InsertTailList(&ParentContext->List, &ChildContext->List);
-    KeReleaseInStackQueuedSpinLock(&handle);
+    WdfWaitLockRelease(ParentContext->Lock);
 }
 
-_IRQL_requires_max_(DISPATCH_LEVEL)
+_IRQL_requires_max_(PASSIVE_LEVEL)
 _IRQL_requires_same_
 static
 FORCEINLINE
@@ -365,6 +365,7 @@ Return Value:
     childContext->TargetDeviceObject = NULL;
     childContext->PhysicalDeviceObject = PhysicalDeviceObject;
     childContext->Parent = Device;
+    WdfObjectReference(Device);
     IoInitializeRemoveLock(&childContext->RemoveLock, 'tFFB', 0, 0);
 
     //
@@ -434,6 +435,7 @@ detachDev:
     IoDetachDevice(targetDeviceObject);
 deleteObj:
     WdfObjectDelete(child);
+    WdfObjectDereference(Device);
 deleteDev:
     IoDeleteDevice(filterDeviceObject);
     return status;
@@ -698,7 +700,23 @@ BffAllocateContext(
     {
         ASSERT(BffGetParentContext(Device) == parentContext);
         InitializeListHead(&parentContext->List);
-        KeInitializeSpinLock(&parentContext->Lock);
+        WDF_OBJECT_ATTRIBUTES_INIT(&attr);
+        attr.ParentObject = Device;
+        WDFWAITLOCK lock;
+        status = WdfWaitLockCreate(&attr, &lock);
+        if (NT_SUCCESS(status))
+        {
+            parentContext->Lock = lock;
+        }
+        else
+        {
+            KdPrint(("%s: failed to create wait lock:%x", __FUNCTION__, status));
+            BffLogError(WdfDeviceWdmGetDeviceObject(Device),
+                        BFF_ERR_NO_WAITLOCK_CREATED,
+                        IO_ERR_INSUFFICIENT_RESOURCES,
+                        status);
+            parentContext->Lock = NULL;
+        }
     }
     return status;
 }
