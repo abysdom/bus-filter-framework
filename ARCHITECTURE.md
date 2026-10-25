@@ -375,5 +375,5 @@ BFF is intentionally focused on Bus Filter infrastructure without requiring the 
 
 - [`bff/bff.h`](bff/bff.h) — public BFF API declarations.
 - [`BusFilter/Driver.c`](BusFilter/Driver.c) — sample integration and driver-specific behavior.
-- [`WDKStorPortVirtualMiniport/`](WDKStorPortVirtualMiniport/) — the sample's underlying virtual-bus project (Git submodule).
+- [`WDKStorPortVirtualMiniport/`](https://github.com/abysdom/WDKStorPortVirtualMiniport/tree/62463ffb8f5892e18878ef83783c8cfee3aa5d5b) — the sample's underlying virtual-bus project (Git submodule).
 - [`mp/mp.sln`](mp/mp.sln) — Visual Studio solution.
