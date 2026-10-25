@@ -1,15 +1,17 @@
 # BFF Architecture
 
-This document explains the Windows device-stack model behind Bus Filter Framework (BFF), the responsibilities BFF provides, and how a BFF-based KMDF Bus Filter Driver interacts with the underlying bus and its child devices.
+This document explains the Windows device-stack model behind Bus Filter Framework (BFF), the responsibilities BFF provides, and how a BFF-based KMDF Bus Filter Driver interacts with the underlying bus and its child devices. It is intended for driver developers and technical evaluators who need to determine whether BFF fits a particular device-stack design.
 
-For build instructions, installation steps, licensing, and project entry points, see the [README](README.md).
+For the project overview, build instructions, sample setup, compatibility status, licensing, and commercial inquiries, see the [README](README.md).
 
 ## Table of Contents
 
 - [Overview](#overview)
+- [Design Intent](#design-intent)
 - [Key Terminology](#key-terminology)
 - [What Defines a Bus Filter](#what-defines-a-bus-filter)
 - [Bus Filter vs. Function Filter](#bus-filter-vs-function-filter)
+- [Potential Applications](#potential-applications)
 - [The Two Device-Stack Levels](#the-two-device-stack-levels)
 - [Bus Relations and Child-Device Enumeration](#bus-relations-and-child-device-enumeration)
 - [Child-Device Identity Filtering](#child-device-identity-filtering)
@@ -20,6 +22,7 @@ For build instructions, installation steps, licensing, and project entry points,
 - [Sample Driver Architecture](#sample-driver-architecture)
 - [Why BFF Exists](#why-bff-exists)
 - [Scope and Limitations](#scope-and-limitations)
+- [Production Integration Checklist](#production-integration-checklist)
 - [BFF and DmfBusFilterExtension](#bff-and-dmfbusfilterextension)
 - [Related Source Files](#related-source-files)
 
@@ -35,6 +38,20 @@ At a high level, a BFF-based driver combines two related roles:
 2. It manages **filter device objects in the stacks of child devices enumerated by that bus**.
 
 The second role is what distinguishes a Bus Filter from a filter that is attached only to one function device.
+
+## Design Intent
+
+BFF is intended to centralize common infrastructure used by KMDF-oriented Bus Filter Drivers. Its likely adopters are Windows kernel-mode driver developers and OEM/ISV teams whose product requires child-device filtering at the bus level. Its design separates reusable framework responsibilities from the bus-specific and product-specific behavior that belongs in the integrating driver.
+
+The principal design goals are to:
+
+- reduce repeated implementation of common Bus Filter and PnP plumbing;
+- support child-device filter creation and lifecycle management in a reusable form;
+- expose integration points for selected PnP and child-device identity behavior;
+- avoid requiring the broader DMF framework as a dependency;
+- leave bus enumeration and product policy decisions with the underlying bus driver and integrating driver, respectively.
+
+BFF does not make a driver automatically compatible with every bus or device topology. The host driver must follow the target bus's PnP contract and validate the interactions that are relevant to its hardware.
 
 ## Key Terminology
 
@@ -109,6 +126,17 @@ A Bus Filter starts at the bus device stack and manages filter DOs for the bus's
 | Typical use | Intercept requests for a known function device | Filter child devices before their function drivers load |
 
 As a rule of thumb, if the requirement is primarily to intercept I/O requests for one known function device, a conventional KMDF Function Filter may be sufficient. If the requirement is to filter the child devices of a bus before their function drivers are loaded, a Bus Filter architecture is appropriate.
+
+## Potential Applications
+
+BFF is most relevant when a product needs the defining behavior of a Bus Filter: managing filter device objects for child devices enumerated by a bus, before their function drivers are loaded. Examples of potential applications include:
+
+- integrating custom or virtual bus implementations with child-device filtering;
+- customizing selected child-device identity information to support a product-specific driver-matching design;
+- implementing specialized PnP behavior for devices exposed by a target bus;
+- sharing Bus Filter infrastructure across related driver products.
+
+These are implementation scenarios, not turnkey product features. BFF does not independently provide a device-management service, a general hardware-policy engine, file-content inspection, or a complete data-loss-prevention solution. An OEM or ISV evaluating BFF should treat it as a driver-infrastructure component to integrate and validate, not as a ready-to-deploy end-user product.
 
 ## The Two Device-Stack Levels
 
@@ -313,6 +341,21 @@ BFF also does not hide every WDM concept. Bus Filter Drivers inherently interact
 A Bus Filter should not be selected simply because the product involves hardware. If the requirement is to filter file-system operations, enforce file-content policies, or control requests for a known function device, additional or different Windows driver components may be more appropriate. Select the attachment point and enforcement layer according to the actual data path and security requirements.
 
 The sample demonstrates a development and learning scenario. For production use, validate the target Windows/KMDF versions, signing and deployment requirements, hardware topology, PnP behavior, concurrency, power transitions, removal paths, and applicable driver-verification/HLK requirements.
+
+## Production Integration Checklist
+
+Before integrating BFF into a production driver, evaluate at least the following:
+
+- **Bus contract:** confirm that the target bus enumerates the relevant child PDOs and that the driver attaches at the intended point in the bus device stack.
+- **Identity and matching:** validate any Hardware ID or Compatible ID customization against the target device's intended driver-matching and installation behavior.
+- **PnP lifecycle:** test arrival, query/remove, orderly removal, surprise removal, re-enumeration, and failure paths.
+- **Concurrency and lifetime:** review callback synchronization, object references, remove-lock usage, and cleanup ordering.
+- **Power behavior:** test the applicable power transitions and the target bus's interaction with child devices.
+- **Compatibility:** define supported Windows, KMDF, WDK, hardware, and bus-topology combinations rather than assuming universal coverage.
+- **Validation:** use Driver Verifier and applicable HLK tests as appropriate; a successful build alone is not evidence of runtime correctness or certification.
+- **Failure recovery:** document installation, update, rollback, and recovery procedures, especially where a filter may affect multiple child devices.
+
+This checklist is a starting point, not a certification claim. The integrating organization remains responsible for validating its driver and product.
 
 ## BFF and DmfBusFilterExtension
 
