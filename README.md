@@ -14,6 +14,10 @@ BFF is intended to help driver developers focus on bus-specific and product-spec
 
 > **In one sentence:** Use BFF when your KMDF driver needs to act as an upper filter for a bus and filter that bus's child devices—not simply to intercept I/O for one known function device.
 
+[![CodeQL Advanced](https://github.com/abysdom/bus-filter-framework/actions/workflows/codeql.yml/badge.svg)](https://github.com/abysdom/bus-filter-framework/actions/workflows/codeql.yml)
+[![MSBuild](https://github.com/abysdom/bus-filter-framework/actions/workflows/msbuild.yml/badge.svg)](https://github.com/abysdom/bus-filter-framework/actions/workflows/msbuild.yml)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
+
 ## Table of Contents
 
 - [Why BFF?](#why-bff)
