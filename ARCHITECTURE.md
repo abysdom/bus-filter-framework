@@ -359,7 +359,7 @@ This checklist is a starting point, not a certification claim. The integrating o
 
 ## BFF and DmfBusFilterExtension
 
-BFF and [DmfBusFilterExtension](https://git.nefarius.at/nefarius/DMF/-/tree/master/Dmf/Modules.Library/DmfBusFilterExtension) both aim to simplify Windows Bus Filter Driver development, but they take different architectural approaches.
+BFF and [DmfBusFilterExtension](https://git.nefarius.at/nefarius/DmfBusFilterExtension) both aim to simplify Windows Bus Filter Driver development, but they take different architectural approaches.
 
 | Aspect | BFF | DmfBusFilterExtension |
 |---|---|---|
