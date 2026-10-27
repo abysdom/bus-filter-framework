@@ -49,7 +49,7 @@ BFF is intended to help driver developers focus on bus-specific and product-spec
 BFF may be a fit if you are developing a Windows driver for a custom or virtual bus, or if your design needs to manage and filter child devices enumerated by a bus. Potential use cases include:
 
 - custom hardware integration that requires child-device filtering;
-- changing selected child-device identification information, such as Compatible IDs, before driver matching;
+- changing selected child-device identification information, such as Hardware IDs, before driver matching;
 - implementing bus-specific PnP behavior around enumerated child devices;
 - reusing Bus Filter infrastructure across related driver projects.
 
@@ -91,7 +91,7 @@ This is a conceptual stack diagram, not a complete representation of every Windo
 - KMDF-oriented Bus Filter infrastructure.
 - Child filter device creation and lifecycle management.
 - Integration points for selected PnP operations and Bus Relations processing.
-- Support for selected child-device identity customization, including Compatible IDs.
+- Support for selected child-device identity customization, including Hardware IDs.
 - Access to related device-stack objects and remove-lock management through the public API.
 - Integration into a KMDF driver without requiring DMF.
 
