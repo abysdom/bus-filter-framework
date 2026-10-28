@@ -198,7 +198,7 @@ Any implementation that processes device relations must preserve the underlying 
 
 ## Child-Device Identity Filtering
 
-A Bus Filter may customize selected identity information associated with a child device, such as Compatible IDs. This can influence how Windows matches the child device to a driver package.
+A Bus Filter may customize selected identity information associated with a child device, such as Hardware IDs. This can influence how Windows matches the child device to a driver package.
 
 The sample driver demonstrates this concept by prepending `BffDevice` to the Compatible IDs returned by the underlying bus driver. The sample is an illustration of identity customization; it is not a general recommendation to change device identity in every driver.
 
