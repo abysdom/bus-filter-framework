@@ -46,7 +46,6 @@ BffDeviceRemove(
 
 static DRIVER_DISPATCH BffDispatchAny;
 static IO_COMPLETION_ROUTINE BffCompleteQueryBusRelations;
-static EVT_WDF_WORKITEM BffWorkItemAddDevice;
 
 #ifdef ALLOC_PRAGMA
 #pragma alloc_text(INIT, BffSetInitializationData)
@@ -54,7 +53,6 @@ static EVT_WDF_WORKITEM BffWorkItemAddDevice;
 #pragma alloc_text(PAGE, BffDeviceRemove)
 #pragma alloc_text(PAGE, BffAllocateContext)
 #pragma alloc_text(PAGE, BffPreprocessQueryBusRelations)
-#pragma alloc_text(PAGE, BffWorkItemAddDevice)
 #endif
 
 _Use_decl_annotations_
@@ -443,48 +441,11 @@ deleteDev:
 
 _Use_decl_annotations_
 static
-VOID
-BffWorkItemAddDevice(
-    _In_ WDFWORKITEM WorkItem
-    )
-{
-    PBFF_WORKITEM_CONTEXT workItemContext = BffWorkItemGetContext(WorkItem);
-    PIRP irp = workItemContext->Irp;
-    WDFDEVICE device = workItemContext->Device;
-    PDEVICE_RELATIONS dr = workItemContext->DeviceRelations;
-    PBFF_PARENT_CONTEXT parentContext = workItemContext->ParentContext;
-
-    PAGED_CODE();
-
-    for (ULONG i = 0; i < dr->Count; i++)
-    {
-        NTSTATUS status = BffFindExistingChild(parentContext, dr->Objects[i]);
-        if (NT_SUCCESS(status))
-        {
-            continue; // This child device has already been added to the list of children.
-        }
-
-        status = BffDeviceAdd(device, parentContext, dr->Objects[i]);
-        if (!NT_SUCCESS(status))
-        {
-            KdPrint(("%s: failed to add a child:%x\n", __FUNCTION__, status));
-            BffLogError(workItemContext->DeviceObject, IRP_MN_QUERY_DEVICE_RELATIONS, IO_ERR_INTERNAL_ERROR, status);
-            // continue to add other new child devices
-        }
-    }
-
-    IoCompleteRequest(irp, IO_NO_INCREMENT);
-    WdfObjectDelete(WorkItem);
-    WdfObjectDereference(device);   // paired with BffPreprocessQueryBusRelations
-}
-
-_Use_decl_annotations_
-static
 NTSTATUS
 BffCompleteQueryBusRelations(
     _In_ PDEVICE_OBJECT DeviceObject,
     _In_ PIRP           Irp,
-    _In_ WDFDEVICE      Device
+    _In_ PVOID          Event
     )
 /*++
 
@@ -496,7 +457,7 @@ Arguments:
 
     DeviceObject - The WDM upper filter device object that Irp is targeting
     Irp - The I/O request packet that queries bus relations
-    Device - The WDF device object representing DeviceObject
+    Event - The KEVENT object passed by BffPreprocessQueryBusRelations
 
 Return Value:
 
@@ -504,59 +465,21 @@ Return Value:
 
 --*/
 {
-    //
-    // BffPrivateContext could be NULL if BffInitialize has not been called yet.
-    //
-    if (!BffPrivateContext)
+    UNREFERENCED_PARAMETER(DeviceObject);
+
+    if (Irp->PendingReturned == TRUE)
     {
-        KdPrint(("%s: BFF has not been initialized yet:%x\n", __FUNCTION__, STATUS_NOT_SUPPORTED));
-        BffLogError(DeviceObject, IRP_MN_QUERY_DEVICE_RELATIONS, IO_ERR_INTERNAL_ERROR, STATUS_NOT_SUPPORTED);
+        //
+        // You will set the event only if the lower driver has returned
+        // STATUS_PENDING earlier. This optimization removes the need to
+        // call KeSetEvent unnecessarily and improves performance because the
+        // system does not have to acquire an internal lock.
+        //
+        KdPrint(("%s: lower driver has completed", __FUNCTION__));
+        KeSetEvent((PKEVENT)Event, IO_NO_INCREMENT, FALSE);
     }
-
-    //
-    // parentContext could be NULL if BffAllocateContext has not been called yet.
-    //
-    PBFF_PARENT_CONTEXT parentContext = BffGetParentContext(Device);
-    if (!parentContext)
-    {
-        KdPrint(("%s: BffAllocateContext has not been called yet:%x\n", __FUNCTION__, STATUS_NOT_SUPPORTED));
-        BffLogError(DeviceObject, IRP_MN_QUERY_DEVICE_RELATIONS, IO_ERR_INTERNAL_ERROR, STATUS_NOT_SUPPORTED);
-    }
-
-    if (NT_SUCCESS(Irp->IoStatus.Status) && BffPrivateContext && parentContext)
-    {
-        PDEVICE_RELATIONS dr = (PDEVICE_RELATIONS)Irp->IoStatus.Information;
-
-        if (dr)
-        {
-            WDF_WORKITEM_CONFIG config;
-            WDF_OBJECT_ATTRIBUTES attr;
-            WDFWORKITEM workItem;
-            WDF_WORKITEM_CONFIG_INIT(&config, BffWorkItemAddDevice);
-            WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&attr, BFF_WORKITEM_CONTEXT);
-            attr.ParentObject = Device;
-            NTSTATUS status = WdfWorkItemCreate(&config, &attr, &workItem);
-            if (NT_SUCCESS(status))
-            {
-                PBFF_WORKITEM_CONTEXT workItemContext = BffWorkItemGetContext(workItem);
-                workItemContext->DeviceObject = DeviceObject;
-                workItemContext->Irp = Irp;
-                workItemContext->Device = Device;
-                workItemContext->DeviceRelations = dr;
-                workItemContext->ParentContext = parentContext;
-                WdfWorkItemEnqueue(workItem);
-                return STATUS_MORE_PROCESSING_REQUIRED;
-            }
-            else
-            {
-                KdPrint(("%s: failed to create work item:%x", __FUNCTION__, status));
-                BffLogError(DeviceObject, IRP_MN_QUERY_DEVICE_RELATIONS, IO_ERR_INSUFFICIENT_RESOURCES, status);
-            }
-        }
-    }
-
-    WdfObjectDereference(Device);   // paired with BffPreprocessQueryBusRelations
-    return STATUS_CONTINUE_COMPLETION;
+    // This is the only status you can return.
+    return STATUS_MORE_PROCESSING_REQUIRED;
 }
 
 /*******************************************************************************
@@ -753,14 +676,85 @@ BffPreprocessQueryBusRelations(
 
     //
     // https://learn.microsoft.com/en-us/windows-hardware/drivers/kernel/different-ways-of-handling-irps-cheat-sheet
-    // Refer to Scenario 4 of the web page above for the reason why IoMarkIrpPending is called here.
+    // Refer to Scenario 2 of the web page above.
     //
-    IoMarkIrpPending(Irp);
+    KEVENT event;
+    KeInitializeEvent(&event, NotificationEvent, FALSE);
     IoCopyCurrentIrpStackLocationToNext(Irp);
-    IoSetCompletionRoutine(Irp, BffCompleteQueryBusRelations, Device, TRUE, TRUE, TRUE);
-    WdfObjectReference(Device); // for BffCompleteQueryBusRelations
-    WdfDeviceWdmDispatchPreprocessedIrp(Device, Irp);
-    return STATUS_PENDING;
+    IoSetCompletionRoutine(Irp, BffCompleteQueryBusRelations, &event, TRUE, TRUE, TRUE);
+    NTSTATUS status = WdfDeviceWdmDispatchPreprocessedIrp(Device, Irp);
+    if (status == STATUS_PENDING)
+    {
+        KdPrint(("%s: wait for lower driver to complete", __FUNCTION__));
+        KeWaitForSingleObject(&event,
+                              Executive, // WaitReason
+                              KernelMode, // must be Kernelmode to prevent the stack getting paged out
+                              FALSE,
+                              NULL // indefinite wait
+                              );
+        status = Irp->IoStatus.Status;
+    }
+
+    PDEVICE_OBJECT deviceObject = WdfDeviceWdmGetDeviceObject(Device);
+    //
+    // BffPrivateContext could be NULL if BffInitialize has not been called yet.
+    //
+    if (!BffPrivateContext)
+    {
+        KdPrint(("%s: BFF has not been initialized yet:%x\n", __FUNCTION__, STATUS_NOT_SUPPORTED));
+        BffLogError(deviceObject, IRP_MN_QUERY_DEVICE_RELATIONS, IO_ERR_INTERNAL_ERROR, STATUS_NOT_SUPPORTED);
+    }
+
+    //
+    // parentContext could be NULL if BffAllocateContext has not been called yet.
+    //
+    PBFF_PARENT_CONTEXT parentContext = BffGetParentContext(Device);
+    if (!parentContext)
+    {
+        KdPrint(("%s: BffAllocateContext has not been called yet:%x\n", __FUNCTION__, STATUS_NOT_SUPPORTED));
+        BffLogError(deviceObject, IRP_MN_QUERY_DEVICE_RELATIONS, IO_ERR_INTERNAL_ERROR, STATUS_NOT_SUPPORTED);
+    }
+
+    if (NT_SUCCESS(Irp->IoStatus.Status) && BffPrivateContext && parentContext)
+    {
+        PDEVICE_RELATIONS dr = (PDEVICE_RELATIONS)Irp->IoStatus.Information;
+        DEVICE_RELATIONS dummyDR;
+
+        if (!dr)
+        {
+            KdPrint(("%s: failed to retreive device relations:%x\n", __FUNCTION__, Irp->IoStatus.Status));
+            BffLogError(deviceObject, IRP_MN_QUERY_DEVICE_RELATIONS, IO_ERR_INTERNAL_ERROR, Irp->IoStatus.Status);
+            //
+            // Workaround for a buggy bus driver that returns NULL device relations. We will treat it as an empty
+            // device relations.
+            //
+            dummyDR.Count = 0;
+            dr = &dummyDR;
+        }
+
+        //
+        // Add new child devices to the list of children.
+        //
+        for (ULONG i = 0; i < dr->Count; i++)
+        {
+            NTSTATUS internalStatus = BffFindExistingChild(parentContext, dr->Objects[i]);
+            if (NT_SUCCESS(internalStatus))
+            {
+                continue; // This child device has already been added to the list of children.
+            }
+
+            internalStatus = BffDeviceAdd(Device, parentContext, dr->Objects[i]);
+            if (!NT_SUCCESS(internalStatus))
+            {
+                KdPrint(("%s: failed to add a child:%x\n", __FUNCTION__, internalStatus));
+                BffLogError(deviceObject, IRP_MN_QUERY_DEVICE_RELATIONS, IO_ERR_INTERNAL_ERROR, internalStatus);
+                // continue to add other new child devices
+            }
+        }
+    }
+
+    IoCompleteRequest(Irp, IO_NO_INCREMENT);
+    return status;
 }
 
 /*******************************************************************************
