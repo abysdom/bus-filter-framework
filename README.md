@@ -24,6 +24,7 @@ BFF is intended to help driver developers focus on bus-specific and product-spec
 - [Is BFF a Fit?](#is-bff-a-fit)
 - [Architecture at a Glance](#architecture-at-a-glance)
 - [Key Capabilities](#key-capabilities)
+- [Target Use Cases](#target-use-cases)
 - [Quick Start](#quick-start)
 - [Sample Driver](#sample-driver)
 - [Installing the Sample Driver](#installing-the-sample-driver)
@@ -96,6 +97,14 @@ This is a conceptual stack diagram, not a complete representation of every Windo
 - Integration into a KMDF driver without requiring DMF.
 
 These capabilities are infrastructure building blocks, not a turnkey device-management or security product. The exact supported behavior and callback contracts are defined by the public API and sample implementation.
+
+## Target Use Cases
+
+- **Data Leak Prevention (DLP)**: Implement peripheral whitelisting and context-aware read-only hardware enforcement.
+- **Dynamic Hardware Spoofing**: Seamlessly intercept `IRP_MN_QUERY_ID` to modify Hardware IDs, Product IDs (VID/PID), and serial numbers on-the-fly.
+- **Anti-Cheat & Anti-DMA**: Detect and neutralize low-level hardware spoofer cards (e.g., malicious PCIe DMA boards, BadUSB).
+- **VDI Hardware Redirection**: Easily pipe low-level USB/PCIe Bus states into virtualized desktop cloud infrastructures.
+- **Fault Injection Testing**: Simulate hardware dropouts, power faults, and malformed descriptors for hardware validation.
 
 ## Quick Start
 
