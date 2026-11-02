@@ -35,7 +35,9 @@ typedef WDFOBJECT BFFDEVICE;
  *                      device object.
  *  @param BffDevice    The WDF object as a bus filter device object.
  *  @return             0 or any positive value for success; otherwise for
- *                      failure.
+ *                      failure, resulting in the deletion of BffDevice and its
+ *                      underlying WDM device object, possibly plus the masking
+ *                      of the underlying PDO.
  */
 _Function_class_(BFF_DEVICE_ADD)
 _IRQL_requires_max_(DISPATCH_LEVEL)
@@ -61,7 +63,7 @@ _IRQL_requires_same_
 typedef
 VOID
 BFF_DEVICE_REMOVE(
-    _In_ WDFDEVICE Device, 
+    _In_ WDFDEVICE Device,
     _In_ BFFDEVICE BffDevice
     );
 typedef BFF_DEVICE_REMOVE *PBFF_DEVICE_REMOVE;
@@ -133,7 +135,7 @@ _IRQL_requires_same_
 typedef
 NTSTATUS
 BFF_DISPATCH_PNP(
-    _In_ BFFDEVICE BffDevice, 
+    _In_ BFFDEVICE BffDevice,
     _In_ PIRP      Irp
     );
 typedef BFF_DISPATCH_PNP *PBFF_DISPATCH_PNP;

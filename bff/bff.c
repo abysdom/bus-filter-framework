@@ -21,7 +21,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *******************************************************************************/
-#include <ntddk.h>
+#include <ntifs.h>
 #include <initguid.h>
 #include "bff.h"
 #include "private.h"
@@ -538,6 +538,51 @@ BffForwardIrpSynchronously(
     return status;
 }
 
+_IRQL_requires_max_(DISPATCH_LEVEL)
+_IRQL_requires_same_
+static
+FORCEINLINE
+ULONG
+BffGetDeviceStackDepth(
+    _In_ PDEVICE_OBJECT Pdo
+    )
+{
+    PDEVICE_OBJECT deviceObject;
+    PDEVICE_OBJECT lowerDeviceObject;
+    ULONG depth = 0;
+
+    if (Pdo == NULL)
+    {
+        return 0;
+    }
+
+    //
+    // Get the topmost device object in the device stack.
+    // The returned device object is referenced.
+    //
+    deviceObject = IoGetAttachedDeviceReference(Pdo);
+
+    while (deviceObject != NULL)
+    {
+        depth++;
+
+        //
+        // Get the next lower device object.
+        // The returned device object is referenced, if not NULL.
+        //
+        lowerDeviceObject = IoGetLowerDeviceObject(deviceObject);
+
+        //
+        // Release the reference obtained for the current device object.
+        //
+        ObDereferenceObject(deviceObject);
+
+        deviceObject = lowerDeviceObject;
+    }
+
+    return depth;
+}
+
 _IRQL_requires_max_(PASSIVE_LEVEL)
 _IRQL_requires_same_
 static
@@ -588,11 +633,13 @@ BffPostprocessQueryBusRelations(
         //
         // Add new child devices to the list of children.
         //
+        ULONG writeIndex = 0;
         for (ULONG i = 0; i < dr->Count; i++)
         {
             NTSTATUS internalStatus = BffFindExistingChild(parentContext, dr->Objects[i]);
             if (NT_SUCCESS(internalStatus))
             {
+                dr->Objects[writeIndex++] = dr->Objects[i];
                 continue; // This child device has already been added to the list of children.
             }
 
@@ -601,9 +648,30 @@ BffPostprocessQueryBusRelations(
             {
                 KdPrint(("%s: failed to add a child:%x\n", __FUNCTION__, internalStatus));
                 BffLogError(deviceObject, IRP_MN_QUERY_DEVICE_RELATIONS, IO_ERR_INTERNAL_ERROR, internalStatus);
+                if (BffGetDeviceStackDepth(dr->Objects[i]) == 1)
+                {
+                    //
+                    // Release the reference obtained by the bus driver for this PDO.
+                    //
+                    ObDereferenceObject(dr->Objects[i]);
+                    dr->Objects[i] = NULL;
+                }
+                else
+                {
+                    //
+                    // There exists at least one another bus filter driver that has already attached to this PDO,
+                    // so we will not release the reference obtained by the bus driver for this PDO.
+                    //
+                }
                 // continue to add other new child devices
             }
+            else
+            {
+                dr->Objects[writeIndex++] = dr->Objects[i];
+            }
         }
+
+        dr->Count = writeIndex;
     }
 }
 
