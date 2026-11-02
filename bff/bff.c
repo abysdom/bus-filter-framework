@@ -37,6 +37,16 @@ static PBFF_PRIVATE_CONTEXT BffPrivateContext;
 _IRQL_requires_max_(PASSIVE_LEVEL)
 _IRQL_requires_same_
 static
+VOID
+BffDeviceDestroy(
+    _In_ WDFDEVICE           Device,
+    _In_ BFFDEVICE           BffDevice,
+    _In_ PBFF_DEVICE_CONTEXT ChildContext
+    );
+
+_IRQL_requires_max_(PASSIVE_LEVEL)
+_IRQL_requires_same_
+static
 NTSTATUS
 BffDeviceRemove(
     _In_ BFFDEVICE           BffDevice,
@@ -46,14 +56,37 @@ BffDeviceRemove(
 
 static DRIVER_DISPATCH BffDispatchAny;
 static IO_COMPLETION_ROUTINE BffCompleteQueryBusRelations;
+static EVT_WDF_DEVICE_CONTEXT_CLEANUP BffCleanupContext;
 
 #ifdef ALLOC_PRAGMA
 #pragma alloc_text(INIT, BffSetInitializationData)
 #pragma alloc_text(INIT, BffInitialize)
+#pragma alloc_text(PAGE, BffDeviceDestroy)
 #pragma alloc_text(PAGE, BffDeviceRemove)
+#pragma alloc_text(PAGE, BffCleanupContext)
 #pragma alloc_text(PAGE, BffAllocateContext)
 #pragma alloc_text(PAGE, BffPreprocessQueryBusRelations)
 #endif
+
+_Use_decl_annotations_
+static
+VOID
+BffDeviceDestroy(
+    _In_ WDFDEVICE           Device,
+    _In_ BFFDEVICE           BffDevice,
+    _In_ PBFF_DEVICE_CONTEXT ChildContext
+    )
+{
+    PAGED_CODE();
+    PBFF_DEVICE_REMOVE deviceRemove = BffPrivateContext->BffInitializationData.DeviceConfig.DeviceRemove;
+    if (deviceRemove)
+        deviceRemove(Device, BffDevice);
+
+    IoDetachDevice(ChildContext->TargetDeviceObject);
+    IoDeleteDevice(ChildContext->DeviceObject);
+    WdfObjectDelete(BffDevice);
+    WdfObjectDereference(Device);   // paired with BffDeviceAdd
+}
 
 _Use_decl_annotations_
 static
@@ -80,8 +113,6 @@ Return Value:
     NTSTATUS
 --*/
 {
-    WDFDEVICE device = ChildContext->Parent;
-
     PAGED_CODE();
 
     if (!IoForwardIrpSynchronously(ChildContext->TargetDeviceObject, Irp))
@@ -103,20 +134,12 @@ Return Value:
     // At this point, all outstanding acquisitions of RemoveLock have been
     // released; the bus filter device object is ready to be removed.
     //
-    PBFF_PARENT_CONTEXT parentContext = BffGetParentContext(ChildContext->Parent);
+    WDFDEVICE device = ChildContext->Parent;
+    PBFF_PARENT_CONTEXT parentContext = BffGetParentContext(device);
     WdfWaitLockAcquire(parentContext->Lock, NULL);
     RemoveEntryList(&ChildContext->List);
-
-    PBFF_DEVICE_REMOVE deviceRemove = BffPrivateContext->BffInitializationData.DeviceConfig.DeviceRemove;
-    if (deviceRemove)
-        deviceRemove(ChildContext->Parent, BffDevice);
-
-    IoDetachDevice(ChildContext->TargetDeviceObject);
+    BffDeviceDestroy(device, BffDevice, ChildContext);
     WdfWaitLockRelease(parentContext->Lock);
-
-    IoDeleteDevice(ChildContext->DeviceObject);
-    WdfObjectDelete(BffDevice);
-    WdfObjectDereference(device);   // paired with BffDeviceAdd
 
     return status;
 }
@@ -350,7 +373,6 @@ Return Value:
     WDF_OBJECT_ATTRIBUTES attr;
     BFFDEVICE child;
     WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&attr, BFF_DEVICE_CONTEXT);
-    attr.ParentObject = Device;
     status = WdfObjectCreate(&attr, &child);
     if (!NT_SUCCESS(status))
     {
@@ -585,6 +607,40 @@ BffPostprocessQueryBusRelations(
     }
 }
 
+_Use_decl_annotations_
+static
+VOID
+BffCleanupContext(
+    _In_ WDFDEVICE Device
+    )
+{
+    PAGED_CODE();
+    PBFF_PARENT_CONTEXT parentContext = BffGetParentContext(Device);
+    WdfWaitLockAcquire(parentContext->Lock, NULL);
+    while (!IsListEmpty(&parentContext->List))
+    {
+        PLIST_ENTRY entry = RemoveHeadList(&parentContext->List);
+        PBFF_DEVICE_CONTEXT childContext = CONTAINING_RECORD(entry, BFF_DEVICE_CONTEXT, List);
+        PDEVICE_OBJECT targetDeviceObject = childContext->TargetDeviceObject;
+        PDEVICE_OBJECT physicalDeviceObject = childContext->PhysicalDeviceObject;
+        BFFDEVICE bffDevice = ((PDEVICE_EXTENSION)(childContext->DeviceObject->DeviceExtension))->Child;
+        KdPrint(("%s: Driver %X Device %X\n",
+                __FUNCTION__,
+                WdfDriverWdmGetDriverObject(WdfGetDriver()),
+                BffDeviceWdmGetPhysicalDevice(bffDevice)));
+        BffDeviceDestroy(Device, bffDevice, childContext);
+        if (targetDeviceObject == physicalDeviceObject)
+        {
+            //
+            // The PDO is not attached to any other bus filter device object,
+            // so we can release the reference obtained by the bus driver for this PDO.
+            //
+            ObDereferenceObject(physicalDeviceObject);
+        }
+    }
+    WdfWaitLockRelease(parentContext->Lock);
+}
+
 /*******************************************************************************
  * APIs for upper filter device objects.
  ******************************************************************************/
@@ -721,6 +777,12 @@ BffAllocateContext(
     PAGED_CODE();
 
     WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&attr, BFF_PARENT_CONTEXT);
+    //
+    // BffCleanupContext is required in case BffDeviceRemove is not called for
+    // some reason, e.g., child devices are hidden from PnP Manager by another
+    // bus filter driver.
+    //
+    attr.EvtCleanupCallback = BffCleanupContext;
     status = WdfObjectAllocateContext(Device, &attr, &parentContext);
     if (NT_SUCCESS(status))
     {
