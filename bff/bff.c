@@ -220,7 +220,14 @@ Return Value:
     // Forward to the parent bus driver
     //
     IoSkipCurrentIrpStackLocation(Irp);
-    status = IoCallDriver(childContext->TargetDeviceObject, Irp);
+    if (major == IRP_MJ_POWER)
+    {
+        status = PoCallDriver(childContext->TargetDeviceObject, Irp);
+    }
+    else
+    {
+        status = IoCallDriver(childContext->TargetDeviceObject, Irp);
+    }
 
     //
     // For I/O operations that do not set an IoCompletion routine, a driver should call IoReleaseRemoveLock after
