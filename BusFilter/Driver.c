@@ -198,7 +198,7 @@ BusFilterQueryID(
     }
 
     if (!IoForwardIrpSynchronously(BffDeviceWdmGetAttachedDevice(BffDevice), Irp))
-    { 
+    {
         Irp->IoStatus.Status = STATUS_NO_SUCH_DEVICE;
         KdPrint(("%s: Driver %X Device %X failed to forward IRP_MN_QUERY_ID\n",
                  __FUNCTION__,
@@ -321,7 +321,6 @@ Return Value:
     if (!NT_SUCCESS(status))
     {
         KdPrint(("%s: failed to initialize BFF:%x\n", __FUNCTION__, status));
-        WPP_CLEANUP(DriverObject);
         return status;
     }
 
