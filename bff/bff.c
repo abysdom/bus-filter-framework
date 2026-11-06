@@ -707,6 +707,7 @@ BffCleanupContext(
         }
     }
     WdfWaitLockRelease(parentContext->Lock);
+    WdfObjectDelete(parentContext->Lock);
 }
 
 /*******************************************************************************
@@ -838,11 +839,21 @@ BffAllocateContext(
     _In_ WDFDEVICE Device
     )
 {
-    NTSTATUS status;
+    PAGED_CODE();
     PBFF_PARENT_CONTEXT parentContext;
     WDF_OBJECT_ATTRIBUTES attr;
-
-    PAGED_CODE();
+    WDF_OBJECT_ATTRIBUTES_INIT(&attr);
+    WDFWAITLOCK lock;
+    NTSTATUS status = WdfWaitLockCreate(&attr, &lock);
+    if (!NT_SUCCESS(status))
+    {
+        KdPrint(("%s: failed to create wait lock:%x", __FUNCTION__, status));
+        BffLogError(WdfDeviceWdmGetDeviceObject(Device),
+                    BFF_ERR_NO_WAITLOCK_CREATED,
+                    IO_ERR_INSUFFICIENT_RESOURCES,
+                    status);
+        return status;
+    }
 
     WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&attr, BFF_PARENT_CONTEXT);
     //
@@ -856,23 +867,16 @@ BffAllocateContext(
     {
         ASSERT(BffGetParentContext(Device) == parentContext);
         InitializeListHead(&parentContext->List);
-        WDF_OBJECT_ATTRIBUTES_INIT(&attr);
-        attr.ParentObject = Device;
-        WDFWAITLOCK lock;
-        status = WdfWaitLockCreate(&attr, &lock);
-        if (NT_SUCCESS(status))
-        {
-            parentContext->Lock = lock;
-        }
-        else
-        {
-            KdPrint(("%s: failed to create wait lock:%x", __FUNCTION__, status));
-            BffLogError(WdfDeviceWdmGetDeviceObject(Device),
-                        BFF_ERR_NO_WAITLOCK_CREATED,
-                        IO_ERR_INSUFFICIENT_RESOURCES,
-                        status);
-            parentContext->Lock = NULL;
-        }
+        parentContext->Lock = lock;
+    }
+    else
+    {
+        KdPrint(("%s: failed to allocate context:%x", __FUNCTION__, status));
+        BffLogError(WdfDeviceWdmGetDeviceObject(Device),
+                    BFF_ERR_NO_CONTEXT_ALLOCATED,
+                    IO_ERR_INSUFFICIENT_RESOURCES,
+                    status);
+        WdfObjectDelete(lock);
     }
     return status;
 }

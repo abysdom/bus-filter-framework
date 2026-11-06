@@ -27,6 +27,7 @@
 #include "bff.h"
 
 #define BFF_ERR_NO_WAITLOCK_CREATED 0xFFFFFFFFUL
+#define BFF_ERR_NO_CONTEXT_ALLOCATED 0xFFFFFFFEUL
 
 //
 // Bus Filter Framework Context
