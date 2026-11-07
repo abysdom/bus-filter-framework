@@ -19,7 +19,7 @@ tab_width = 4
 max_line_length = 120
 
 [*.{inf,inx}]
-charset = utf-8-bom
+charset = utf-16le-bom
 end_of_line = crlf
 indent_style = space
 indent_size = 4
