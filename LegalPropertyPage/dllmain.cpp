@@ -65,9 +65,9 @@ INT_PTR CALLBACK GPLNoticeDlgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPa
     return FALSE;
 }
 
-// Entry point for the property page provider
-extern "C" __declspec(dllexport) BOOL APIENTRY LegalPropertyPageProvider(PSP_PROPSHEETPAGE_REQUEST pRequest,
-                                                                         LPFNADDPROPSHEETPAGE pAddSheetFunc, LPARAM lParam)
+// Entry point for the property page provider (exported via LegalPropertyPage.def)
+extern "C" BOOL APIENTRY LegalPropertyPageProvider(PSP_PROPSHEETPAGE_REQUEST pRequest,
+                                                   LPFNADDPROPSHEETPAGE pAddSheetFunc, LPARAM lParam)
 {
     if (pRequest->PageRequested != SPPSR_ENUM_ADV_DEVICE_PROPERTIES)
     {
