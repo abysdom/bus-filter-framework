@@ -123,7 +123,7 @@ Return Value:
     NTSTATUS status = Irp->IoStatus.Status;
     IoCompleteRequest(Irp, IO_NO_INCREMENT);
 
-    KdPrint(("%s: Driver %X Device %X\n",
+    KdPrint(("%s: Driver %p Device %p\n",
             __FUNCTION__,
             WdfDriverWdmGetDriverObject(WdfGetDriver()),
             BffDeviceWdmGetPhysicalDevice(BffDevice)));
@@ -360,7 +360,7 @@ Return Value:
     //
 
     PDRIVER_OBJECT driverObject = WdfDriverWdmGetDriverObject(WdfGetDriver());
-    KdPrint(("%s: Driver %X Device %X\n", __FUNCTION__, driverObject, PhysicalDeviceObject));
+    KdPrint(("%s: Driver %p Device %p\n", __FUNCTION__, driverObject, PhysicalDeviceObject));
 
     PDEVICE_OBJECT filterDeviceObject;
     ULONG deviceType = BffPrivateContext->BffInitializationData.DeviceConfig.DeviceType;
@@ -421,7 +421,7 @@ Return Value:
                                              &childContext->TargetDeviceObject);
     if (!NT_SUCCESS(status))
     {
-        KdPrint(("%s: Unable to attach %X to target %X\n", __FUNCTION__, filterDeviceObject, PhysicalDeviceObject));
+        KdPrint(("%s: Unable to attach %p to target %p\n", __FUNCTION__, filterDeviceObject, PhysicalDeviceObject));
         goto deleteObj;
     }
 
@@ -699,7 +699,7 @@ BffCleanupContext(
         PDEVICE_OBJECT targetDeviceObject = childContext->TargetDeviceObject;
         PDEVICE_OBJECT physicalDeviceObject = childContext->PhysicalDeviceObject;
         BFFDEVICE bffDevice = ((PDEVICE_EXTENSION)(childContext->DeviceObject->DeviceExtension))->Child;
-        KdPrint(("%s: Driver %X Device %X\n",
+        KdPrint(("%s: Driver %p Device %p\n",
                 __FUNCTION__,
                 WdfDriverWdmGetDriverObject(WdfGetDriver()),
                 BffDeviceWdmGetPhysicalDevice(bffDevice)));

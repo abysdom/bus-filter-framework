@@ -200,7 +200,7 @@ BusFilterQueryID(
     if (!IoForwardIrpSynchronously(BffDeviceWdmGetAttachedDevice(BffDevice), Irp))
     {
         Irp->IoStatus.Status = STATUS_NO_SUCH_DEVICE;
-        KdPrint(("%s: Driver %X Device %X failed to forward IRP_MN_QUERY_ID\n",
+        KdPrint(("%s: Driver %p Device %p failed to forward IRP_MN_QUERY_ID\n",
                  __FUNCTION__,
                  WdfDriverWdmGetDriverObject(WdfGetDriver()),
                  BffDeviceWdmGetPhysicalDevice(BffDevice)));
@@ -214,7 +214,7 @@ BusFilterQueryID(
             WCHAR *oldIDs = (WCHAR *)Irp->IoStatus.Information;
             size_t length = wcslen(L"BffDevice") + 1;
             wcscpy(newIDs, L"BffDevice");
-            KdPrint(("%s: Driver %X Device %X returns compatible ID: %ws\n",
+            KdPrint(("%s: Driver %p Device %p returns compatible ID: %ws\n",
                     __FUNCTION__,
                     WdfDriverWdmGetDriverObject(WdfGetDriver()),
                     BffDeviceWdmGetPhysicalDevice(BffDevice),
@@ -227,7 +227,7 @@ BusFilterQueryID(
             while (oldIDs && *oldIDs && length + wcslen(oldIDs) + 2 <= MAX_DEVICE_ID_LEN)
             {
                 wcscpy(newIDs, oldIDs);
-                KdPrint(("%s: Driver %X Device %X returns compatible ID: %ws\n",
+                KdPrint(("%s: Driver %p Device %p returns compatible ID: %ws\n",
                         __FUNCTION__,
                         WdfDriverWdmGetDriverObject(WdfGetDriver()),
                         BffDeviceWdmGetPhysicalDevice(BffDevice),
