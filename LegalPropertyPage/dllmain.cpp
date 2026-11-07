@@ -74,6 +74,8 @@ extern "C" __declspec(dllexport) BOOL APIENTRY LegalPropertyPageProvider(PSP_PRO
         return FALSE;
     }
 
+    g_hRichEditDll = LoadLibraryW(L"riched20.dll");
+
     // Create property page
     PROPSHEETPAGE psp = {0};
     psp.dwSize = sizeof(PROPSHEETPAGE);
@@ -103,7 +105,6 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
     {
         g_hInstance = hModule;
         DisableThreadLibraryCalls(hModule);
-        g_hRichEditDll = LoadLibraryW(L"riched20.dll");
     }
     else if (ul_reason_for_call == DLL_PROCESS_DETACH && g_hRichEditDll)
     {
