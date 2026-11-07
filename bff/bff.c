@@ -54,6 +54,15 @@ BffDeviceRemove(
     _In_ PIRP                Irp
     );
 
+_IRQL_requires_max_(PASSIVE_LEVEL)
+_IRQL_requires_same_
+static
+NTSTATUS
+BffDeviceUsageNotification(
+    _In_ PBFF_DEVICE_CONTEXT ChildContext,
+    _In_ PIRP                Irp
+    );
+
 static DRIVER_DISPATCH BffDispatchAny;
 static IO_COMPLETION_ROUTINE BffCompleteQueryBusRelations;
 static EVT_WDF_DEVICE_CONTEXT_CLEANUP BffCleanupContext;
@@ -63,6 +72,7 @@ static EVT_WDF_DEVICE_CONTEXT_CLEANUP BffCleanupContext;
 #pragma alloc_text(INIT, BffInitialize)
 #pragma alloc_text(PAGE, BffDeviceDestroy)
 #pragma alloc_text(PAGE, BffDeviceRemove)
+#pragma alloc_text(PAGE, BffDeviceUsageNotification)
 #pragma alloc_text(PAGE, BffCleanupContext)
 #pragma alloc_text(PAGE, BffAllocateContext)
 #pragma alloc_text(PAGE, BffPreprocessQueryBusRelations)
@@ -147,6 +157,72 @@ Return Value:
 _Use_decl_annotations_
 static
 NTSTATUS
+BffDeviceUsageNotification(
+    _In_ PBFF_DEVICE_CONTEXT ChildContext,
+    _In_ PIRP                Irp
+    )
+/*++
+
+Routine Description:
+
+    Default handler for IRP_MN_DEVICE_USAGE_NOTIFICATION. It keeps the
+    DO_POWER_PAGABLE flag of the child filter DO consistent with the
+    next lower device object.
+
+--*/
+{
+    PIO_STACK_LOCATION stack = IoGetCurrentIrpStackLocation(Irp);
+    PDEVICE_OBJECT filterDeviceObject = ChildContext->DeviceObject;
+    PDEVICE_OBJECT targetDeviceObject = ChildContext->TargetDeviceObject;
+    ULONG savedPagable = filterDeviceObject->Flags & DO_POWER_PAGABLE;
+    BOOLEAN inPath = stack->Parameters.UsageNotification.InPath;
+    NTSTATUS status;
+
+    PAGED_CODE();
+
+    //
+    // A device that is in a paging/hibernation/dump path must not be
+    // power-pageable. Clear the flag before the IRP goes down, as the lower
+    // drivers may rely on the whole stack being non-pageable.
+    //
+    if (inPath)
+    {
+        filterDeviceObject->Flags &= ~DO_POWER_PAGABLE;
+    }
+
+    if (!IoForwardIrpSynchronously(targetDeviceObject, Irp))
+    {
+        Irp->IoStatus.Status = STATUS_NO_SUCH_DEVICE;
+    }
+
+    status = Irp->IoStatus.Status;
+
+    if (NT_SUCCESS(status))
+    {
+        //
+        // Mirror the lower device object. When the last special file is
+        // removed, the lower driver sets DO_POWER_PAGABLE again, and so do we.
+        //
+        if (targetDeviceObject->Flags & DO_POWER_PAGABLE)
+            filterDeviceObject->Flags |= DO_POWER_PAGABLE;
+        else
+            filterDeviceObject->Flags &= ~DO_POWER_PAGABLE;
+    }
+    else
+    {
+        //
+        // The request failed; restore the original state.
+        //
+        filterDeviceObject->Flags = (filterDeviceObject->Flags & ~DO_POWER_PAGABLE) | savedPagable;
+    }
+
+    IoCompleteRequest(Irp, IO_NO_INCREMENT);
+    return status;
+}
+
+_Use_decl_annotations_
+static
+NTSTATUS
 BffDispatchAny(
     _In_ PDEVICE_OBJECT DeviceObject,
     _In_ PIRP           Irp
@@ -196,7 +272,7 @@ Return Value:
         return STATUS_DELETE_PENDING;
     }
 
-    if (major == IRP_MJ_PNP && minor <= IRP_MN_DEVICE_ENUMERATED)
+    if (major == IRP_MJ_PNP)
     {
         if (minor == IRP_MN_REMOVE_DEVICE)
         {
@@ -204,12 +280,22 @@ Return Value:
             status = BffDeviceRemove(bffDevice, childContext, Irp);
             return status;
         }
-        else
+        else if (minor <= IRP_MN_DEVICE_ENUMERATED)
         {
             PBFF_DISPATCH_PNP dispatchPnp = BffPrivateContext->BffInitializationData.PnPMinorFunction[minor];
             if (dispatchPnp)
             {
                 status = dispatchPnp(bffDevice, Irp);
+                IoReleaseRemoveLock(&childContext->RemoveLock, Irp);
+                return status;
+            }
+
+            //
+            // Default handling when the client has not supplied a handler.
+            //
+            if (minor == IRP_MN_DEVICE_USAGE_NOTIFICATION)
+            {
+                status = BffDeviceUsageNotification(childContext, Irp);
                 IoReleaseRemoveLock(&childContext->RemoveLock, Irp);
                 return status;
             }
