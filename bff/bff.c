@@ -516,8 +516,23 @@ Return Value:
     //
 
     PDEVICE_OBJECT targetDeviceObject = childContext->TargetDeviceObject;
+
+    //
+    // Mirror the attributes of the next lower device object, as WDM filters conventionally do.
+    //
+
     filterDeviceObject->Flags |= targetDeviceObject->Flags &
                                  (DO_BUFFERED_IO | DO_DIRECT_IO | DO_POWER_INRUSH | DO_POWER_PAGABLE);
+
+    filterDeviceObject->AlignmentRequirement = targetDeviceObject->AlignmentRequirement;
+
+    //
+    // Characteristics: keep what the client asked for, and add the hardware-related bits the lower device reports.
+    //
+
+    filterDeviceObject->Characteristics |=
+        targetDeviceObject->Characteristics &
+        (FILE_REMOVABLE_MEDIA | FILE_READ_ONLY_DEVICE | FILE_FLOPPY_DISKETTE | FILE_WRITE_ONCE_MEDIA);
 
     //
     // Call the client's DeviceAdd callback function if it exists.
