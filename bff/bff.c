@@ -767,9 +767,7 @@ BffSetInitializationData(
  *                          WdfDriverCreate, or if this routine is called for a
  *                          second time;
  *                      (c) STATUS_INVALID_PARAMETER if an invalid parameter is
- *                          speciifed;
- *                      (d) STATUS_INVALID_SIGNATURE if no valid license key in
- *                          registry; or
+ *                          speciifed; or
  *                      (e) Any other negative value for failure.
  */
 _Use_decl_annotations_
