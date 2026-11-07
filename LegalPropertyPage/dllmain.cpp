@@ -79,7 +79,7 @@ extern "C" __declspec(dllexport) BOOL APIENTRY LegalPropertyPageProvider(PSP_PRO
     // Create property page
     PROPSHEETPAGE psp = {0};
     psp.dwSize = sizeof(PROPSHEETPAGE);
-    psp.dwFlags = PSP_USECALLBACK | PSP_USETITLE;
+    psp.dwFlags = PSP_USETITLE;
     psp.hInstance = g_hInstance;
     psp.pszTemplate = MAKEINTRESOURCE(IDD_GPL_DIALOG);
     psp.pszTitle = L"GPL v3 Notice";
