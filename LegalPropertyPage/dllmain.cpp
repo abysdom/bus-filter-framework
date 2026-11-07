@@ -51,6 +51,7 @@ INT_PTR CALLBACK GPLNoticeDlgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPa
             if (nmhdr->code == PSN_APPLY)
             {
                 SetWindowLongPtr(hwnd, DWLP_MSGRESULT, PSNRET_NOERROR);
+                return TRUE;
             }
             break;
         }
