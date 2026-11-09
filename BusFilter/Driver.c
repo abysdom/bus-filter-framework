@@ -60,6 +60,8 @@ static BFF_DEVICE_REMOVE BusFilterRemoveDevice;
 #ifdef ALLOC_PRAGMA
 #pragma alloc_text(INIT, DriverEntry)
 #pragma alloc_text(PAGE, BusFilterStartDevice)
+#pragma alloc_text(PAGE, BusFilterAddDevice)
+#pragma alloc_text(PAGE, BusFilterRemoveDevice)
 #pragma alloc_text(PAGE, BusFilterQueryID)
 #pragma alloc_text(PAGE, BusFilterEvtDeviceAdd)
 #pragma alloc_text(PAGE, BusFilterEvtDriverContextCleanup)

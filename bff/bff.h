@@ -40,7 +40,7 @@ typedef WDFOBJECT BFFDEVICE;
  *                      of the underlying PDO.
  */
 _Function_class_(BFF_DEVICE_ADD)
-_IRQL_requires_max_(DISPATCH_LEVEL)
+_IRQL_requires_max_(PASSIVE_LEVEL)
 _IRQL_requires_same_
 typedef
 NTSTATUS
@@ -58,7 +58,7 @@ typedef BFF_DEVICE_ADD *PBFF_DEVICE_ADD;
  *  @param BffDevice    The WDF object as a bus filter device object.
  */
 _Function_class_(BFF_DEVICE_REMOVE)
-_IRQL_requires_max_(DISPATCH_LEVEL)
+_IRQL_requires_max_(PASSIVE_LEVEL)
 _IRQL_requires_same_
 typedef
 VOID
