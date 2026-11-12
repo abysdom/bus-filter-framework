@@ -115,10 +115,19 @@ typedef struct _BFF_DEVICE_CONFIG
  *  }
  *
  *  Example#3:
+ *  NTSTATUS IoCompletion(PDEVICE_OBJECT DeviceObject, PIRP Irp, BFFDEVICE BffDevice)
+ *  {
+ *      ...
+ *      BffDeviceWdmReleaseRemoveLock(BffDevice, Irp);
+ *      ...
+ *      return STATUS_CONTINUE_COMPLETION;
+ *  }
+ *
  *  NTSTATUS callback3(BFFDEVICE BffDevice, PIRP Irp)
  *  {
  *      ...
  *      IoCopyCurrentIrpStackLocationToNext(Irp);
+ *      BffDeviceWdmAcquireRemoveLock(BffDevice, Irp);
  *      IoSetCompletionRoutine(Irp, IoCompletion, BffDevice, ...);
  *      status = IoCallDriver(BffDeviceWdmGetAttachedDevice(BffDevice), Irp);
  *      ...
