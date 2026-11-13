@@ -1082,9 +1082,11 @@ BffDeviceWdmGetPhysicalDevice(
  *  in BFF_DISPATCH_PNP or in the processing of Irp.
  *  @param BffDevice    The WDF object as a bus filter device object.
  *  @param Irp          The PnP IRP.
+ *  @return             STATUS_SUCCESS if the RemoveLock is acquired; otherwise,
+ *                      STATUS_DELETE_PENDING if the device is being removed.
  */
 _Use_decl_annotations_
-VOID
+NTSTATUS
 BffDeviceWdmAcquireRemoveLock(
     _In_ BFFDEVICE  BffDevice,
     _In_ PIRP       Irp
@@ -1092,7 +1094,7 @@ BffDeviceWdmAcquireRemoveLock(
 {
     PBFF_DEVICE_CONTEXT childContext = BffDeviceGetContext(BffDevice);
     ASSERT(childContext);
-    IoAcquireRemoveLock(&childContext->RemoveLock, Irp);
+    return IoAcquireRemoveLock(&childContext->RemoveLock, Irp);
 }
 
 /** Release the RemoveLock of the specified BFF device. Call this function only
